@@ -1,0 +1,27 @@
+# === Dashboard dev — git-friendly ===
+
+# Binary
+*.zip
+*.tar.gz
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Temp
+*.tmp
+*.log
+Nová složka/
+
+# Python __pycache__
+__pycache__/
+*.pyc
+
+# Phase 1 backup files (pokud generuješ .bak)
+*.bak

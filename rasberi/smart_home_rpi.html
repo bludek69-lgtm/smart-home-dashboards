@@ -1,0 +1,3333 @@
+<!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║  RASPBERRY PI — SETUP INSTRUCTIONS                      ║
+  ╠══════════════════════════════════════════════════════════╣
+  ║                                                          ║
+  ║  1. Zkopíruj tento soubor + dashboard_server.py          ║
+  ║     do /home/pi/dashboard/                               ║
+  ║                                                          ║
+  ║  2. Spusť server:                                        ║
+  ║     cd /home/pi/dashboard                                ║
+  ║     python3 dashboard_server.py &                        ║
+  ║                                                          ║
+  ║  3. Otevři v Chromium kiosk mode:                        ║
+  ║     chromium-browser --kiosk --noerrdialogs              ║
+  ║       --disable-infobars --incognito                     ║
+  ║       http://localhost:8080/smart_home_rpi.html           ║
+  ║                                                          ║
+  ║  4. Autostart (přidej do /etc/xdg/lxsession/LXDE-pi/    ║
+  ║     autostart):                                          ║
+  ║     @python3 /home/pi/dashboard/dashboard_server.py      ║
+  ║     @chromium-browser --kiosk --noerrdialogs             ║
+  ║       --disable-infobars --incognito                     ║
+  ║       http://localhost:8080/smart_home_rpi.html           ║
+  ║                                                          ║
+  ║  5. Vypnout screensaver:                                 ║
+  ║     sudo apt install xscreensaver                        ║
+  ║     xscreensaver → Disable                               ║
+  ║     NEBO: xset s off && xset -dpms                       ║
+  ║                                                          ║
+  ╚══════════════════════════════════════════════════════════╝
+-->
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a0a2e">
+<title>Smart Home — Semily (Raspberry Pi)</title>
+<style>
+/* Google Fonts — RPi: pokud offline, fallback na system-ui */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --bg0:#1a0a2e; --bg1:#1e1035; --bg2:rgba(255,255,255,.08); --bg3:rgba(255,255,255,.12); --bg4:rgba(255,255,255,.16);
+  --bd:rgba(255,255,255,.12); --bda:rgba(255,255,255,.22);
+  --tx1:#ffffff; --tx2:rgba(255,255,255,.7); --tx3:rgba(255,255,255,.4);
+  --green:#5ee8a0; --greend:rgba(94,232,160,.15); --greenb:rgba(94,232,160,.35);
+  --orange:#ffb347; --oranged:rgba(255,179,71,.15);
+  --red:#ff6b6b; --redd:rgba(255,107,107,.15);
+  --cyan:#64f4d8; --cyand:rgba(100,244,216,.12); --cyanb:rgba(100,244,216,.25);
+  --blue:#6cb4ff; --blued:rgba(108,180,255,.12);
+  --purple:#c084fc; --purpled:rgba(192,132,252,.12);
+  --light:#ffd060; --lightd:rgba(255,208,96,.12);
+  --r:14px; --r2:18px; --r3:22px;
+  --sans:'DM Sans',system-ui,sans-serif; --mono:'JetBrains Mono',monospace;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation;}
+html,body{overflow:hidden;overflow-x:hidden;background:linear-gradient(135deg,#1a0a2e 0%,#2d1b4e 25%,#4a2066 50%,#6b2fa0 75%,#8b3fa0 100%);color:var(--tx1);font-family:var(--sans);-webkit-font-smoothing:antialiased;user-select:none;height:100vh;width:100vw;}
+body{padding-bottom:64px;}
+
+/* ══ TOPBAR ══ */
+.topbar{position:fixed;top:0;left:0;right:0;height:48px;background:#1a0a2e;border-bottom:1px solid var(--bd);display:flex;align-items:center;padding:0 16px;gap:10px;z-index:100;}
+.topbar-logo{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--cyan);letter-spacing:3px;text-transform:uppercase;}
+.topbar-chips{display:flex;gap:5px;align-items:center;flex:1;overflow:hidden;}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:5px;font-size:10px;font-family:var(--mono);background:var(--bg3);border:1px solid var(--bd);white-space:nowrap;}
+.chip .cd{width:6px;height:6px;border-radius:50%;}
+.topbar-time{font-family:var(--mono);font-size:12px;color:var(--tx2);}
+
+/* ══ PAGES ══ */
+.pages{position:fixed;top:54px;bottom:58px;left:0;right:0;overflow:hidden;}
+.page{display:none;position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:14px 12px 12px;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;}
+.page.active{display:block;}
+
+/* ══ LOXONE TILES ══ */
+.tile-grid{display:grid;gap:8px;margin-bottom:10px;}
+.tile-grid.g6{grid-template-columns:repeat(5,1fr);}
+.tile-grid.g5{grid-template-columns:repeat(5,1fr);}
+.tile-grid.g4{grid-template-columns:repeat(4,1fr);}
+.tile-grid.g3{grid-template-columns:repeat(5,1fr);}
+.tile-grid.g2{grid-template-columns:repeat(2,1fr);}
+.tile-grid.auto{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));}
+
+.tile{
+  display:flex;flex-direction:column;justify-content:space-between;
+  background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);
+  padding:12px 14px;cursor:pointer;transition:none;position:relative;overflow:hidden;
+  min-height:90px;
+}
+.tile:active{transform:scale(.97);background:rgba(255,255,255,.12);}
+.tile .t-top{display:flex;align-items:flex-start;gap:10px;}
+.tile .t-icon{font-size:22px;line-height:1;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,.1);flex-shrink:0;}
+.tile .t-info{flex:1;min-width:0;}
+.tile .t-lbl{font-size:12px;font-weight:600;color:var(--tx1);line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tile .t-cat{font-size:9px;color:var(--tx3);font-family:var(--mono);margin-top:1px;}
+.tile .t-val{font-family:var(--mono);font-size:13px;font-weight:600;color:var(--green);margin-top:6px;line-height:1.1;}
+.tile .t-sub{font-size:9px;color:var(--tx3);margin-top:1px;font-family:var(--mono);}
+.tile .t-dot{position:absolute;top:8px;right:10px;width:7px;height:7px;border-radius:50%;}
+.tile .t-badge{position:absolute;top:8px;right:10px;font-size:9px;color:var(--tx3);font-family:var(--mono);}
+
+/* Tile colors */
+.tile.on{background:rgba(94,232,160,.12);border-color:var(--greenb);box-shadow:0 0 16px rgba(94,232,160,.2);}
+.tile.on .t-val{color:var(--green);font-weight:700;}
+.tile.on .t-icon{background:var(--green);color:#fff;box-shadow:0 0 10px rgba(76,175,125,.4);}
+.tile.on .t-lbl{color:var(--green);}
+.tile.warn{background:var(--oranged);border-color:rgba(245,166,35,.3);box-shadow:0 0 10px rgba(245,166,35,.15);}
+.tile.warn .t-val{color:var(--orange);font-weight:700;}
+.tile.warn .t-icon{background:rgba(245,166,35,.25);box-shadow:0 0 8px rgba(245,166,35,.3);}
+.tile.err{background:var(--redd);border-color:rgba(232,85,85,.3);box-shadow:0 0 12px rgba(232,85,85,.2);}
+.tile.err .t-val{color:var(--red);font-weight:700;}
+.tile.err .t-icon{background:rgba(232,85,85,.25);box-shadow:0 0 8px rgba(232,85,85,.3);}
+.tile.active-c{background:var(--cyand);border-color:var(--cyanb);box-shadow:0 0 14px rgba(76,239,203,.2);}
+.tile.active-c .t-val{color:var(--cyan);font-weight:700;}
+.tile.active-c .t-icon{background:rgba(76,239,203,.25);box-shadow:0 0 10px rgba(76,239,203,.35);}
+.tile.active-c .t-lbl{color:var(--cyan);}
+.tile.active-p{background:var(--purpled);border-color:rgba(160,112,240,.3);box-shadow:0 0 12px rgba(160,112,240,.2);}
+.tile.active-p .t-val{color:var(--purple);font-weight:700;}
+.tile.active-p .t-icon{background:rgba(160,112,240,.25);box-shadow:0 0 10px rgba(160,112,240,.35);}
+.tile.active-b{background:var(--blued);border-color:rgba(74,158,255,.3);box-shadow:0 0 12px rgba(74,158,255,.2);}
+.tile.active-b .t-val{color:var(--blue);font-weight:700;}
+.tile.active-b .t-icon{background:rgba(74,158,255,.25);box-shadow:0 0 10px rgba(74,158,255,.35);}
+.tile.active-l{background:var(--lightd);border-color:rgba(240,192,64,.3);box-shadow:0 0 12px rgba(240,192,64,.2);}
+.tile.active-l .t-val{color:var(--light);font-weight:700;}
+.tile.active-l .t-icon{background:rgba(240,192,64,.25);box-shadow:0 0 10px rgba(240,192,64,.35);}
+.tile.off{opacity:.55;}
+
+/* Scene tiles */
+.tile.scene{min-height:70px;}
+.tile.scene .t-top{justify-content:center;}
+.tile.scene.active-c{background:var(--cyand);border-color:var(--cyanb);}
+.tile.scene.reset-t{border-color:rgba(232,85,85,.2);}
+.tile.scene.reset-t .t-icon{filter:none;}
+
+/* Room tiles */
+.tile.room .t-icon{font-size:24px;}
+.tile.room .t-lbl{font-size:13px;}
+
+/* Appliance tiles */
+.tile.app-t .t-icon{font-size:22px;}
+.tile.app-t .t-val{font-size:10px;}
+
+/* Section label */
+.sect{font-family:var(--mono);font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--tx3);margin:10px 0 6px 2px;}
+
+/* Toggle in tile */
+.tile .toggle{width:36px;height:20px;border-radius:10px;background:var(--bg4);border:1px solid var(--bd);position:relative;cursor:pointer;transition:none;margin-top:4px;}
+.tile .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--tx2);transition:none;}
+.tile .toggle.on{background:var(--green);border-color:var(--green);}
+.tile .toggle.on::after{left:18px;background:#fff;}
+
+/* ══ CAMERA ══ */
+.cam-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);overflow:hidden;margin-bottom:10px;}
+.cam-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer;}
+.cam-title{font-size:12px;color:var(--tx2);}
+.cam-live{font-size:10px;color:var(--green);animation:pulse 1.5s infinite;}
+.cam-expand{font-size:10px;color:var(--tx3);}
+.cam-body{display:none;position:relative;background:#000;aspect-ratio:16/9;}
+.cam-body.open{display:block;}
+.cam-body img{width:100%;height:100%;object-fit:contain;}
+.cam-offline{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:12px;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.4;}}
+
+/* ══ FLOOR GRID ══ */
+.floor-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(2,1fr);gap:6px;margin-bottom:10px;}
+.room{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:10px;cursor:pointer;display:flex;flex-direction:column;justify-content:space-between;min-height:64px;transition:none;}
+.room:active{transform:scale(.97);}
+.room-name{font-size:11px;font-weight:600;}
+.room-inds{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px;}
+.room-inds .ri{font-size:18px;padding:4px 8px;border-radius:var(--r);background:rgba(255,255,255,.08);line-height:1;display:inline-flex;align-items:center;gap:4px;}
+.ri.on{background:rgba(94,232,160,.18);box-shadow:0 0 10px rgba(94,232,160,.12);}
+.ri.warn{background:rgba(255,179,71,.18);box-shadow:0 0 10px rgba(255,179,71,.12);}
+.ri.off{opacity:.4;}
+.ri.aud{background:rgba(100,244,216,.18);box-shadow:0 0 10px rgba(100,244,216,.12);}
+.ri .ri-txt{font-size:11px;font-family:var(--mono);font-weight:600;color:var(--tx1);}
+.ri.err{background:var(--redd);color:var(--red);font-weight:600;}
+
+/* ══ ZONE LIST (Zóny page) — tile style ══ */
+.zone-list{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px;}
+.zone-card{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);padding:12px;cursor:pointer;transition:none;display:flex;align-items:flex-start;gap:10px;}
+.zone-card:active{transform:scale(.97);}
+.zc-icon{font-size:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg3);flex-shrink:0;}
+.zc-name{font-size:12px;font-weight:600;}
+.zc-meta{font-size:9px;color:var(--tx3);margin-top:1px;}
+.zc-inds{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.zc-inds .ri{font-size:16px;padding:3px 6px;border-radius:var(--r);background:rgba(255,255,255,.08);line-height:1;display:inline-flex;align-items:center;gap:3px;}
+.zc-info{flex:1;min-width:0;}
+
+/* ══ ZONE DETAIL ══ */
+.zone-back{font-size:12px;color:var(--cyan);cursor:pointer;padding:8px 0;display:inline-block;}
+.zone-title{font-size:18px;font-weight:700;margin:4px 0 2px;}
+.zone-subtitle{font-size:11px;color:var(--tx2);margin-bottom:10px;}
+
+/* ══ CARDS (for detail views, audio, AI) ══ */
+.card{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);padding:12px;margin-bottom:8px;}
+.card-row{display:flex;align-items:center;gap:8px;padding:5px 0;}
+.card-icon{font-size:16px;width:24px;text-align:center;flex-shrink:0;}
+.card-lbl{flex:1;font-size:12px;}
+.card-sub{font-size:11px;color:var(--tx2);}
+.card-val{font-family:var(--mono);font-size:12px;font-weight:500;white-space:nowrap;}
+.card-val.on{color:var(--green);} .card-val.off{color:var(--tx3);} .card-val.warn{color:var(--orange);} .card-val.err{color:var(--red);} .card-val.cyan{color:var(--cyan);}
+.divider{height:1px;background:var(--bd);margin:2px 0;}
+
+/* ══ SLIDERS ══ */
+.slider-row{display:flex;align-items:center;gap:8px;padding:4px 0;}
+.sl-icon{font-size:14px;width:20px;text-align:center;}
+.sl-lbl{font-size:11px;color:var(--tx2);min-width:50px;}
+.sl-val{font-family:var(--mono);font-size:11px;min-width:32px;text-align:right;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--bg4);outline:none;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--cyan);border:2px solid var(--bg0);cursor:pointer;}
+input[type=range].green::-webkit-slider-thumb{background:var(--green);}
+input[type=range].orange::-webkit-slider-thumb{background:var(--orange);}
+input[type=range].purple::-webkit-slider-thumb{background:var(--purple);}
+
+/* ══ BUTTONS ══ */
+.btn-row{display:flex;flex-wrap:wrap;gap:6px;}
+.btn{padding:8px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);font-size:11px;cursor:pointer;transition:none;white-space:nowrap;}
+.btn:active{background:var(--bg4);transform:scale(.96);}
+.btn.warn{border-color:rgba(245,166,35,.3);color:var(--orange);}
+.btn.err{border-color:rgba(232,85,85,.3);color:var(--red);}
+
+/* ══ TABS ══ */
+.tabs{position:fixed;bottom:0;left:0;right:0;height:58px;background:#1a0a2e;border-top:1px solid var(--bd);display:flex;z-index:100;overflow:hidden;}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:8px;color:var(--tx3);cursor:pointer;letter-spacing:0.5px;font-family:var(--mono);transition:none;min-width:0;overflow:hidden;}
+.tab .ti{font-size:16px;display:block;}
+.tab.active{color:var(--cyan);}
+
+/* ══ CONFIG ══ */
+.cfg-group{margin-bottom:8px;}
+.cfg-row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.04);min-height:44px;}
+.cfg-row:last-child{border-bottom:none;}
+.cfg-label{flex:1;font-size:12px;}
+.cfg-row input[type=number],.cfg-row input[type=text]{width:76px;padding:7px 9px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx1);font-family:var(--mono);font-size:12px;text-align:center;}
+.cfg-row input[type=text]{text-align:left;}
+.cfg-row input:focus{outline:none;border-color:var(--cyan);}
+.cfg-unit{font-family:var(--mono);font-size:9px;color:var(--tx2);width:26px;text-align:right;}
+.cfg-hint{font-size:10px;color:rgba(180,200,220,.7);margin:0 0 6px;line-height:1.4;padding:5px 8px;background:rgba(76,239,203,.04);border-radius:5px;border-left:2px solid rgba(76,239,203,.4);}
+.cfg-missing{opacity:.5;}
+.save-btn{width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:var(--r2);font-weight:700;font-size:13px;cursor:pointer;margin-top:10px;text-transform:uppercase;}
+.save-btn:active{opacity:.85;}
+.save-btn.saved{background:var(--green);}
+
+/* ══ FLASH ══ */
+.flash{position:fixed;bottom:74px;left:50%;transform:translateX(-50%);background:var(--cyan);color:#000;padding:8px 20px;border-radius:var(--r);font-size:12px;font-weight:600;z-index:200;opacity:0;pointer-events:none;transition:none;white-space:nowrap;}
+.flash.show{opacity:1;}
+
+/* ══ AI PAGE ══ */
+#page-ai .sect{color:rgba(157,113,234,.45);}
+#page-ai .card{border-color:rgba(157,113,234,.1);background:rgba(157,113,234,.03);}
+
+/* ══ AUTO-LEVEL BARS ══ */
+.auto-levels{display:flex;gap:4px;margin-top:8px;}
+.auto-lv{flex:1;padding:8px 4px;text-align:center;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;transition:none;}
+.auto-lv:active{transform:scale(.95);}
+.lv-num{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--tx2);display:block;}
+.lv-lbl{font-size:8px;color:var(--tx3);display:block;margin-top:2px;}
+.auto-lv.active{border-color:var(--purple);background:var(--purpled);}
+.auto-lv.active .lv-num{color:var(--purple);}
+
+
+/* ══ AUDIO PAGE — Loxone tiles ══ */
+.audio-grid{display:grid;grid-template-columns:1fr;gap:8px;}
+.speaker-card{
+  background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);
+  padding:14px;transition:none;
+}
+.spk-header{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.spk-icon{font-size:20px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg3);flex-shrink:0;}
+.spk-info{flex:1;min-width:0;}
+.spk-name{font-size:13px;font-weight:600;}
+.spk-status{font-size:10px;font-family:var(--mono);margin-top:1px;}
+.spk-status.idle{color:var(--tx3);}
+.spk-status.playing{color:var(--green);}
+.spk-status.restricted{color:var(--orange);}
+.spk-now{font-size:11px;color:var(--tx2);margin-bottom:8px;font-family:var(--mono);}
+.blue{color:var(--blue);}
+.cyan{color:var(--cyan);}
+
+/* ══ AI PAGE — Loxone tiles ══ */
+.ai-hero-bar{display:flex;align-items:center;gap:12px;padding:12px 0;margin-bottom:4px;}
+.ai-hero-title{font-size:18px;font-weight:700;color:var(--purple);}
+.ai-hero-sub{font-size:11px;color:var(--tx3);font-family:var(--mono);}
+.ai-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px;}
+.ai-metric{
+  background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);
+  padding:14px;text-align:center;
+}
+.aim-val{font-family:var(--mono);font-size:22px;font-weight:700;}
+.aim-val.green{color:var(--green);} .aim-val.orange{color:var(--orange);}
+.aim-val.cyan{color:var(--cyan);} .aim-val.red{color:var(--red);}
+.aim-lbl{font-size:10px;color:var(--tx3);margin-top:4px;font-family:var(--mono);}
+
+/* Gauge bars */
+.gauge-wrap{padding:4px 0;}
+.gauge-head{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px;}
+.gauge-head span:first-child{color:var(--tx2);}
+.gauge-head span:last-child{font-family:var(--mono);font-weight:500;}
+.gauge-bar{height:6px;border-radius:3px;background:var(--bg4);overflow:hidden;}
+.gauge-fill{height:100%;border-radius:3px;transition:width .5s;}
+.gauge-fill.green{background:var(--green);} .gauge-fill.orange{background:var(--orange);}
+.gauge-fill.red{background:var(--red);} .gauge-fill.cyan{background:var(--cyan);}
+
+/* AI card-val */
+.card-val.ai{color:var(--purple);}
+
+/* Toggle rows */
+.tog-row{display:flex;align-items:center;gap:8px;padding:6px 0;}
+.tog-lbl{flex:1;font-size:12px;}
+
+/* ══ CONFIG PAGE — cleaner Loxone style ══ */
+#page-settings .card{background:var(--bg2);border-color:var(--bd);}
+#page-settings .sect{color:var(--cyan);opacity:.85;}
+
+
+/* ══ CONFIG OVERLAY ══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:999;display:flex;align-items:center;justify-content:center;}
+.overlay.hidden{display:none;}
+.cfg-box{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r3);padding:28px;width:340px;max-width:90vw;}
+.cfg-box h2{font-size:16px;margin-bottom:16px;color:var(--cyan);}
+.cfg-box label{font-size:11px;color:var(--tx2);display:block;margin:10px 0 4px;}
+.cfg-box input{width:100%;padding:10px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx1);font-family:var(--mono);font-size:13px;user-select:text;-webkit-user-select:text;}
+.cfg-box input:focus{outline:none;border-color:var(--cyan);}
+.cfg-box button{width:100%;padding:12px;margin-top:16px;background:var(--cyan);color:#000;border:none;border-radius:var(--r2);font-weight:700;font-size:14px;cursor:pointer;}
+
+/* ══ CONFIG VALIDATION ══ */
+.cfg-vld{font-size:9px;font-family:var(--mono);padding:3px 8px;margin:-2px 0 4px;border-radius:4px;line-height:1.4;display:none;}
+.cfg-vld.err{display:block;background:rgba(232,85,85,.1);border-left:2px solid var(--red);color:var(--red);}
+
+/* ══ DEVICE TILES ══ */
+.dev-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:8px;}
+.dev-tile{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);padding:20px 14px 18px;text-align:center;cursor:pointer;transition:none;position:relative;min-height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.dev-tile:active{transform:scale(.95);}
+.dev-tile.tile-on{border-color:var(--greenb);background:rgba(94,232,160,.12);box-shadow:0 0 16px rgba(94,232,160,.15);}
+.dev-tile .tile-icon{font-size:40px;line-height:1;}
+.dev-tile .tile-name{font-size:14px;color:var(--tx2);line-height:1.3;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dev-tile .tile-state{font-size:14px;font-weight:600;font-family:var(--mono);margin-top:2px;}
+.dev-tile .tile-state.on{color:var(--green);}
+.dev-tile .tile-state.off{color:var(--tx3);}
+.dev-tile .tile-cfg{position:absolute;top:8px;right:10px;font-size:12px;color:var(--tx3);opacity:.6;}
+.dev-tile .tile-dim{position:absolute;bottom:6px;left:14px;right:14px;height:4px;background:var(--bg4);border-radius:2px;overflow:hidden;}
+.dev-tile .tile-dim .tile-dim-fill{height:100%;background:var(--green);border-radius:2px;transition:width .2s;}
+
+
+/* ══ SENSOR TILES ══ */
+.sensor-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:8px;}
+.sensor-tile{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+.sensor-tile .st-icon{font-size:26px;flex-shrink:0;}
+.sensor-tile .st-info{flex:1;min-width:0;}
+.sensor-tile .st-lbl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:1.5px;font-family:var(--mono);}
+.sensor-tile .st-val{font-size:17px;font-weight:600;font-family:var(--mono);margin-top:2px;white-space:nowrap;}
+.sensor-tile .st-val.on{color:var(--green);}
+.sensor-tile .st-val.off{color:var(--tx3);}
+.sensor-tile .st-val.warn{color:var(--orange);}
+.sensor-tile .st-val.err{color:var(--red);}
+
+/* ══ DEVICE DETAIL OVERLAY ══ */
+.dev-detail-overlay{position:fixed;inset:0;background:rgba(26,10,46,.92);z-index:200;display:none;flex-direction:column;overflow-y:auto;padding:0 16px 80px;}
+.dev-detail-overlay.show{display:flex;}
+.dev-detail-header{display:flex;align-items:center;gap:10px;padding:14px 0 8px;position:sticky;top:0;background:rgba(6,8,16,.95);z-index:1;}
+.dev-detail-back{color:var(--cyan);font-size:13px;cursor:pointer;padding:6px 0;}
+.dev-detail-icon{font-size:28px;}
+.dev-detail-name{font-size:17px;font-weight:600;flex:1;}
+.dev-detail-body{display:flex;flex-direction:column;gap:14px;padding-top:8px;}
+.dd-card{background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);padding:14px;}
+.dd-card .dd-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--tx3);margin-bottom:8px;font-family:var(--mono);}
+.dd-slider-row{display:flex;align-items:center;gap:10px;padding:4px 0;}
+.dd-slider-row .dd-sl-icon{font-size:14px;width:20px;text-align:center;}
+.dd-slider-row input[type=range]{flex:1;height:6px;-webkit-appearance:none;appearance:none;background:var(--bg4);border-radius:3px;outline:none;}
+.dd-slider-row input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--cyan);cursor:pointer;border:2px solid var(--bg0);}
+.dd-slider-row .dd-sl-val{font-family:var(--mono);font-size:13px;min-width:40px;text-align:right;color:var(--tx1);}
+.dd-onoff{display:flex;gap:10px;margin-top:4px;}
+.dd-onoff .dd-btn{flex:1;padding:12px;text-align:center;border-radius:var(--r);font-weight:600;font-size:13px;cursor:pointer;border:1px solid var(--bd);transition:none;}
+.dd-onoff .dd-btn:active{transform:scale(.96);}
+.dd-onoff .dd-btn-on{background:var(--greend);border-color:var(--greenb);color:var(--green);}
+.dd-onoff .dd-btn-off{background:var(--redd);border-color:rgba(232,85,85,.3);color:var(--red);}
+.dd-onoff .dd-btn-on.active{background:var(--green);color:#000;}
+.dd-onoff .dd-btn-off.active{background:var(--red);color:#fff;}
+.dd-power-row{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;}
+.dd-power-row .dd-pw-icon{font-size:14px;width:20px;text-align:center;}
+.dd-power-row .dd-pw-lbl{flex:1;color:var(--tx2);}
+.dd-power-row .dd-pw-val{font-family:var(--mono);font-size:13px;}
+.cfg-vld.warn{display:block;background:rgba(245,166,35,.1);border-left:2px solid var(--orange);color:var(--orange);}
+.cfg-vld.ok{display:block;background:rgba(76,175,125,.08);border-left:2px solid var(--green);color:var(--green);}
+.cfg-row input.invalid{border-color:var(--red) !important;box-shadow:0 0 6px rgba(232,85,85,.3);}
+.cfg-row input.warning{border-color:var(--orange) !important;box-shadow:0 0 6px rgba(245,166,35,.3);}
+.cfg-row input.valid-ok{border-color:var(--green) !important;}
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE OVERHAUL — No-scroll on 1920×1080 / 2880×1800 / Tablet
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base: pages can scroll if content overflows ───── */
+.page{overflow-y:auto !important;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;}
+#page-settings.active{display:flex !important;flex-direction:column;overflow:hidden !important;}
+.cfg-top-grid{flex-shrink:0;}
+.cfg-tile-grid{flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;min-height:0;}
+.cfg-bottom{flex-shrink:0;margin-top:4px;padding-bottom:16px;}
+/* ── HOME: full-screen grid layout ──────────────── */
+.home-grid{
+  display:grid;
+  grid-template-columns:3fr 2fr;
+  grid-template-rows:auto auto 1fr 1fr;
+  gap:4px;
+  height:100%;
+}
+.hg-status{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.hg-sys{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;}
+.hg-rooms{grid-column:1;grid-row:3;}
+.hg-rooms .floor-grid{height:100%;grid-template-rows:1fr 1fr;margin:0;gap:4px;}
+.hg-rooms .room{min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6px 4px;background:rgba(255,255,255,.06);border:1px solid var(--bd);border-radius:var(--r2);cursor:pointer;transition:none;}
+.hg-rooms .room:active{transform:scale(.97);}
+.hg-rooms .room.lit{border-color:var(--greenb);background:rgba(94,232,160,.1);box-shadow:0 0 12px rgba(94,232,160,.12);}
+.hg-rooms .rm-icon{font-size:clamp(22px,2.5vw,32px);line-height:1;margin-bottom:2px;}
+.hg-rooms .room-name{font-size:clamp(11px,1.2vw,15px);font-weight:700;margin-bottom:2px;color:var(--tx1);}
+.hg-rooms .room-inds{justify-content:center;}
+.hg-rooms .room-inds .ri{font-size:clamp(14px,1.5vw,18px);padding:2px 5px;}
+.hg-cam{grid-column:2;grid-row:3;}
+.hg-apps{grid-column:1;grid-row:4;overflow:hidden;}
+.hg-apps .card{overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;}
+.hg-scenes{grid-column:2;grid-row:4;overflow:hidden;}
+.scene-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:3px;height:100%;}
+.scene-grid .tile.scene{min-height:0 !important;justify-content:center;align-items:center;}
+.scene-grid .tile.scene .t-top{justify-content:center;}
+.scene-grid .tile.scene .t-icon{width:clamp(30px,2.5vw,44px);height:clamp(30px,2.5vw,44px);font-size:clamp(16px,1.6vw,24px);}
+.scene-grid .tile.scene .t-lbl{font-size:clamp(10px,1vw,14px);}
+
+/* Status/sys tiles — compact */
+.hg-status .tile,.hg-sys .tile{min-height:44px !important;justify-content:center;}
+.hg-status .tile .t-icon,.hg-sys .tile .t-icon{width:clamp(28px,2vw,36px);height:clamp(28px,2vw,36px);font-size:clamp(14px,1.3vw,20px);}
+.hg-status .tile .t-lbl,.hg-sys .tile .t-lbl{font-size:clamp(9px,0.9vw,12px);}
+.hg-status .tile .t-val,.hg-sys .tile .t-val{font-size:clamp(11px,1.1vw,15px);}
+.hg-status .tile .t-cat,.hg-sys .tile .t-cat{font-size:clamp(7px,0.6vw,9px);}
+/* ══ HOME TILE — centered icon layout ══ */
+.tile.ht{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:2px;padding:8px 6px;}
+.tile.ht .ht-icon{font-size:24px;line-height:1;}
+.tile.ht .ht-name{font-size:10px;color:var(--tx2);line-height:1.2;}
+.tile.ht .ht-val{font-size:12px;font-weight:700;font-family:var(--mono);color:var(--green);line-height:1.1;}
+.tile.ht.on .ht-val{color:var(--green);}
+.tile.scene.ht{min-height:0;}
+.tile.scene.ht .ht-icon{font-size:22px;}
+.tile.ht.on .ht-icon{filter:drop-shadow(0 0 8px rgba(94,232,160,.4));}
+.tile.ht.active-c{background:rgba(100,244,216,.12);border-color:var(--cyanb);box-shadow:0 0 14px rgba(100,244,216,.2);}
+.tile.ht.active-c .ht-name{color:var(--cyan);}
+.tile.ht.active-c .ht-icon{filter:drop-shadow(0 0 8px rgba(100,244,216,.5));}
+
+
+/* AI columns */
+
+/* ── AI + Settings: 2-column layout when active ────── */
+#page-ai.active{
+  columns:2;column-gap:12px;
+}
+#page-ai>*{break-inside:avoid;}
+
+/* ── Settings: tile grid layout ────────────────────── */
+.cfg-top-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;}
+.cfg-tile-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:6px;}
+.cfg-tile{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:8px;overflow:hidden;}
+.cfg-tile .sect{margin:2px 0 3px;}
+.cfg-tile .card{margin-bottom:4px;background:transparent;border:none;padding:0;}
+.cfg-tile .cfg-row{padding:4px 0;min-height:32px;}
+.cfg-tile .cfg-hint{font-size:9px;padding:2px 6px;margin:0 0 3px;}
+.cfg-tile .cfg-vld{font-size:8px;padding:2px 6px;margin:0 0 2px;}
+#page-ai .tile-grid, #page-settings .tile-grid{margin-bottom:6px;}
+#page-ai .card, #page-settings .card{margin-bottom:6px;}
+#page-ai .sect, #page-settings .sect{margin:4px 0 3px 2px;}
+
+/* ── Compact tiles for fit ─────────────────────────── */
+.tile{min-height:68px !important;padding:8px 10px;}
+.tile .t-icon{width:32px;height:32px;font-size:18px;}
+.tile .t-lbl{font-size:11px;}
+.tile .t-val{font-size:12px;margin-top:4px;}
+.tile .t-cat{font-size:8px;}
+.tile .t-sub{font-size:8px;}
+
+/* ── Compact sections + gaps ───────────────────────── */
+.sect{margin:6px 0 4px 2px;font-size:9px;}
+.tile-grid{gap:6px;margin-bottom:6px;}
+.card{padding:8px;margin-bottom:6px;}
+.card-row{padding:3px 0;}
+.cfg-row{padding:5px 0;min-height:36px;}
+
+/* ── Compact topbar ────────────────────────────────── */
+.topbar{height:40px;padding:0 12px;background:rgba(26,10,46,.95);}
+
+/* ── Compact tabs ──────────────────────────────────── */
+.tabs{height:52px;background:rgba(26,10,46,.95);}
+.tab{font-size:8px;gap:1px;}
+.tab .ti{font-size:16px;}
+
+/* ── Pages area adjusted ───────────────────────────── */
+.pages{top:54px;bottom:52px;}
+.page{padding:8px;}
+
+/* ── Compact floor grid ────────────────────────────── */
+.floor-grid{gap:4px;margin-bottom:6px;}
+.room{min-height:50px;padding:6px 8px;}
+.room-name{font-size:10px;}
+
+/* ── Compact audio ─────────────────────────────────── */
+.speaker-card{padding:10px;}
+.spk-header{margin-bottom:4px;}
+.spk-icon{width:32px;height:32px;font-size:16px;}
+.slider-row{padding:2px 0;}
+.btn{padding:6px 10px;font-size:10px;}
+
+/* ── Compact auto-levels ───────────────────────────── */
+.auto-levels{margin-top:4px;margin-bottom:4px;}
+.auto-lv{padding:4px 2px;}
+.lv-num{font-size:14px;}
+
+/* ── Compact gauges ────────────────────────────────── */
+.gauge-wrap{padding:2px 0;}
+.gauge-head{font-size:10px;margin-bottom:2px;}
+
+/* ── Weather compact ───────────────────────────────── */
+/* Weather stays single column */
+
+/* ── Toggle compact ────────────────────────────────── */
+.tog-row{padding:3px 0;}
+.tog-lbl{font-size:11px;}
+.toggle{width:32px;height:18px;}
+.toggle::after{width:12px;height:12px;}
+.toggle.on::after{left:16px;}
+
+/* ── Config compact ────────────────────────────────── */
+.save-btn{padding:8px;font-size:12px;margin-top:6px;}
+
+/* ── Zone cards compact ────────────────────────────── */
+.zone-card{padding:8px;}
+.zc-icon{width:32px;height:32px;font-size:16px;}
+.zc-name{font-size:11px;}
+
+/* ── Camera compact ────────────────────────────────── */
+.cam-card{margin-bottom:6px;}
+
+/* ══ MEDIA: Desktop ≥ 1600px ═══════════════════════ */
+@media (min-width:1600px) {
+  .page{padding:12px 16px;}
+  #page-ai, #page-settings{column-gap:16px;}
+  .tile{min-height:76px !important;padding:10px 12px;}
+  .tile .t-icon{width:36px;height:36px;font-size:20px;}
+  .tile .t-lbl{font-size:12px;}
+  .tile .t-val{font-size:13px;}
+  .tile-grid{gap:8px;margin-bottom:8px;}
+  .card{padding:10px;margin-bottom:8px;}
+  .sect{font-size:10px;margin:8px 0 5px 2px;}
+  .floor-grid{gap:6px;}
+  .room{min-height:56px;padding:8px;}
+  .zone-list{grid-template-columns:repeat(5,1fr);}
+}
+
+/* ══ MEDIA: Retina / laptop 1200-1599 ═════════════ */
+@media (max-width:1599px) and (min-width:1100px) {
+  .tile-grid.g5,.tile-grid.g6{grid-template-columns:repeat(4,1fr);}
+  .zone-list{grid-template-columns:repeat(4,1fr);}
+}
+
+/* ══ MEDIA: Tablet ≤ 1100px ═══════════════════════ */
+@media (max-width:1100px) {
+  .topbar{height:36px;padding:0 8px;}
+  .topbar-logo{font-size:10px;letter-spacing:2px;}
+  .chip{font-size:8px;padding:2px 5px;}
+  .tabs{height:46px;}
+  .tab{font-size:7px;}
+  .tab .ti{font-size:14px;}
+  .pages{top:46px;bottom:46px;}
+  .page{padding:6px;}
+
+  .tile{min-height:54px !important;padding:6px 8px;}
+  .tile .t-icon{width:26px;height:26px;font-size:14px;}
+  .tile .t-lbl{font-size:10px;}
+  .tile .t-val{font-size:11px;margin-top:2px;}
+  .tile .t-cat{font-size:7px;}
+  .tile-grid{gap:4px;margin-bottom:4px;}
+  .tile-grid.g5,.tile-grid.g4,.tile-grid.g6,.tile-grid.g3{grid-template-columns:repeat(3,1fr);}
+  .tile-grid.g2{grid-template-columns:repeat(2,1fr);}
+
+  .card{padding:6px;margin-bottom:4px;}
+  .card-row{padding:2px 0;}
+  .sect{margin:3px 0 2px;font-size:8px;letter-spacing:1.5px;}
+
+  .floor-grid{grid-template-columns:repeat(4,1fr);gap:3px;}
+  .room{min-height:42px;padding:4px 6px;}
+  .room-name{font-size:9px;}
+
+  .zone-list{grid-template-columns:repeat(3,1fr);gap:4px;}
+  .zone-card{padding:6px;gap:6px;}
+  .zc-icon{width:24px;height:24px;font-size:13px;}
+  .zc-name{font-size:10px;}
+
+  .speaker-card{padding:6px;}
+  .spk-icon{width:26px;height:26px;font-size:14px;}
+  .spk-name{font-size:11px;}
+  .slider-row{padding:1px 0;}
+  .btn{padding:4px 8px;font-size:9px;}
+  .btn-row{gap:4px;}
+
+  .auto-lv{padding:3px 1px;}
+  .lv-num{font-size:12px;}
+  .lv-lbl{font-size:7px;}
+
+  .gauge-head{font-size:9px;}
+  .gauge-bar{height:4px;}
+
+  .tog-row{padding:2px 0;}
+  .tog-lbl{font-size:10px;}
+  .divider{margin:1px 0;}
+
+  .cfg-row{padding:3px 0;min-height:30px;}
+  .cfg-label{font-size:10px;}
+  .cfg-row input[type=number],.cfg-row input[type=text]{width:60px;padding:4px 6px;font-size:10px;}
+  .save-btn{padding:6px;font-size:11px;}
+
+  .cam-header{padding:6px 10px;}
+
+  .cfg-top-grid{grid-template-columns:1fr 1fr;gap:4px;}
+  .cfg-tile-grid{grid-template-columns:1fr 1fr;gap:4px;}
+  .cfg-tile{padding:4px;}
+  .cfg-tile .cfg-row{padding:2px 0;min-height:26px;}
+  .cfg-tile .cfg-hint{font-size:8px;padding:1px 4px;}
+
+  .home-grid{grid-template-columns:1fr 1fr;gap:3px;}
+  .hg-status{grid-template-columns:repeat(5,1fr);gap:3px;}
+  .hg-sys{grid-template-columns:repeat(4,1fr);gap:3px;}
+  .hg-status .tile,.hg-sys .tile{min-height:44px !important;}
+  .scene-grid{grid-template-columns:repeat(2,1fr);gap:3px;}
+
+  .sensor-tiles{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:5px;}
+  .sensor-tile{padding:8px 10px;}
+  .sensor-tile .st-icon{font-size:20px;}
+  .sensor-tile .st-val{font-size:13px;}
+  .dev-tiles{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:6px;}
+  .dev-tile{padding:12px 8px 10px;min-height:90px;}
+  .dev-tile .tile-icon{font-size:28px;}
+  .dev-tile .tile-name{font-size:11px;}
+  .dev-tile .tile-state{font-size:11px;}
+  .dev-detail-overlay{padding:0 10px 70px;}
+  .dev-detail-name{font-size:15px;}
+  .dd-card{padding:10px;}
+}
+
+/* ══ MEDIA: Small height ≤ 800px ═════════════════ */
+@media (max-height:800px) {
+  .topbar{height:32px;}
+  .tabs{height:42px;}
+  .pages{top:42px;bottom:42px;}
+  .page{padding:4px 6px;}
+  .sect{margin:2px 0 1px;font-size:8px;}
+  .tile{min-height:48px !important;padding:4px 6px;}
+  .tile .t-icon{width:24px;height:24px;font-size:13px;}
+  .tile .t-lbl{font-size:9px;}
+  .tile .t-val{font-size:10px;margin-top:1px;}
+  .tile-grid{gap:3px;margin-bottom:3px;}
+  .card{padding:4px;margin-bottom:3px;}
+  .floor-grid{gap:2px;}
+  .room{min-height:36px;padding:3px 4px;}
+  .sensor-tiles{gap:4px;}
+  .sensor-tile{padding:6px 8px;}
+  .sensor-tile .st-icon{font-size:18px;}
+  .sensor-tile .st-val{font-size:12px;}
+  .dev-tiles{gap:5px;}
+  .dev-tile{padding:10px 8px;min-height:80px;}
+  .dev-tile .tile-icon{font-size:26px;}
+  .dev-tile .tile-name{font-size:11px;}
+  .dev-tile .tile-state{font-size:11px;}
+}
+
+
+/* ══ Gap handled by JS fixGap() — 54px fallback ══ */
+.pages{top:54px;}
+
+/* ══ RASPBERRY PI OPTIMIZATIONS ══ */
+html,body{cursor:none !important;}
+*{-webkit-backface-visibility:hidden;backface-visibility:hidden;}
+.tile:active{transform:none;}
+.dev-tile:active{transform:none;}
+/* Hide scrollbars completely */
+::-webkit-scrollbar{display:none;}
+.page{scrollbar-width:none;}
+/* Compact mode for 800x480 */
+@media (max-height:520px) {
+  .topbar{height:32px;padding:0 8px;}
+  .topbar-logo{font-size:9px;letter-spacing:2px;}
+  .topbar-time{font-size:10px;}
+  .pages{top:34px;bottom:40px;}
+  .page{padding:6px 6px 4px;}
+  .tabs{height:40px;}
+  .tab{font-size:7px;gap:0;}
+  .tab .ti{font-size:14px;}
+  .tile{padding:6px 8px;min-height:36px;}
+  .tile .t-icon{font-size:18px;}
+  .tile .t-lbl{font-size:9px;}
+  .tile .t-val{font-size:10px;}
+  .sect{font-size:8px;margin:4px 0 3px;}
+  .card{padding:6px 8px;margin-bottom:4px;}
+  .tile-grid{gap:4px;margin-bottom:4px;}
+  .chip{padding:2px 4px;font-size:8px;}
+  .room-tile{min-height:60px;}
+  .room-tile .room-icon{font-size:22px;}
+  .room-tile .room-name{font-size:10px;}
+  .cam-card{margin-bottom:4px;}
+  .scene-btn{padding:6px 10px;font-size:10px;}
+  .btn{padding:4px 8px;font-size:9px;}
+}
+</style>
+</head>
+<body>
+
+
+<!-- CONFIG OVERLAY -->
+<div class="overlay" id="configOverlay">
+  <div class="cfg-box">
+    <h2>⚙ SMART HOME CONFIG</h2>
+    <div style="font-size:10px;color:var(--green);margin-bottom:8px;">🍓 Raspberry Pi Dashboard — kiosk mode ready</div>
+    <label>Homey IP (http://192.168.x.x)</label>
+    <input type="text" id="cfgHost" placeholder="http://192.168.1.x" value="http://localhost:8080">
+    <label>API klíč (jen klíč, BEZ slova "Bearer")</label>
+    <input type="text" id="cfgToken" placeholder="be2e2ce1-1d55-40bf-xxxx-xxxxxxxxxxxx">
+    <label>Interval (s)</label>
+    <input type="number" id="cfgInterval" value="10" min="5" max="60">
+    <button onclick="saveConfig()">PŘIPOJIT</button>
+    <button onclick="clearConfig()" style="width:100%;padding:8px;margin-top:6px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:var(--r2);font-size:11px;cursor:pointer;">🗑 Smazat staré nastavení</button>
+    <div id="cfgStatus" style="font-size:10px;color:var(--tx3);margin-top:8px;text-align:center;"></div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-logo">SEMILY</div>
+  <div class="topbar-chips" id="topChips"></div>
+  <div class="topbar-time" id="topTime">—</div>
+  <div class="topbar-clock" id="clock">--:--:--</div>
+  <span class="conn-led off" id="connLed" onclick="showConfig()">●</span>
+  <span onclick="showConfig()" style="cursor:pointer;font-size:10px;font-family:var(--mono);color:var(--cyan);padding:3px 8px;border:1px solid var(--cyan);border-radius:5px;white-space:nowrap;">⚙ API</span>
+</div>
+
+<div class="pages" id="pagesContainer">
+  <div class="page active" id="page-home">
+    <div style="height:8px;flex-shrink:0;"></div>
+
+    <div class="home-grid">
+      <!-- ROW 1: Status tiles -->
+      <div class="hg-status">
+        <div class="tile ht" id="s-presence-tile"><div class="ht-icon">🏠</div><div class="ht-name">Přítomnost</div><div class="ht-val" id="s-presence">—</div></div>
+        <div class="tile ht" id="s-phase-tile"><div class="ht-icon">☀️</div><div class="ht-name">Fáze dne</div><div class="ht-val" id="s-phase">—</div></div>
+        <div class="tile ht" id="s-sleep-tile"><div class="ht-icon">😴</div><div class="ht-name">Spánek</div><div class="ht-val" id="s-sleep">—</div></div>
+        <div class="tile ht" id="s-health-tile"><div class="ht-icon">💚</div><div class="ht-name">Health</div><div class="ht-val" id="s-health">—</div></div>
+        <div class="tile ht" id="s-intent-tile"><div class="ht-icon">🎯</div><div class="ht-name">Intent</div><div class="ht-val" id="s-intent">—</div></div>
+      </div>
+      <!-- ROW 2: System tiles -->
+      <div class="hg-sys">
+        <div class="tile ht" id="s-power-tile"><div class="ht-icon">⚡</div><div class="ht-name">Výkon</div><div class="ht-val" id="s-power">—</div></div>
+        <div class="tile ht" id="s-state-tile"><div class="ht-icon">🔑</div><div class="ht-name">House State</div><div class="ht-val" id="s-house-state">—</div></div>
+        <div class="tile ht" id="s-visitor-tile"><div class="ht-icon">👥</div><div class="ht-name">Návštěva</div><div class="ht-val" id="s-visitor">—</div></div>
+        <div class="tile ht" id="s-dovolena-tile" onclick="toggleDovolena()"><div class="ht-icon">🏖</div><div class="ht-name">Dovolená</div><div class="ht-val" id="s-dovolena">—</div><div class="toggle" id="tog-dovolena" style="position:absolute;bottom:8px;right:10px;"></div></div>
+      </div>
+      <!-- ROOMS (left) -->
+      <div class="hg-rooms">
+        <div class="floor-grid">
+          <div class="room" id="fr-jidelna"  onclick="goZone('jidelna')"><div class="rm-icon">🛋</div><div class="room-name">Jídelna</div><div class="room-inds" id="ri-jidelna"></div></div>
+          <div class="room" id="fr-kitchen"  onclick="goZone('kitchen')"><div class="rm-icon">🍳</div><div class="room-name">Kuchyně</div><div class="room-inds" id="ri-kitchen"></div></div>
+          <div class="room" id="fr-bedroom"  onclick="goZone('bedroom')"><div class="rm-icon">🛏</div><div class="room-name">Ložnice</div><div class="room-inds" id="ri-bedroom"></div></div>
+          <div class="room" id="fr-bathroom" onclick="goZone('bathroom')"><div class="rm-icon">🚿</div><div class="room-name">Koupelna</div><div class="room-inds" id="ri-bathroom"></div></div>
+          <div class="room" id="fr-pracovna" onclick="goZone('pracovna')"><div class="rm-icon">💻</div><div class="room-name">Pracovna</div><div class="room-inds" id="ri-pracovna"></div></div>
+          <div class="room" id="fr-pradelna" onclick="goZone('pradelna')"><div class="rm-icon">🧺</div><div class="room-name">Prádelna</div><div class="room-inds" id="ri-pradelna"></div></div>
+          <div class="room" id="fr-predsin"  onclick="goZone('predsin')"><div class="rm-icon">🚪</div><div class="room-name">Předsíň</div><div class="room-inds" id="ri-predsin"></div></div>
+          <div class="room" id="fr-toilet"   onclick="goZone('toilet')"><div class="rm-icon">🚽</div><div class="room-name">Toaleta</div><div class="room-inds" id="ri-toilet"></div></div>
+        </div>
+      </div>
+      <!-- CAMERA mini preview (right of rooms) -->
+      <div class="hg-cam" onclick="switchPage('camera')" style="cursor:pointer;">
+        <div class="card" style="height:100%;margin:0;position:relative;overflow:hidden;display:flex;flex-direction:column;">
+          <div style="display:flex;align-items:center;gap:8px;padding:0 0 6px;">
+            <span style="font-size:16px;">📷</span>
+            <span style="font-size:12px;font-weight:600;">Kamera</span>
+            <span class="cam-live" id="camLiveMini" style="display:none;font-size:9px;color:var(--green);font-family:var(--mono);">● LIVE</span>
+          </div>
+          <div style="flex:1;position:relative;background:#000;border-radius:var(--r);overflow:hidden;min-height:0;">
+            <img id="camImgMini" alt="" style="width:100%;height:100%;object-fit:cover;display:none;">
+            <div id="camOffMini" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--tx3);">Offline</div>
+          </div>
+        </div>
+      </div>
+      <!-- APPLIANCES (bottom left) -->
+      <div class="hg-apps">
+        <div class="card" id="appCard" style="height:100%;margin:0;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.1) transparent;"><div class="card-row"><span class="card-icon">⏳</span><span class="card-lbl card-sub">Načítám…</span></div></div>
+      </div>
+      <!-- SCENES (bottom right) -->
+      <div class="hg-scenes">
+        <div class="scene-grid">
+          <div class="tile scene ht" id="scn-relax"     onclick="sendReq('sh_scene_active_request','relax')"><div class="ht-icon">🌙</div><div class="ht-name">Relax</div></div>
+          <div class="tile scene ht" id="scn-work"      onclick="sendReq('sh_scene_active_request','work')"><div class="ht-icon">💼</div><div class="ht-name">Work</div></div>
+          <div class="tile scene ht" id="scn-audio"     onclick="sendReq('sh_scene_active_request','audio')"><div class="ht-icon">🎵</div><div class="ht-name">Audio</div></div>
+          <div class="tile scene ht" id="scn-vareni"    onclick="sendReq('sh_scene_active_request','vareni')"><div class="ht-icon">🍳</div><div class="ht-name">Vaření</div></div>
+          <div class="tile scene ht" id="scn-kino"      onclick="sendReq('sh_scene_active_request','kino')"><div class="ht-icon">🎬</div><div class="ht-name">Kino</div></div>
+          <div class="tile scene ht" id="scn-romantika" onclick="sendReq('sh_scene_active_request','romantika')"><div class="ht-icon">🕯</div><div class="ht-name">Romantika</div></div>
+          <div class="tile scene ht reset-t"            onclick="sendReq('sh_scene_active_request','reset')"><div class="ht-icon">↺</div><div class="ht-name">Reset</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="page-zones">
+    <div style="height:8px;flex-shrink:0;"></div>
+
+    <div id="zoneListView">
+      <div class="sect">MÍSTNOSTI</div>
+      <div class="zone-list">
+        <div class="zone-card" id="zc-jidelna"  onclick="openZone('jidelna')"><div class="zc-icon">🛋</div><div class="zc-info"><div class="zc-name">Jídelna</div><div class="zc-meta">Roleta · Okno</div><div class="zc-inds" id="zci-jidelna"></div></div></div>
+        <div class="zone-card" id="zc-kitchen"  onclick="openZone('kitchen')"><div class="zc-icon">🍳</div><div class="zc-info"><div class="zc-name">Kuchyně</div><div class="zc-meta">+ reproduktor</div><div class="zc-inds" id="zci-kitchen"></div></div></div>
+        <div class="zone-card" id="zc-bedroom"  onclick="openZone('bedroom')"><div class="zc-icon">🛏</div><div class="zc-info"><div class="zc-name">Ložnice</div><div class="zc-meta">Nest Hub Max</div><div class="zc-inds" id="zci-bedroom"></div></div></div>
+        <div class="zone-card" id="zc-bathroom" onclick="openZone('bathroom')"><div class="zc-icon">🚿</div><div class="zc-info"><div class="zc-name">Koupelna</div><div class="zc-meta">+ reproduktor</div><div class="zc-inds" id="zci-bathroom"></div></div></div>
+        <div class="zone-card" id="zc-pracovna" onclick="openZone('pracovna')"><div class="zc-icon">💻</div><div class="zc-info"><div class="zc-name">Pracovna</div><div class="zc-meta">PC setup</div><div class="zc-inds" id="zci-pracovna"></div></div></div>
+        <div class="zone-card" id="zc-pradelna" onclick="openZone('pradelna')"><div class="zc-icon">🧺</div><div class="zc-info"><div class="zc-name">Prádelna</div><div class="zc-meta">Boiler</div><div class="zc-inds" id="zci-pradelna"></div></div></div>
+        <div class="zone-card" id="zc-predsin"  onclick="openZone('predsin')"><div class="zc-icon">🚪</div><div class="zc-info"><div class="zc-name">Předsíň</div><div class="zc-meta">kamera</div><div class="zc-inds" id="zci-predsin"></div></div></div>
+        <div class="zone-card" id="zc-toilet"   onclick="openZone('toilet')"><div class="zc-icon">🚽</div><div class="zc-info"><div class="zc-name">Toaleta</div><div class="zc-meta">—</div><div class="zc-inds" id="zci-toilet"></div></div></div>
+        <div class="zone-card" id="zc-spolecne" onclick="openZone('spolecne')"><div class="zc-icon">🏠</div><div class="zc-info"><div class="zc-name">Společné</div><div class="zc-meta">Cubo · Remote</div><div class="zc-inds" id="zci-spolecne"></div></div></div>
+      </div>
+    </div>
+    <div id="zoneDetailView" style="display:none;">
+      <div class="zone-back" onclick="closeZone()">← zpět</div>
+      <div class="zone-title" id="zdTitle">—</div>
+      <div class="zone-subtitle" id="zdSub">—</div>
+      <div id="zdContent"></div>
+      <div style="height:10px;"></div>
+    </div>
+    <!-- Device detail overlay -->
+    <div class="dev-detail-overlay" id="devDetailOverlay">
+      <div class="dev-detail-header">
+        <div class="dev-detail-back" onclick="closeDeviceDetail()">← zpět</div>
+        <div class="dev-detail-icon" id="ddIcon">💡</div>
+        <div class="dev-detail-name" id="ddName">—</div>
+      </div>
+      <div class="dev-detail-body" id="ddBody"></div>
+    </div>
+  </div>
+
+  </div>
+
+    <div class="page" id="page-audio">
+    <div style="height:14px;flex-shrink:0;"></div>
+
+    <div class="sect">REPRODUKTORY</div>
+
+    <div class="speaker-card">
+      <div class="spk-header">
+        <div class="spk-icon">🔊</div>
+        <div class="spk-info"><div class="spk-name">Kuchyň</div><div class="spk-status idle" id="spk-kitchen-status">Idle</div></div>
+        <div class="btn" onclick="audioStop('Kuchyn')">⏹ Stop</div>
+      </div>
+      <div class="spk-now" id="spk-kitchen-now">Nic nehraje.</div>
+      <div class="slider-row">
+        <span class="sl-icon">🔊</span><span class="sl-lbl">Hlasitost</span>
+        <input type="range" class="vol" min="0" max="100" value="30" id="vol-kitchen"
+          oninput="document.getElementById('vol-kitchen-val').textContent=this.value+'%'"
+          onchange="setDeviceCap('Kuchyn','volume_set',this.value/100)">
+        <span class="sl-val" id="vol-kitchen-val">30%</span>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <div class="btn blue" onclick="sendReq('sh_audio_request','radio_kitchen')">▶ Radio Italia</div>
+        <div class="btn" onclick="sendReq('sh_audio_request','radio_low')">🔉 Tiše</div>
+        <div class="btn" onclick="sendReq('sh_audio_request','radio_full')">🔊 Hlasitě</div>
+        <div class="btn cyan" onclick="runScript('sh_tts_orchestrator_v1')">⚡ TTS Queue</div>
+        <div class="btn" onclick="runScript('sh_gemini_daily_briefing_v1')" style="border-color:var(--orange);color:var(--orange);">☀ Briefing</div>
+      </div>
+    </div>
+
+    <!-- Ložnice — pouze ovládání hlasitosti (žádné TTS/audio routing) -->
+    <div class="speaker-card" style="margin-top:8px;">
+      <div class="spk-header">
+        <div class="spk-icon">🌙</div>
+        <div class="spk-info"><div class="spk-name">Ložnice · Nest Hub Max</div><div class="spk-status idle">Hlasitost</div></div>
+      </div>
+      <div class="slider-row">
+        <span class="sl-icon">🔊</span><span class="sl-lbl">Hlasitost</span>
+        <input type="range" class="vol" min="0" max="100" value="30" id="vol-bedroom"
+          oninput="document.getElementById('vol-bedroom-val').textContent=this.value+'%'"
+          onchange="setDeviceCap('nest max Ložnice 2','volume_set',this.value/100)">
+        <span class="sl-val" id="vol-bedroom-val">30%</span>
+      </div>
+    </div>
+
+    <div class="speaker-card" style="margin-top:8px;">
+      <div class="spk-header">
+        <div class="spk-icon">🚿</div>
+        <div class="spk-info"><div class="spk-name">Koupelna</div><div class="spk-status idle">Nezávislý subsystém</div></div>
+      </div>
+      <div class="btn-row">
+        <div class="btn blue" onclick="sendReq('sh_audio_request','radio_bathroom')">▶ Radio</div>
+        <div class="btn" onclick="audioStop('Speaker koupelna')">⏹ Stop</div>
+      </div>
+    </div>
+
+    <div class="sect">TTS PIPELINE</div>
+    <div class="tile-grid g3">
+      <div class="tile"><div class="t-top"><span class="t-icon">🗣</span><div class="t-info"><span class="t-lbl">TTS Queue</span><span class="t-cat">Pipeline</span></div></div><span class="t-val" id="aud-queue">—</span><span id="tts-state" style="display:none;">idle</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">📻</span><div class="t-info"><span class="t-lbl">Audio Mode</span><span class="t-cat">Pipeline</span></div></div><span class="t-val" id="aud-mode">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">▶</span><div class="t-info"><span class="t-lbl">Přehrává</span><span class="t-cat">Stav</span></div></div><span class="t-val" id="aud-playing">—</span></div>
+    </div>
+    <div style="height:10px;"></div>
+  </div>
+
+  <!-- AI & DIAGNOSTIKA -->
+<!-- AI & DIAGNOSTIKA -->
+    <div class="page" id="page-ai">
+    <div style="height:16px;flex-shrink:0;column-span:all;"></div>
+
+    <div class="sect" style="color:var(--purple);">🧠 AI CONTROL CENTER</div>
+
+    <div class="tile-grid g4">
+      <div class="tile"><div class="t-top"><span class="t-icon">💚</span><div class="t-info"><span class="t-lbl">Health</span><span class="t-cat">Systém</span></div></div><span class="t-val" id="ai-health" style="color:var(--green);">—</span></div>
+      <div class="tile" id="ai-errors-tile"><div class="t-top"><span class="t-icon" id="ai-errors-icon">✅</span><div class="t-info"><span class="t-lbl">Chyby/30m</span><span class="t-cat">Monitor</span></div></div><span class="t-val" id="ai-errors" style="color:var(--green);">0</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">⚡</span><div class="t-info"><span class="t-lbl">Výkon</span><span class="t-cat">Energie</span></div></div><span class="t-val" id="ai-power" style="color:var(--cyan);">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">📡</span><div class="t-info"><span class="t-lbl">Offline</span><span class="t-cat">Zařízení</span></div></div><span class="t-val" id="ai-offline">—</span></div>
+    </div>
+
+    <div class="card">
+      <div class="gauge-wrap"><div class="gauge-head"><span>Health</span><span id="gh-health">—%</span></div><div class="gauge-bar"><div class="gauge-fill green" id="gf-health" style="width:100%"></div></div></div>
+      <div class="gauge-wrap" style="margin-top:8px;"><div class="gauge-head"><span>Výkon</span><span id="gh-power">—W</span></div><div class="gauge-bar"><div class="gauge-fill cyan" id="gf-power" style="width:0%"></div></div></div>
+      <div class="gauge-wrap" style="margin-top:8px;"><div class="gauge-head"><span>Chyby</span><span id="gh-errors">—</span></div><div class="gauge-bar"><div class="gauge-fill orange" id="gf-errors" style="width:0%"></div></div></div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">AI AUTONOMIE</div>
+    <div class="auto-levels" id="autoLevels">
+      <div class="auto-lv" onclick="setAutoLevel(1)"><div class="lv-num">1</div><div class="lv-lbl">LOG</div></div>
+      <div class="auto-lv" onclick="setAutoLevel(2)"><div class="lv-num">2</div><div class="lv-lbl">SUGGEST</div></div>
+      <div class="auto-lv" onclick="setAutoLevel(3)"><div class="lv-num">3</div><div class="lv-lbl">ASK</div></div>
+      <div class="auto-lv" onclick="setAutoLevel(4)"><div class="lv-num">4</div><div class="lv-lbl">AUTO</div></div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">AI MODULY</div>
+    <div class="tile-grid g3">
+      <div class="tile"><div class="t-top"><span class="t-icon">🧠</span><div class="t-info"><span class="t-lbl">Meta Brain</span><span class="t-cat">AI</span></div></div><span class="t-val" id="ai-meta" style="color:var(--purple);">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">🔮</span><div class="t-info"><span class="t-lbl">Predict</span><span class="t-cat">AI</span></div></div><span class="t-val" id="ai-predict" style="color:var(--purple);">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">🤝</span><div class="t-info"><span class="t-lbl">Coordinator</span><span class="t-cat">AI</span></div></div><span class="t-val" id="ai-coord" style="color:var(--purple);">—</span></div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">REQUEST PIPELINE</div>
+    <div class="tile-grid g4">
+      <div class="tile"><div class="t-top"><span class="t-icon">💡</span><div class="t-info"><span class="t-lbl">Light</span><span class="t-cat">Request</span></div></div><span class="t-val" id="pip-light">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">🔊</span><div class="t-info"><span class="t-lbl">Audio</span><span class="t-cat">Request</span></div></div><span class="t-val" id="pip-audio">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">🎬</span><div class="t-info"><span class="t-lbl">Scene</span><span class="t-cat">Request</span></div></div><span class="t-val" id="pip-scene">—</span></div>
+      <div class="tile"><div class="t-top"><span class="t-icon">▬</span><div class="t-info"><span class="t-lbl">Roleta</span><span class="t-cat">Trigger</span></div></div><span class="t-val" id="pip-roleta">—</span></div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">AI TASKS (GOOGLE SHEETS)</div>
+    <div class="card">
+      <div class="card-row"><span class="card-icon">📋</span><span class="card-lbl">Otevřené úkoly</span><div class="btn cyan" onclick="loadAiTasks()" style="padding:4px 10px;font-size:10px;">⟳</div></div>
+      <div id="aiTasksList" style="margin-top:8px;font-family:var(--mono);font-size:10px;color:var(--tx3);">Klikni ⟳</div>
+    </div>
+    <div class="sect" style="color:var(--purple);">AI PENDING CHANGES</div>
+    <div class="card">
+      <div class="card-row"><span class="card-icon">⏳</span><span class="card-lbl">Čekající změny (48h)</span></div>
+      <div id="aiPendingList" style="margin-top:6px;font-family:var(--mono);font-size:10px;color:var(--tx3);">—</div>
+    </div>
+    <div id="aiNotes" style="display:none;"></div>
+    <div class="sect" style="color:var(--purple);">OFFLINE ZAŘÍZENÍ</div>
+    <div class="card" id="offlineCard">
+      <div class="card-row"><span class="card-icon">✅</span><span class="card-lbl card-sub" id="offlineList">Vše online</span></div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">PŘEPISY (OVERRIDES)</div>
+    <div class="card">
+      <div class="tog-row"><span class="card-icon">💡</span><span class="tog-lbl">Light override</span><div class="toggle" id="tog-ov-light" onclick="toggleVar('sh_manual_override_light',this)"></div></div>
+      <div class="divider"></div>
+      <div class="tog-row"><span class="card-icon">🔒</span><span class="tog-lbl">Privacy (roleta)</span><div class="toggle" id="tog-privacy" onclick="toggleVar('sh_privacy_guard_enabled',this)"></div></div>
+      <div class="divider"></div>
+      <div class="tog-row"><span class="card-icon">🧪</span><span class="tog-lbl">Simulation mode</span><div class="toggle" id="tog-sim" onclick="toggleVar('sh_simulation_mode',this)"></div></div>
+      <div class="divider"></div>
+      <div class="tog-row"><span class="card-icon">🔮</span><span class="tog-lbl">Predict enabled</span><div class="toggle" id="tog-predict" onclick="toggleVar('sh_predict_enabled',this)"></div></div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">DIAGNOSTICKÉ AKCE</div>
+    <div class="tile-grid g4" style="margin-bottom:6px;">
+      <div class="tile" onclick="runScript('sh_system_health_v1')" style="min-height:60px;"><div class="t-top"><span class="t-icon">🏥</span><div class="t-info"><span class="t-lbl">Health</span></div></div></div>
+      <div class="tile" onclick="runScript('sh_self_healing_v2')" style="min-height:60px;"><div class="t-top"><span class="t-icon">🔄</span><div class="t-info"><span class="t-lbl">Self-heal</span></div></div></div>
+      <div class="tile" onclick="runScript('sh_critical_devices_v1')" style="min-height:60px;"><div class="t-top"><span class="t-icon">📡</span><div class="t-info"><span class="t-lbl">Devices</span></div></div></div>
+      <div class="tile" onclick="runScript('sh_anomaly_detector_v1')" style="min-height:60px;"><div class="t-top"><span class="t-icon">🔍</span><div class="t-info"><span class="t-lbl">Anomálie</span></div></div></div>
+    </div>
+    <div class="btn-row">
+      <div class="btn" style="border-color:var(--purple);background:var(--purpled);color:var(--purple);width:100%;" onclick="runScript('sh_explain_last_action_v1')">🧠 Vysvětli poslední rozhodnutí</div>
+    </div>
+    <div id="ai-explain-result" style="display:none;margin-top:8px;padding:10px 12px;background:var(--purpled);border:1px solid rgba(160,112,240,.2);border-radius:var(--r2);font-size:12px;color:var(--purple);"></div>
+    <div class="btn-row" style="margin-top:6px;">
+      <div class="btn cyan" onclick="runScript('sh_state_engine_v1')">⚡ State</div>
+      <div class="btn" onclick="runScript('sh_error_tracker_v1')">📋 Errors</div>
+    </div>
+
+    <div class="sect" style="color:var(--purple);">EVENT LOG · DIAGNOSTIKA</div>
+    <div class="card" id="eventlog-stats" style="font-family:var(--mono);font-size:11px;color:var(--tx2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+        <span style="color:var(--purple);font-weight:600;">📊 Posledních 24h</span>
+        <div class="btn" onclick="fetchEventLog()" style="padding:3px 8px;font-size:9px;">↻ Obnovit</div>
+      </div>
+      <div id="el-summary" style="color:var(--tx3);">Klikni ↻ pro načtení...</div>
+    </div>
+    <div class="card" id="eventlog-recent" style="font-family:var(--mono);font-size:10px;display:none;max-height:300px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--bg4) transparent;">
+      <div style="color:var(--purple);font-weight:600;margin-bottom:4px;">📋 Poslední události</div>
+      <div id="el-rows"></div>
+    </div>
+
+    <div style="height:10px;"></div>
+  </div>
+
+  <!-- WEATHER -->
+    <div class="page" id="page-weather">
+    <div style="height:18px;flex-shrink:0;"></div>
+
+    <div id="wx-loading" style="text-align:center;color:var(--tx3);padding:20px;">Načítám počasí...</div>
+    <div id="wx-main" style="display:none;">
+      <!-- Location heading -->
+      <!-- Current — horizontal compact -->
+      <div class="card" style="display:flex;align-items:center;gap:16px;padding:12px 20px;">
+        <div id="wx-icon" style="flex-shrink:0;">☀</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:11px;color:var(--cyan);font-family:var(--mono);letter-spacing:1.5px;font-weight:500;margin-bottom:4px;">📍 SEMILY · LIBERECKÝ KRAJ</div>
+          <div style="display:flex;align-items:baseline;gap:10px;">
+            <div style="font-size:38px;font-weight:700;color:var(--tx1);line-height:1;" id="wx-temp">—°C</div>
+            <div style="font-size:13px;color:var(--green);text-transform:uppercase;font-weight:600;" id="wx-desc">—</div>
+          </div>
+          <div style="font-size:11px;color:var(--tx3);margin-top:2px;" id="wx-feels">Pocitová —°C</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:11px;color:var(--tx2);flex-shrink:0;text-align:right;">
+          <div>💨 <span id="wx-wind">—</span> km/h</div>
+          <div>💧 <span id="wx-humidity">—</span>%</div>
+          <div>🌧 <span id="wx-rain">—</span> mm</div>
+          <div>🔽 <span id="wx-pressure">—</span> hPa</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;font-family:var(--mono);font-size:11px;color:var(--tx2);flex-shrink:0;text-align:right;border-left:1px solid var(--bd);padding-left:14px;">
+          <div>🌅 <span id="wx-sunrise">—</span></div>
+          <div>🌇 <span id="wx-sunset">—</span></div>
+        </div>
+      </div>
+      <!-- Forecast — compact 2 rows -->
+      <div class="sect" style="color:var(--green);margin-top:8px;">PŘEDPOVĚĎ · 24H</div>
+      <div id="wx-forecast"></div>
+      <div style="text-align:center;font-size:9px;color:var(--tx3);margin-top:4px;" id="wx-updated">—</div>
+    </div>
+  </div>
+
+  <!-- CAMERA PAGE -->
+    <div class="page" id="page-camera">
+    <div style="height:8px;flex-shrink:0;"></div>
+
+      <div class="sect" style="color:var(--green);">KAMERA · PŘEDSÍŇ</div>
+      <div class="cam-card" style="margin:0;">
+        <div class="cam-header">
+          <span class="cam-title">📷 Kamera venkovní</span>
+          <span class="cam-live" id="camLive" style="display:none">● LIVE</span>
+          <span class="btn" id="irBtn" onclick="toggleIR()" style="padding:4px 10px;font-size:11px;">🔄 IR: AUTO</span>
+        </div>
+        <div class="cam-body open" id="camBody" style="display:block;">
+          <img id="camImg" alt="Camera feed">
+          <div class="cam-offline" id="camOff">Kamera nedostupná</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:8px;">
+        <div class="btn" onclick="refreshCamera()">↻ Obnovit</div>
+        <div class="btn" onclick="toggleIR()">🔄 Změnit IR režim</div>
+      </div>
+    </div>
+
+  <!-- SETTINGS -->
+<!-- SETTINGS -->
+    <div class="page" id="page-settings">
+    <div style="height:14px;flex-shrink:0;"></div>
+
+    <!-- Top row: connection + mode -->
+    <div class="cfg-top-grid">
+      <div>
+        <div class="sect" style="color:var(--cyan);">PŘIPOJENÍ</div>
+        <div class="tile-grid g2">
+          <div class="tile"><div class="t-top"><span class="t-icon">🌐</span><div class="t-info"><span class="t-lbl">Homey</span><span class="t-cat">Host</span></div></div><span class="t-val" id="cfgHostDisplay" style="font-size:10px;">—</span></div>
+          <div class="tile"><div class="t-top"><span class="t-icon">⏱</span><div class="t-info"><span class="t-lbl">Interval</span><span class="t-cat">Refresh</span></div></div><div style="margin-top:6px;display:flex;align-items:center;gap:6px;"><input type="number" id="settInterval" value="10" min="5" max="60" style="width:55px;padding:5px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);color:var(--tx1);font-family:var(--mono);font-size:12px;text-align:center;"><span class="cfg-unit">s</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="sect" style="color:var(--cyan);">PROVOZNÍ REŽIM</div>
+        <div class="card">
+          <div class="tog-row"><span class="card-icon">🏖</span><span class="tog-lbl">Dovolená (DOVOLENA = true)</span><div class="toggle" id="tog-dovolena2" onclick="toggleDovolena()"></div></div>
+          <div class="divider"></div>
+          <div class="tog-row"><span class="card-icon">👥</span><span class="tog-lbl">Režim návštěvy — vypne TTS, zablokuje vysavač</span><div class="toggle" id="tog-visitor" onclick="toggleVar('sh_visitor_mode_cmd',this,'on','off')"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Config tile grid: 3 columns -->
+    <div class="cfg-tile-grid">
+      <div class="cfg-tile">
+        <div class="sect" style="color:var(--cyan);">LUX PRAHY</div>
+        <div class="card cfg-group" id="cfgLux"></div>
+      </div>
+      <div class="cfg-tile">
+        <div class="sect" style="color:var(--cyan);">KLIMA</div>
+        <div class="card cfg-group" id="cfgClimate"></div>
+        <div class="sect" style="color:var(--cyan);">ENERGIE</div>
+        <div class="card cfg-group" id="cfgEnergy"></div>
+      </div>
+      <div class="cfg-tile">
+        <div class="sect" style="color:var(--cyan);">ZÁSUVKY · OCHRANA</div>
+        <div class="card cfg-group" id="cfgPlugs"></div>
+        <div class="sect" style="color:var(--cyan);">AI</div>
+        <div class="card cfg-group" id="cfgAI"></div>
+      </div>
+    </div>
+
+    <!-- Bottom: save + info -->
+    <div class="cfg-bottom">
+      <button class="save-btn" id="saveAllBtn" onclick="saveAllConfig()">💾 Uložit všechny změny</button>
+      <div class="tile-grid g4" style="margin-top:6px;">
+        <div class="tile" style="min-height:50px;"><div class="t-top"><span class="t-icon">📱</span><div class="t-info"><span class="t-lbl">Dashboard</span><span class="t-cat">v2 Loxone</span></div></div></div>
+        <div class="tile" style="min-height:50px;"><div class="t-top"><span class="t-icon">🏠</span><div class="t-info"><span class="t-lbl">Homey Pro 2026</span><span class="t-cat">Platforma</span></div></div></div>
+        <div class="tile" style="min-height:50px;"><div class="t-top"><span class="t-icon">📍</span><div class="t-info"><span class="t-lbl">Semily</span><span class="t-cat">Lokace</span></div></div></div>
+        <div class="tile" style="min-height:50px;"><div class="t-top"><span class="t-icon">📊</span><div class="t-info"><span class="t-lbl">Zařízení</span><span class="t-cat">Počet</span></div></div><span class="t-val" id="cfgDeviceCount">—</span><span id="devCount" style="display:none;">—</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- BOTTOM TABS -->
+<div class="tabs">
+  <div class="tab active" id="tab-home"     onclick="switchPage('home')"><span class="ti">🏠</span>HOME</div>
+  <div class="tab"        id="tab-zones"    onclick="switchPage('zones')"><span class="ti">🗺</span>ZÓNY</div>
+  <div class="tab"        id="tab-audio"    onclick="switchPage('audio')"><span class="ti">🔊</span>AUDIO</div>
+  <div class="tab"        id="tab-ai"       onclick="switchPage('ai')"><span class="ti">🧠</span>AI</div>
+  <div class="tab"        id="tab-weather"  onclick="switchPage('weather')"><span class="ti">🌤</span>POČASÍ</div>
+  <div class="tab"        id="tab-camera"   onclick="switchPage('camera')"><span class="ti">📷</span>KAMERA</div>
+  <div class="tab"        id="tab-settings" onclick="switchPage('settings')"><span class="ti">⚙</span>CONFIG</div>
+</div>
+
+<div class="flash" id="flashBar"></div>
+
+<script>
+
+// ════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════
+let CFG = { host: 'http://localhost:8080', token: 'be2e2ce1-1d55-40bf-9d24-f07294d5071d:089f6b36-e770-45c7-870d-71e86a07a9e3:1b38e08a545a4ef5ff651c18e5ddeede17a5d87c', interval: 10 };
+let ALL_VARS = {};
+let ALL_SCRIPTS = {};
+let ALL_DEVICES = {};
+let DATA = null;
+let refreshTimer = null;
+let varMapLoaded = false;
+
+function loadConfig() {
+  try {
+    const s = localStorage.getItem('sh_dashboard_cfg');
+    if (s) { CFG = JSON.parse(s); return !!(CFG.host && CFG.token); }
+  } catch(e) {}
+  return false;
+}
+function saveConfig() {
+  CFG.host = document.getElementById('cfgHost').value.trim().replace(/\/+$/,'') || 'http://localhost:8080';
+  CFG.token = document.getElementById('cfgToken').value.trim().replace(/^Bearer\s+/i, '');
+  CFG.interval = parseInt(document.getElementById('cfgInterval').value) || 10;
+  if (!CFG.host || !CFG.token) {
+    var st = document.getElementById('cfgStatus');
+    if (st) st.innerHTML = '<span style="color:var(--red);">Vyplň IP i Token!</span>';
+    return;
+  }
+  try { localStorage.setItem('sh_dashboard_cfg', JSON.stringify(CFG)); } catch(e) {}
+  document.getElementById('configOverlay').classList.add('hidden');
+  document.getElementById('cfgHostDisplay').textContent = CFG.host;
+  varMapLoaded = false;
+  startPolling();
+}
+function showConfig() {
+  document.getElementById('cfgHost').value = CFG.host || 'http://192.168.1.142';
+  document.getElementById('cfgToken').value = CFG.token;
+  document.getElementById('cfgInterval').value = CFG.interval;
+  document.getElementById('configOverlay').classList.remove('hidden');
+}
+function clearConfig() {
+  try { localStorage.removeItem('sh_dashboard_cfg'); } catch(e) {}
+  CFG = { host: 'http://192.168.1.142', token: '', interval: 10 };
+  document.getElementById('cfgHost').value = CFG.host;
+  document.getElementById('cfgToken').value = '';
+  document.getElementById('cfgInterval').value = 10;
+  var st = document.getElementById('cfgStatus');
+  if (st) st.innerHTML = '<span style="color:var(--green);">✅ Staré nastavení smazáno — vlož nový API klíč</span>';
+}
+
+// ════════════════════════════════════════════════════
+// HOMEY API
+// ════════════════════════════════════════════════════
+async function apiGet(path) {
+  const r = await fetch(CFG.host + path, {
+    headers: { 'Authorization': 'Bearer ' + CFG.token }
+  });
+  if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+  return r.json();
+}
+async function apiPut(path, body) {
+  const r = await fetch(CFG.host + path, {
+    method: 'PUT',
+    headers: { 'Authorization': 'Bearer ' + CFG.token, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+  return r.json();
+}
+
+async function loadVarMap() {
+  const data = await apiGet('/api/manager/logic/variable/');
+  ALL_VARS = {};
+  for (const [id, v] of Object.entries(data)) ALL_VARS[v.name] = { id, value: v.value };
+  try {
+    const scripts = await apiGet('/api/app/com.athom.homeyscript/script/');
+    ALL_SCRIPTS = {};
+    for (const [id, s] of Object.entries(scripts)) ALL_SCRIPTS[(s.name||'').replace('.js','')] = { id, name: s.name };
+  } catch(e) { console.warn('Scripts load failed:', e.message); }
+  try {
+    const devs = await apiGet('/api/manager/devices/device/');
+    ALL_DEVICES = {};
+    for (const [id, d] of Object.entries(devs)) ALL_DEVICES[d.name] = { id, caps: d.capabilities || [] };
+  } catch(e) { console.warn('Devices load failed:', e.message); }
+  varMapLoaded = true;
+  renderSettingsForms();
+  return ALL_VARS;
+}
+
+async function fetchDashboardData() {
+  if (!varMapLoaded) await loadVarMap();
+  const v = ALL_VARS['sh_dashboard_data'];
+  if (!v) throw new Error('sh_dashboard_data nenalezena');
+  const fresh = await apiGet('/api/manager/logic/variable/' + v.id);
+  return JSON.parse(fresh.value || '{}');
+}
+
+async function writeVar(name, value) {
+  if (!varMapLoaded) await loadVarMap();
+  const v = ALL_VARS[name];
+  if (!v) {
+    flash('⚠ CHYBÍ proměnná v Homey Logic: ' + name);
+    console.warn('[Dashboard] Proměnná neexistuje v Homey Logic:', name);
+    return false;
+  }
+  await apiPut('/api/manager/logic/variable/' + v.id, { value });
+  ALL_VARS[name].value = value;
+  flash('✓ ' + name + ' = ' + value);
+  return true;
+}
+
+// FIX 2026-04-20: resolveDeviceName — fuzzy match friendly labels ("Stůl jídelna")
+//   na skutečná Homey jména ("Stul Jidelna1"). Normalizuje háčky/case/čísla.
+function _normalizeName(s) {
+  return String(s || '').toLowerCase().trim()
+    .replace(/ů/g,'u').replace(/í/g,'i').replace(/á/g,'a').replace(/é/g,'e')
+    .replace(/ě/g,'e').replace(/š/g,'s').replace(/č/g,'c').replace(/ř/g,'r')
+    .replace(/ž/g,'z').replace(/ý/g,'y').replace(/ú/g,'u').replace(/ň/g,'n')
+    .replace(/ť/g,'t').replace(/ď/g,'d').replace(/\d+$/,'').trim();
+}
+function resolveDeviceName(displayName) {
+  if (!displayName || !ALL_DEVICES) return displayName;
+  if (ALL_DEVICES[displayName]) return displayName;
+  const norm = _normalizeName(displayName);
+  for (const k of Object.keys(ALL_DEVICES)) {
+    if (_normalizeName(k) === norm) return k;
+  }
+  for (const k of Object.keys(ALL_DEVICES)) {
+    const nk = _normalizeName(k);
+    if (nk.includes(norm) || norm.includes(nk)) return k;
+  }
+  return displayName;
+}
+
+async function setDeviceCap(deviceName, capability, value) {
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const resolved = resolveDeviceName(deviceName);
+    const d = ALL_DEVICES[resolved];
+    if (!d) { flash('⚠ Zařízení ' + deviceName + ' nenalezeno (resolved: ' + resolved + ')'); return; }
+    await apiPut('/api/manager/devices/device/' + d.id + '/capability/' + capability, { value });
+    flash('✓ ' + resolved + ' → ' + capability + ' = ' + value);
+  } catch(e) { flash('✗ ' + e.message); }
+}
+
+async function toggleVisitorMode() {
+  const tog = document.getElementById('tog-visitor');
+  const isOn = tog && tog.classList.contains('on');
+  const cmd = isOn ? 'off' : 'on';
+  try {
+    await writeVar('sh_visitor_mode_cmd', 'idle');
+    await writeVar('sh_visitor_mode_cmd', cmd);
+    showFlash('Režim návštěvy: ' + (cmd === 'on' ? '👥 ZAPNUT' : '✅ VYPNUT'));
+    setTimeout(() => fetchDashboardData(), 3000);
+  } catch(e) { showFlash('Chyba: ' + e.message); }
+}
+
+async function explainLastAction() {
+  const btn = document.querySelector('[onclick="explainLastAction()"]');
+  if (btn) { btn.textContent = '⏳ Ptám se Gemini…'; btn.style.opacity = '.6'; }
+  try {
+    await runScript('sh_explain_last_action_v1');
+    // Zobraz výsledek po 4s (TTS pipeline potřebuje čas)
+    setTimeout(async () => {
+      await loadVarMap();
+      const result = ALL_VARS['sh_last_explain_result']?.value || '—';
+      const ts     = ALL_VARS['sh_last_explain_ts']?.value || '';
+      const el = document.getElementById('ai-explain-result');
+      if (el) {
+        el.textContent = result;
+        el.style.display = 'block';
+      }
+      if (btn) { btn.textContent = '🧠 Vysvětli poslední akci'; btn.style.opacity = '1'; }
+    }, 4000);
+  } catch(e) {
+    if (btn) { btn.textContent = '🧠 Vysvětli poslední akci'; btn.style.opacity = '1'; }
+  }
+}
+
+async function runScript(name) {
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    let s = ALL_SCRIPTS[name];
+    if (!s) {
+      // Retry script loading once
+      try {
+        const scripts = await apiGet('/api/app/com.athom.homeyscript/script/');
+        for (const [id, sc] of Object.entries(scripts)) ALL_SCRIPTS[(sc.name||'').replace('.js','')] = { id, name: sc.name };
+        s = ALL_SCRIPTS[name];
+      } catch(e) {}
+    }
+    if (!s) { flash('⚠ Skript ' + name + ' nenalezen'); return; }
+    flash('⏳ Spouštím ' + name + '…');
+    const r = await fetch(CFG.host + '/api/app/com.athom.homeyscript/script/' + s.id + '/run', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + CFG.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    if (!r.ok) throw new Error(r.status);
+    const res = await r.json();
+    flash('✅ ' + name + ' ' + (res.returns || 'done'));
+  } catch(e) { flash('✗ ' + name + ': ' + e.message); }
+}
+
+const REQ_SCRIPTS = {
+  'sh_scene_active_request': 'sh_scene_engine_v1',
+  'sh_light_request': 'sh_light_router_v1',
+  'sh_audio_request': 'sh_audio_brain_v2',
+  'sh_jidelna_roleta_trigger': 'sh_jidelna_roleta_router_v2',
+};
+
+async function sendReq(name, value) {
+  try {
+    await writeVar(name, 'idle');
+    await writeVar(name, value);
+    const sn = REQ_SCRIPTS[name];
+    if (sn) await runScript(sn);
+    // Refresh UI after 1.5s to show updated state
+    setTimeout(poll, 1500);
+  } catch(e) { flash('✗ ' + e.message); }
+}
+
+async function toggleVar(name) {
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const cur = String(ALL_VARS[name]?.value || 'no').trim().toLowerCase();
+    await writeVar(name, cur === 'yes' ? 'no' : 'yes');
+    setTimeout(poll, 1000);
+  } catch(e) { flash('✗ ' + e.message); }
+}
+
+async function toggleFan() {
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const d = ALL_DEVICES['ventilatore'];
+    if (!d) { flash('⚠ Ventilátor nenalezen'); return; }
+    const on = DATA?.appliances?.fan?.on ?? false;
+    await setDeviceCap('ventilatore', 'onoff', !on);
+    setTimeout(poll, 1500);
+  } catch(e) { flash('✗ ' + e.message); }
+}
+
+// Dovolena toggle — DOVOLENA je STRING 'true'/'false', nikdy boolean
+async function toggleDovolena() {
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const cur = String(ALL_VARS['DOVOLENA']?.value || 'false').toLowerCase();
+    const next = cur === 'true' ? 'false' : 'true';
+    await writeVar('DOVOLENA', next);
+    // Refresh UI
+    setTimeout(poll, 800);
+    flash('Dovolená: ' + (next === 'true' ? '🏖 AKTIVNÍ' : '✅ VYPNUTA'));
+  } catch(e) { flash('✗ ' + e.message); }
+}
+
+// AI Tasks loader ze Google Sheets (Apps Script v7 ?mode=tasks)
+async function loadAITasks() {
+  const el = document.getElementById('aiTasksList');
+  if (!el) return;
+  el.innerHTML = '<span style="color:var(--tx2)">⏳ Načítám z Google Sheets…</span>';
+  try {
+    const sheetsUrl = ALL_VARS['sh_sheets_url']?.value || ALL_VARS['sh_cfg_sheets_url']?.value || '';
+    if (!sheetsUrl) {
+      el.innerHTML = '<span style="color:var(--orange)">⚠ sh_sheets_url proměnná nenalezena. Nastav URL v CONFIG → AI.</span>';
+      return;
+    }
+    const res = await fetch(sheetsUrl + '?mode=tasks', { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    const tasks = data.tasks || data.data || data || [];
+    if (!Array.isArray(tasks) || tasks.length === 0) {
+      el.innerHTML = '<span style="color:var(--green)">✅ Žádné otevřené úkoly</span>';
+      return;
+    }
+    el.innerHTML = tasks.map(t => {
+      const status = t.status || t.Status || '?';
+      const desc = t.description || t.Description || t.task || JSON.stringify(t);
+      const ai = t.ai || t.AI || '';
+      const cls = status === 'open' ? 'var(--orange)' : status === 'done' ? 'var(--green)' : 'var(--tx2)';
+      return '<div style="padding:5px 0;border-bottom:1px solid var(--bd)">' +
+        '<span style="color:' + cls + ';font-size:9px">[' + status.toUpperCase() + ']</span>' +
+        (ai ? ' <span style="color:var(--purple);font-size:9px">' + ai + '</span>' : '') +
+        '<div style="margin-top:2px">' + desc + '</div></div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<span style="color:var(--red)">✗ ' + e.message + '</span>';
+  }
+}
+
+// Přeruší smyčku: roleta zavřená + světla ON → vypne světla → recheck rolety
+async function saveZoneCfg(zone) {
+  const vars = ZONE_CFG[zone] || [];
+  if (!vars.length) return;
+
+  // Validate first
+  let allOk = true;
+  for (const v of vars) {
+    if (!validateCfgInput(v.name, 'zcfg')) allOk = false;
+  }
+  if (!allOk) {
+    flash('❌ Oprav chyby v konfiguraci před uložením');
+    return;
+  }
+
+  let saved = 0, errors = 0, missing = 0;
+  for (const v of vars) {
+    const el = document.getElementById('zcfg_' + v.name);
+    if (!el) continue;
+    const newVal = v.type === 'text' ? el.value.trim() : Number(el.value);
+    const curVal = ALL_VARS[v.name]?.value;
+    if (String(newVal) === String(curVal ?? '')) continue;  // beze změny
+    const ok = await writeVar(v.name, newVal);
+    if (ok === false) {
+      // writeVar vrátí false pokud proměnná neexistuje
+      el.style.borderColor = 'var(--red)';
+      missing++;
+    } else {
+      el.style.borderColor = 'var(--green)';
+      saved++;
+    }
+  }
+  if (missing > 0) flash('⚠ ' + missing + ' proměnných chybí v Homey Logic — vytvoř je!');
+  else if (saved > 0) flash('✅ Uloženo ' + saved + ' hodnot pro zónu: ' + zone);
+  else flash('↺ Žádná změna');
+}
+
+async function roletaRecheck() {
+  await sendReq('sh_jidelna_roleta_trigger', 'privacy_recheck');
+  flash('↺ Roleta recheck spuštěn');
+}
+
+// Audio stop — přímý stop na zařízení + pipeline
+async function audioStop(speaker) {
+  try {
+    flash('⏹ Zastavuji audio...');
+    // Použij dedikovaný stop skript — přímý HomeyScript setCapabilityValue
+    await runScript('sh_audio_stop_v1');
+    flash('✅ Audio zastaveno');
+  } catch(e) {
+    // Fallback — pipeline
+    try {
+      await writeVar('sh_audio_request', 'idle');
+      await writeVar('sh_audio_request', 'stop');
+      flash('⏹ Stop (fallback pipeline)');
+    } catch(_) { flash('✗ Stop selhal'); }
+  }
+}
+
+async function breakRoletaLoop() {
+  try {
+    flash('⏳ Vypínám světla Open Space...');
+    // Vypni oba open space světelné okruhy přes light router
+    await sendReq('sh_light_request', 'open_space_off');
+    // Počkej 1s (Flow delay nefunguje, ale pipeline je rychlá)
+    await new Promise(r => setTimeout(r, 1500));
+    // Spusť recheck rolety
+    await sendReq('sh_jidelna_roleta_trigger', 'privacy_recheck');
+    flash('✅ Světla vypnuta + roleta recheck spuštěn');
+  } catch(e) { flash('✗ breakRoletaLoop: ' + e.message); }
+}
+
+async function setAutoLevel(lv) {
+  await writeVar('sh_ai_autonomy_level', lv);
+  updateAutoLevels(lv);
+  flash('AI autonomie → level ' + lv);
+}
+
+// ════════════════════════════════════════════════════
+// NAVIGATION
+// ════════════════════════════════════════════════════
+let currentPage = 'home';
+
+function switchPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  currentPage = name;
+  if (name === 'zones') { closeZone(); }
+}
+
+function goZone(zone) {
+  switchPage('zones');
+  openZone(zone);
+}
+
+let currentZone = null;
+
+function openZone(zone) {
+  currentZone = zone;
+  document.getElementById('zoneListView').style.display = 'none';
+  document.getElementById('zoneDetailView').style.display = 'block';
+  renderZoneDetail(zone);
+}
+function closeZone() {
+  currentZone = null;
+  document.getElementById('zoneDetailView').style.display = 'none';
+  document.getElementById('zoneListView').style.display = 'block';
+}
+
+// ════════════════════════════════════════════════════
+// DEVICE DETAIL OVERLAY
+// ════════════════════════════════════════════════════
+function openDeviceDetail(d) {
+  const overlay = document.getElementById('devDetailOverlay');
+  document.getElementById('ddIcon').textContent = d.icon;
+  document.getElementById('ddName').textContent = d.name;
+
+  let html = '';
+
+  // ON/OFF card — FIX 2026-04-20: preferuj rawName (Homey device name) před friendly label
+  const apiName = d.rawName || d.name;
+  html += '<div class="dd-card">' +
+    '<div class="dd-label">Stav</div>' +
+    '<div class="dd-onoff">' +
+      '<div class="dd-btn dd-btn-on' + (d.on ? ' active' : '') + '" onclick="ddSetOnOff(\'' + apiName + '\',true)">▶ ZAP</div>' +
+      '<div class="dd-btn dd-btn-off' + (!d.on ? ' active' : '') + '" onclick="ddSetOnOff(\'' + apiName + '\',false)">⏹ VYP</div>' +
+    '</div>' +
+  '</div>';
+
+  // Blind/roleta position slider
+  if (d.type === 'blind') {
+    const bPct = d.blindPct || 0;
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Pozice rolety</div>' +
+      '<div class="dd-slider-row">' +
+        '<div class="dd-sl-icon">▬</div>' +
+        '<input type="range" min="0" max="100" value="' + bPct + '"' +
+          ' style="background:linear-gradient(to right,var(--bg4) 0%,var(--green) 100%);"' +
+          ' oninput="this.parentElement.querySelector(\'.dd-sl-val\').textContent=this.value+\'%\'"' +
+          ' onchange="setDeviceCap(\'Roleta Fyrtur1\',\'windowcoverings_set\',this.value/100)">' +
+        '<div class="dd-sl-val">' + bPct + '%</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:2px;padding:0 30px;">' +
+        '<span>zavřená</span><span>otevřená</span>' +
+      '</div>' +
+    '</div>';
+
+    // Roleta diagnostika
+    const r2 = DATA?.rooms?.jidelna || {};
+    const privacyVal = ALL_VARS['sh_privacy_guard_enabled']?.value || '?';
+    const luxThresh = ALL_VARS['sh_cfg_lux_roleta_open']?.value || 500;
+    const luxD = r2.lux !== undefined ? Math.round(r2.lux) : '?';
+    const lOn1 = DATA?.rooms?.kitchen?.light_1?.on;
+    const lOn2 = DATA?.rooms?.jidelna?.light_2?.on;
+    const lOn = lOn1 || lOn2;
+    const ph = DATA?.state?.phase || '?';
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Diagnostika</div>' +
+      '<div class="dd-power-row"><div class="dd-pw-icon">☀️</div><div class="dd-pw-lbl">Lux okno</div><div class="dd-pw-val">' + luxD + ' lux</div></div>' +
+      '<div class="dd-power-row"><div class="dd-pw-icon">🔒</div><div class="dd-pw-lbl">Privacy guard</div><div class="dd-pw-val" style="color:' + (privacyVal==='yes'?'var(--orange)':'var(--green)') + '">' + privacyVal + '</div></div>' +
+      '<div class="dd-power-row"><div class="dd-pw-icon">💡</div><div class="dd-pw-lbl">Interlock</div><div class="dd-pw-val" style="color:' + (lOn?'var(--red)':'var(--green)') + '">' + (lOn ? '⛔ BLOKUJE' : '✅ volno') + '</div></div>' +
+      '<div class="dd-power-row"><div class="dd-pw-icon">📊</div><div class="dd-pw-lbl">Fáze / Práh</div><div class="dd-pw-val">' + ph + ' / ' + luxThresh + '</div></div>' +
+    '</div>' +
+    '<div class="dd-card">' +
+      '<div class="dd-label">Akce</div>' +
+      '<div class="dd-onoff">' +
+        '<div class="dd-btn dd-btn-off" onclick="breakRoletaLoop();closeDeviceDetail()">⚡ Světla OFF + Recheck</div>' +
+        '<div class="dd-btn dd-btn-on" onclick="roletaRecheck();closeDeviceDetail()">↺ Recheck</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Dim slider — FIX 2026-04-20: apiName (rawName || name) pro API calls
+  if (d.hasDim && d.type !== 'blind') {
+    const dimPct = Math.round((d.dim || 0) * 100);
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Jas</div>' +
+      '<div class="dd-slider-row">' +
+        '<div class="dd-sl-icon">☀️</div>' +
+        '<input type="range" min="1" max="100" value="' + dimPct + '"' +
+          ' oninput="this.parentElement.querySelector(\'.dd-sl-val\').textContent=this.value+\'%\'"' +
+          ' onchange="setDeviceCap(\'' + apiName + '\',\'dim\',this.value/100)">' +
+        '<div class="dd-sl-val">' + dimPct + '%</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Light temperature slider
+  if (d.hasTemp) {
+    const tempPct = Math.round((d.temp || 0.5) * 100);
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Teplota barvy</div>' +
+      '<div class="dd-slider-row">' +
+        '<div class="dd-sl-icon">🔥</div>' +
+        '<input type="range" min="0" max="100" value="' + tempPct + '"' +
+          ' style="background:linear-gradient(to right,#ffd27f,#fff,#a6c8ff);"' +
+          ' oninput="this.parentElement.querySelector(\'.dd-sl-val\').textContent=this.value+\'%\'"' +
+          ' onchange="setDeviceCap(\'' + d.name + '\',\'light_temperature\',this.value/100)">' +
+        '<div class="dd-sl-val">' + tempPct + '%</div>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;font-size:9px;color:var(--tx3);margin-top:2px;padding:0 30px;">' +
+        '<span>teplá</span><span>studená</span>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Power & temperature (plugs)
+  if (d.type === 'plug' && (d.power !== null || d.plugTemp !== null)) {
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Monitoring</div>';
+    if (d.power !== null) {
+      html += '<div class="dd-power-row">' +
+        '<div class="dd-pw-icon">⚡</div>' +
+        '<div class="dd-pw-lbl">Spotřeba</div>' +
+        '<div class="dd-pw-val">' + Math.round(d.power) + ' W</div>' +
+      '</div>';
+    }
+    if (d.plugTemp !== null) {
+      const t = Math.round(d.plugTemp);
+      const warnT = 60, critT = 75;
+      const cls = t >= critT ? 'color:var(--red)' : t >= warnT ? 'color:var(--orange)' : 'color:var(--green)';
+      html += '<div class="dd-power-row">' +
+        '<div class="dd-pw-icon">🌡</div>' +
+        '<div class="dd-pw-lbl">Teplota zásuvky</div>' +
+        '<div class="dd-pw-val" style="' + cls + '">' + t + '°C</div>' +
+      '</div>';
+    }
+    html += '</div>';
+  }
+
+  // Speaker — volume slider + audio controls
+  if (d.type === 'speaker' && d.speakerName) {
+    const vol = d.volume || 30;
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Hlasitost</div>' +
+      '<div class="dd-slider-row">' +
+        '<div class="dd-sl-icon">🔊</div>' +
+        '<input type="range" min="0" max="100" value="' + vol + '"' +
+          ' oninput="this.parentElement.querySelector(\'.dd-sl-val\').textContent=this.value+\'%\'"' +
+          ' onchange="setDeviceCap(\'' + d.speakerName + '\',\'volume_set\',this.value/100)">' +
+        '<div class="dd-sl-val">' + vol + '%</div>' +
+      '</div>' +
+    '</div>';
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">Ovládání</div>' +
+      '<div class="dd-onoff">' +
+        '<div class="dd-btn dd-btn-on" onclick="sendReq(\'sh_audio_request\',\'radio_kitchen\');closeDeviceDetail()">🔊 Rádio</div>' +
+        '<div class="dd-btn dd-btn-off" onclick="audioStop();closeDeviceDetail()">⏹ Stop</div>' +
+      '</div>' +
+    '</div>';
+  }
+
+  // Device config (from DEVICE_CFG)
+  const cfgVars = DEVICE_CFG[d.key] || [];
+  if (cfgVars.length > 0) {
+    html += '<div class="dd-card">' +
+      '<div class="dd-label">⚙ Konfigurace</div>';
+    cfgVars.forEach(v => {
+      const cur = ALL_VARS[v.name]?.value ?? '';
+      const iType = (v.type === 'text') ? 'text' : 'number';
+      const missing = !ALL_VARS[v.name];
+      html += '<div class="cfg-row' + (missing ? ' cfg-missing' : '') + '" style="border-bottom:1px solid rgba(255,255,255,.04);padding:8px 0;">' +
+        '<span class="cfg-label" style="font-size:11px;">' + v.label +
+          (missing ? ' <span style="color:var(--red);font-size:9px;">⚠</span>' : '') +
+        '</span>' +
+        '<input type="' + iType + '" id="dcfg_' + v.name + '" value="' + cur + '" step="1"' +
+          ' oninput="validateCfgInput(\'' + v.name + '\',\'dcfg\')"' +
+          ' onchange="validateCfgInput(\'' + v.name + '\',\'dcfg\')"' +
+          ' style="width:68px;padding:5px 7px;background:var(--bg3);border:1px solid var(--bd);' +
+          'border-radius:var(--r);color:var(--tx1);font-family:var(--mono);font-size:12px;text-align:center;">' +
+        '<span style="font-family:var(--mono);font-size:10px;color:var(--tx2);min-width:24px;text-align:right;">' + (v.unit||'') + '</span>' +
+      '</div>' +
+      '<div class="cfg-vld" id="vld_dcfg_' + v.name + '"></div>';
+      if (v.desc) {
+        html += '<div class="cfg-hint">' + v.desc + '</div>';
+      }
+    });
+    html += '<button onclick="saveDeviceCfg(\'' + d.key + '\')"' +
+      ' style="margin-top:10px;width:100%;padding:10px;background:var(--cyan);color:#000;' +
+      'border:none;border-radius:var(--r);font-weight:bold;font-size:13px;cursor:pointer;">' +
+      '💾 Uložit</button>';
+    html += '</div>';
+  }
+
+  document.getElementById('ddBody').innerHTML = html;
+  overlay.classList.add('show');
+
+  // Run initial validation on all config inputs
+  cfgVars.forEach(v => validateCfgInput(v.name, 'dcfg'));
+}
+
+function closeDeviceDetail() {
+  document.getElementById('devDetailOverlay').classList.remove('show');
+  // Refresh zone to reflect any changes
+  if (currentZone) renderZoneDetail(currentZone);
+}
+
+function ddSetOnOff(name, val) {
+  // setDeviceCap už má resolveDeviceName interně
+  setDeviceCap(name, 'onoff', val);
+  const btns = document.querySelectorAll('.dd-onoff .dd-btn');
+  btns.forEach(b => b.classList.remove('active'));
+  if (val) btns[0]?.classList.add('active');
+  else     btns[1]?.classList.add('active');
+}
+
+async function saveDeviceCfg(key) {
+  const cfgVars = DEVICE_CFG[key] || [];
+  // Validate all first
+  let allValid = true;
+  for (const v of cfgVars) {
+    if (!validateCfgInput(v.name, 'dcfg')) allValid = false;
+  }
+  if (!allValid) {
+    flash('❌ Oprav chyby v konfiguraci před uložením');
+    return;
+  }
+  let saved = 0, errors = 0;
+  for (const v of cfgVars) {
+    const el = document.getElementById('dcfg_' + v.name);
+    if (!el || el.value.trim() === '') continue;
+    const val = el.value.trim();
+    try {
+      await writeVar(v.name, isNaN(val) || v.type === 'text' ? val : Number(val));
+      saved++;
+    } catch(e) { errors++; }
+  }
+  flash(errors ? '⚠ Uloženo ' + saved + '/' + cfgVars.length : '✅ Konfigurace uložena (' + saved + ')');
+}
+
+// ════════════════════════════════════════════════════
+// FLASH
+// ════════════════════════════════════════════════════
+let flashTimer = null;
+function flash(msg) {
+  const el = document.getElementById('flashBar');
+  el.textContent = msg;
+  el.classList.add('show');
+  if (flashTimer) clearTimeout(flashTimer);
+  flashTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════════════
+// UPDATE UI
+// ════════════════════════════════════════════════════
+function updateUI(d) {
+  DATA = d;
+  const s = d.state || {};
+  const h = d.health || {};
+  const a = d.audio || {};
+  const ov = d.overrides || {};
+  const pip = d.pipeline || {};
+  const ai = d.ai || {};
+
+  // Top chips
+  const hDot = (h.score >= 90) ? 'dg' : (h.score >= 70) ? 'do' : 'dr';
+  const pDot = s.presence === 'home' ? 'dg' : 'do';
+  const sDot = s.sleep === 'yes' ? 'do' : 'dg';
+  document.getElementById('topChips').innerHTML = `
+    <div class="chip"><span class="dot ${pDot}"></span>${(s.presence||'?').toUpperCase()}</div>
+    <div class="chip"><span class="dot db"></span>${(s.phase||'?').toUpperCase()}</div>
+    <div class="chip hi"><span class="dot ${hDot}"></span>${h.score||'?'}%</div>
+    <div class="chip"><span class="dot ${sDot}"></span>${s.sleep==='yes'?'SPÍM':'VZHŮRU'}</div>
+    <div class="chip"><span class="dot dc"></span>${(s.intent||'idle').toUpperCase()}</div>
+  `;
+
+  // Status tiles (HOME)
+  setText('s-presence', (s.presence||'—').toUpperCase());
+  setText('s-phase', (s.phase||'—').toUpperCase());
+  const sleepEl = document.getElementById('s-sleep');
+  sleepEl.textContent = s.sleep === 'yes' ? 'SPÍM' : 'VZHŮRU';
+  sleepEl.className = 'st-value ' + (s.sleep === 'yes' ? 'orange' : 'green');
+  setText('s-intent', (s.intent||'idle').toUpperCase());
+
+  // House state
+  const hs_val = DATA?.state?.house_state || ALL_VARS['sh_house_state']?.value || '—';
+  setText('s-house-state', String(hs_val).toUpperCase());
+
+  // Dovolena
+  const dovVal = String(ALL_VARS['DOVOLENA']?.value || 'false').toLowerCase();
+  const dovOn = dovVal === 'true';
+  setText('s-dovolena', dovOn ? 'ANO' : 'NE');
+  const dovEl = document.getElementById('s-dovolena');
+  if (dovEl) dovEl.className = 'st-value ' + (dovOn ? 'orange' : 'green');
+  setToggle('tog-dovolena', dovOn ? 'yes' : 'no');
+  setToggle('tog-dovolena-cfg', dovOn ? 'yes' : 'no');
+
+  // AI pending changes
+  const pending = ALL_VARS['sh_ai_pending_changes']?.value || '';
+  const pendEl = document.getElementById('aiPendingList');
+  if (pendEl) {
+    if (pending && pending !== '' && pending !== 'idle') {
+      try {
+        const p = JSON.parse(pending);
+        const keys = Object.keys(p);
+        pendEl.innerHTML = keys.length === 0 ? 'Žádné čekající změny.' :
+          keys.map(k => '<div style="margin:2px 0"><span style="color:var(--cyan)">' + k + '</span> → ' + p[k] + '</div>').join('');
+      } catch(e) { pendEl.textContent = pending; }
+    } else { pendEl.textContent = 'Žádné čekající změny.'; }
+  }
+  const healthEl = document.getElementById('s-health');
+  healthEl.textContent = (h.score||0) + '%';
+  healthEl.className = 'st-value ' + (h.score >= 90 ? 'green' : h.score >= 70 ? 'orange' : 'red');
+  setText('s-power', Math.round(h.power_total||0) + ' W');
+
+  // Rooms (floor plan + zone list)
+  const r = d.rooms || {};
+  const kitchenWithPlugs = r.kitchen ? { ...r.kitchen, plugs: d.plugs } : { plugs: d.plugs };
+  updateRoomFloor('jidelna',  r.jidelna);
+  updateRoomFloor('kitchen',  kitchenWithPlugs);
+  updateRoomFloor('bedroom',  r.bedroom);
+  updateRoomFloor('bathroom', r.bathroom);
+  updateRoomFloor('pracovna', r.pracovna);
+  updateRoomFloor('pradelna', r.pradelna);
+  updateRoomFloor('predsin',  r.predsin);
+  updateRoomFloor('toilet',   r.toilet);
+  updateRoomFloor('spolecne', r.spolecne);
+
+  updateZoneCard('jidelna',  r.jidelna);
+  updateZoneCard('kitchen',  r.kitchen);
+  updateZoneCard('bedroom',  r.bedroom);
+  updateZoneCard('bathroom', r.bathroom);
+  updateZoneCard('pracovna', r.pracovna);
+  updateZoneCard('pradelna', r.pradelna);
+  updateZoneCard('predsin',  r.predsin);
+  updateZoneCard('toilet',   r.toilet);
+  updateZoneCard('spolecne', r.spolecne);
+
+  // Scene buttons
+  const scn = s.scene || 'idle';
+  ['relax','work','audio','vareni','kino','romantika'].forEach(sc => {
+    const el = document.getElementById('scn-' + sc);
+    if (el) el.classList.toggle('on', scn === sc);
+  });
+
+  // Audio
+  setText('aud-mode', a.mode || 'idle');
+  setText('aud-playing', a.playing === 'yes' ? '▶ hraje' : '—');
+  setText('tts-state', ALL_VARS['sh_tts_queue']?.value || 'idle');
+  const kStatus = document.getElementById('spk-kitchen-status');
+  if (kStatus) {
+    kStatus.textContent = a.playing === 'yes' ? '▶ hraje' : 'idle';
+    kStatus.className = 'spk-status ' + (a.playing === 'yes' ? 'playing' : 'idle');
+  }
+  if (a.mode || a.track) {
+    const now = document.getElementById('spk-kitchen-now');
+    if (now) now.innerHTML = a.track ? '<span>' + a.track + '</span>' : (a.mode || 'idle');
+  }
+
+  // AI page
+  const hScore = h.score || 0;
+  setText('ai-health', hScore + '%');
+  const healthMetric = document.getElementById('ai-health');
+  if (healthMetric) healthMetric.className = 'aim-val ' + (hScore >= 90 ? 'green' : hScore >= 70 ? 'orange' : 'red');
+  const errCount = h.errors_30m || 0;
+  setText('ai-errors', errCount);
+  const errEl = document.getElementById('ai-errors');
+  const errIcon = document.getElementById('ai-errors-icon');
+  const errTile = document.getElementById('ai-errors-tile');
+  if (errEl) errEl.style.color = errCount === 0 ? 'var(--green)' : 'var(--red)';
+  if (errIcon) errIcon.textContent = errCount === 0 ? '✅' : '⚠️';
+  if (errTile) errTile.className = 'tile' + (errCount > 0 ? ' warn' : '');
+  setText('ai-power', Math.round(h.power_total || 0));
+  const offArr = d.offline || [];
+  setText('ai-offline', offArr.length);
+  const offEl = document.getElementById('ai-offline');
+  if (offEl) offEl.className = 'aim-val ' + (offArr.length === 0 ? 'green' : 'red');
+
+  // Gauges
+  setGauge('health', hScore, 100, 'var(--' + (hScore >= 90 ? 'green' : hScore >= 70 ? 'orange' : 'red') + ')');
+  setGauge('power', Math.min(h.power_total||0, 3000), 3000, 'var(--cyan)');
+  setGauge('errors', Math.min((h.errors_30m||0)*10, 100), 100, 'var(--red)');
+  setText('gh-health', hScore + '%');
+  setText('gh-power', Math.round(h.power_total||0) + 'W');
+  setText('gh-errors', h.errors_30m || 0);
+
+  // AI modules
+  setText('ai-meta', ai.meta_last || 'idle');
+  setText('ai-predict', ai.predict_last || 'idle');
+  setText('ai-coord', ai.coord_last || 'idle');
+
+  // Pipeline
+  setPipeVal('pp-light', pip.light_request);
+  setPipeVal('pp-audio', pip.audio_request);
+  setPipeVal('pp-scene', s.scene);
+  setPipeVal('pp-roleta', pip.jidelna_roleta_trigger);
+
+  // Offline
+  const offDiv = document.getElementById('offlineList');
+  if (offDiv) offDiv.textContent = offArr.length === 0 ? 'Vše online ✅' : offArr.join(', ');
+  const offCard = document.getElementById('offlineCard');
+  if (offCard) offCard.querySelector('.card-icon').textContent = offArr.length === 0 ? '✅' : '🔴';
+
+  // Overrides toggles
+  setToggle('tog-light', ov.light);
+  setToggle('tog-privacy', ov.privacy);  // ov.privacy = sh_privacy_guard_enabled
+  setToggle('tog-sim', ov.simulation);
+  setToggle('tog-predict', ov.predict);
+
+  // Autonomy level
+  updateAutoLevels(ALL_VARS['sh_ai_autonomy_level']?.value);
+
+  // Appliances (home page)
+  renderAppliances(d.appliances || {});
+
+  // Device count
+  setText('devCount', d.device_count || '?');
+
+  // AI notes
+  const notesEl = document.getElementById('aiNotes');
+  if (notesEl) {
+    const lastAction = ALL_VARS['sh_ai_last_action']?.value || '';
+    notesEl.textContent = lastAction || 'Žádné poznámky';
+  }
+
+  // Update zone detail if open
+  if (currentZone) renderZoneDetail(currentZone);
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = val;
+}
+
+function setGauge(id, val, max, color) {
+  const el = document.getElementById('gf-' + id);
+  if (el) { el.style.width = Math.round((val/max)*100) + '%'; if (color) el.style.background = color; }
+}
+
+function setPipeVal(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const v = val || 'idle';
+  el.textContent = v;
+  el.className = 'card-val ' + (v === 'idle' ? 'off' : 'warn');
+}
+
+function setToggle(id, value) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const on = String(value||'no').toLowerCase() === 'yes';
+  el.classList.toggle('on', on);
+}
+
+function updateAutoLevels(val) {
+  const lv = parseInt(val) || 2;
+  document.querySelectorAll('.auto-lv').forEach((el, i) => {
+    el.classList.toggle('active', i + 1 === lv);
+  });
+}
+
+// ════════════════════════════════════════════════════
+// ROOM INDICATORS
+// ════════════════════════════════════════════════════
+function roomInds(data) {
+  if (!data) return '<span class="ri off">—</span>';
+  const parts = [];
+  const deviceIcon = (key) => {
+    if (DEVICE_DISPLAY[key]) return DEVICE_DISPLAY[key].icon;
+    const k = key.toLowerCase();
+    if (k.includes('plug') || k.includes('boiler') || k.includes('office')) return '🔌';
+    if (k.includes('strip')) return '🎗';
+    if (k.includes('lampicka') || k.includes('lamp')) return '🛋';
+    if (k.includes('e14')) return '💡';
+    if (k.includes('light')) return '💡';
+    if (k.includes('fan') || k.includes('digestor')) return '🌀';
+    if (k.includes('purifier')) return '🌬';
+    if (k.includes('humidifier')) return '💧';
+    if (k.includes('tv')) return '📺';
+    return '💡';
+  };
+  for (const [k, v] of Object.entries(data)) {
+    if (v && typeof v === 'object' && 'on' in v) {
+      parts.push('<span class="ri ' + (v.on ? 'on' : 'off') + '">' + deviceIcon(k) + '</span>');
+    }
+  }
+  if (data.speaker_playing) parts.push('<span class="ri aud">🔊</span>');
+  if ('lux' in data && data.lux !== null) parts.push('<span class="ri"><span class="ri-txt">' + Math.round(data.lux) + 'lx</span></span>');
+  if ('temp' in data && data.temp !== null) parts.push('<span class="ri"><span class="ri-txt">' + data.temp + '°</span></span>');
+  if (data.blind) parts.push('<span class="ri">▬<span class="ri-txt">' + Math.round((data.blind.position||0)*100) + '%</span></span>');
+  if ('window' in data) parts.push('<span class="ri ' + (data.window ? 'warn' : 'off') + '">🪟</span>');
+  return parts.join('') || '';
+}
+
+function updateRoomFloor(id, ...sources) {
+  const el = document.getElementById('ri-' + id);
+  if (!el) return;
+  const data = Object.assign({}, ...sources.filter(Boolean));
+  el.innerHTML = roomInds(data);
+  const fr = document.getElementById('fr-' + id);
+  if (fr) {
+    const hasLight = Object.values(data).some(v => v && typeof v === 'object' && v.on === true);
+    fr.classList.toggle('lit', hasLight);
+  }
+}
+
+function updateZoneCard(id, data) {
+  const el = document.getElementById('zci-' + id);
+  if (!el) return;
+  el.innerHTML = roomInds(data || {});
+  const card = document.getElementById('zc-' + id);
+  if (card) {
+    const hasLight = Object.values(data || {}).some(v => v && typeof v === 'object' && v.on === true);
+    card.classList.toggle('lit', hasLight);
+    card.classList.toggle('aud', !!(data?.speaker_playing));
+    // Update meta text
+    const meta = card.querySelector('.zc-meta');
+    if (meta && data?.temp !== undefined) meta.textContent = data.temp + '°C' + (data.humidity ? ' · ' + data.humidity + '%' : '');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// HOME — DEVICE TILES PER ZONE
+// ════════════════════════════════════════════════════
+const HOME_ZONES = [
+  { key: 'jidelna', name: 'Jídelna', plugs: [] },
+  { key: 'kitchen', name: 'Kuchyně', plugs: ['oven','micro','fridge','coffee'], speaker: 'Kuchyn' },
+  { key: 'bedroom', name: 'Ložnice', plugs: ['tv','humidifier'] },
+  { key: 'bathroom', name: 'Koupelna', plugs: [], speaker: 'Speaker koupelna' },
+  { key: 'pracovna', name: 'Pracovna', plugs: [] },
+  { key: 'pradelna', name: 'Prádelna', plugs: ['boiler'] },
+  { key: 'predsin', name: 'Předsíň', plugs: [] },
+  { key: 'toilet', name: 'Toaleta', plugs: [] },
+];
+const PLUG_META = {
+  oven:{icon:'🍞',label:'Trouba'}, micro:{icon:'📡',label:'Mikrovlnka'},
+  fridge:{icon:'🧊',label:'Lednice'}, coffee:{icon:'☕',label:'Kávovar'},
+  tv:{icon:'📺',label:'TV'}, humidifier:{icon:'💧',label:'Zvlhčovač'},
+  boiler:{icon:'🔥',label:'Boiler'},
+};
+
+function renderHomeDevices() {
+  const el = document.getElementById('homeDevices');
+  if (!el) return;
+  const rooms = DATA?.rooms || {};
+  const plugs = DATA?.plugs || {};
+  let html = '';
+
+  HOME_ZONES.forEach(zone => {
+    const rd = rooms[zone.key] || {};
+    const devs = Object.entries(rd).filter(([k,v]) => v && typeof v === 'object' && 'on' in v);
+    const hasPlugs = zone.plugs.some(pk => plugs[pk]);
+    if (!devs.length && !hasPlugs && !zone.speaker) return;
+
+    html += '<div class="hd-zone"><div class="hd-zone-name" onclick="goZone(\'' + zone.key + '\')">' + zone.name + ' →</div><div class="hd-tiles">';
+
+    // Room devices (lights, plugs from roomData)
+    devs.forEach(([k, lv]) => {
+      const dd = DEVICE_DISPLAY[k] || {name:k, icon:'💡', type:'light'};
+      const isOn = !!lv.on;
+      const dimVal = lv.dim !== undefined ? Math.round(lv.dim * 100) : null;
+      const nm = dd.name !== k ? dd.name : k;
+      const tIdx = _tileData.length;
+      _tileData.push({key:k, name:nm, icon:dd.icon, type:dd.type, on:isOn,
+        dim:lv.dim||null, hasDim:lv.dim!==undefined&&!ONOFF_ONLY.has(nm)&&dd.type==='light',
+        hasTemp:lv.light_temperature!==undefined, temp:lv.light_temperature||null,
+        power:null, plugTemp:null});
+      html += '<div class="hd-tile' + (isOn ? ' hd-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+        '<div class="hd-icon">' + dd.icon + '</div>' +
+        '<div class="hd-name">' + nm + '</div>' +
+        '<div class="hd-val ' + (isOn ? 'on' : 'off') + '">' + (isOn ? (dimVal !== null ? dimVal+'%' : 'ON') : 'OFF') + '</div>' +
+      '</div>';
+    });
+
+    // Zone plugs (from DATA.plugs)
+    zone.plugs.forEach(pk => {
+      const d = plugs[pk];
+      if (!d) return;
+      const pm = PLUG_META[pk] || {icon:'🔌',label:pk};
+      const isOn = !!d.on;
+      const pw = d.power !== null && d.power !== undefined ? Math.round(d.power) : null;
+      const tIdx = _tileData.length;
+      _tileData.push({key:pk, name:d.name||pm.label, icon:pm.icon, type:'plug', on:isOn,
+        dim:null, hasDim:false, hasTemp:false, temp:null,
+        power:d.power||null, plugTemp:d.temp||null});
+      html += '<div class="hd-tile' + (isOn ? ' hd-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+        '<div class="hd-icon">' + pm.icon + '</div>' +
+        '<div class="hd-name">' + pm.label + '</div>' +
+        '<div class="hd-val ' + (isOn ? 'on' : 'off') + '">' + (isOn ? (pw !== null ? pw+'W' : 'ON') : 'OFF') + '</div>' +
+      '</div>';
+    });
+
+    // Speaker
+    if (zone.speaker) {
+      const spkPlaying = DATA?.audio?.playing === 'yes';
+      const tIdx = _tileData.length;
+      _tileData.push({key:'speaker_'+zone.key, name:zone.speaker, icon:'🔊', type:'speaker', on:spkPlaying,
+        dim:null, hasDim:false, hasTemp:false, temp:null, power:null, plugTemp:null,
+        speakerName:zone.speaker, volume:30});
+      html += '<div class="hd-tile' + (spkPlaying ? ' hd-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+        '<div class="hd-icon">🔊</div>' +
+        '<div class="hd-name">' + zone.speaker.replace('Speaker ','') + '</div>' +
+        '<div class="hd-val ' + (spkPlaying ? 'on' : 'off') + '">' + (spkPlaying ? 'hraje' : 'idle') + '</div>' +
+      '</div>';
+    }
+
+    // Roleta (jidelna)
+    if (zone.key === 'jidelna' && rd.blind) {
+      const bp = Math.round((rd.blind.position||0)*100);
+      const tIdx = _tileData.length;
+      _tileData.push({key:'roleta', name:'Roleta Fyrtur1', icon:'▬', type:'blind', on:bp>5,
+        dim:rd.blind.position, hasDim:true, hasTemp:false, temp:null, power:null, plugTemp:null,
+        blindPct:bp, blindState:rd.blind.state||'?'});
+      html += '<div class="hd-tile' + (bp>5 ? ' hd-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+        '<div class="hd-icon">▬</div>' +
+        '<div class="hd-name">Roleta</div>' +
+        '<div class="hd-val ' + (bp>5?'on':'off') + '">' + bp + '%</div>' +
+      '</div>';
+    }
+
+    html += '</div></div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// ════════════════════════════════════════════════════
+// APPLIANCES
+// ════════════════════════════════════════════════════
+function renderAppliances(app) {
+  const el = document.getElementById('appCard');
+  if (!el) return;
+  const plugs = DATA?.plugs || {};
+  let html = '';
+
+  // Měřené zásuvky — vždy zobrazit spotřebu
+  const measuredPlugs = [
+    { key: 'oven',       icon: '🍞', label: 'Trouba',     zone: 'kitchen' },
+    { key: 'micro',      icon: '📡', label: 'Mikrovlnka', zone: 'kitchen' },
+    { key: 'fridge',     icon: '🧊', label: 'Lednice',    zone: 'kitchen' },
+    { key: 'tv',         icon: '📺', label: 'TV zasuvka', zone: 'bedroom' },
+    { key: 'humidifier', icon: '💧', label: 'Zvlhčovač',  zone: 'bedroom' },
+    { key: 'boiler',     icon: '🔥', label: 'Boiler',     zone: 'pradelna' },
+    { key: 'office',     icon: '🖥',  label: 'PC zasuvka', zone: 'pracovna' },
+  ];
+  measuredPlugs.forEach((p, i) => {
+    const d = plugs[p.key];
+    if (!d) return;
+    const powerW = (d.power !== null && d.power !== undefined) ? Math.round(d.power) : null;
+    const tempC  = (d.temp  !== null && d.temp  !== undefined) ? Math.round(d.temp)  : null;
+    const onCls  = d.on ? 'on' : 'off';
+    const tempCls = tempC !== null ? (tempC >= 75 ? 'err' : tempC >= 60 ? 'warn' : '') : '';
+    if (i > 0) html += '<div class="divider"></div>';
+    html += '<div class="card-row">' +
+      '<span class="card-icon">' + p.icon + '</span>' +
+      '<span class="card-lbl">' + p.label + '</span>' +
+      '<span class="card-val ' + onCls + '">' + (d.on ? 'ON' : 'OFF') + '</span>';
+    if (powerW !== null) html += '<span class="card-val" style="min-width:52px;text-align:right">' + powerW + ' W</span>';
+    if (tempC  !== null) html += '<span class="card-val ' + tempCls + '">' + tempC + '°C</span>';
+    html += '</div>';
+  });
+
+  // Digestor + ventilátor
+  if (html) html += '<div class="divider"></div>';
+  const fanOn = app.fan?.on;
+  html += '<div class="card-row"><span class="card-icon">🍳</span><span class="card-lbl">Digestoř' + (app.digestor_humidity ? ' · ' + app.digestor_humidity + '%' : '') + '</span><div class="btn ' + (fanOn ? 'on' : '') + '" onclick="toggleFan()" style="padding:3px 8px;font-size:10px;">' + (fanOn ? '⏹ VYP' : '▶ ZAP') + '</div></div>';
+
+  // Čistička vzduchu
+  if (app.purifier) {
+    html += '<div class="divider"></div><div class="card-row"><span class="card-icon">🌬</span><span class="card-lbl">Čistička</span>' +
+      '<span class="card-val ' + (app.purifier.on ? 'on' : 'off') + '">' + (app.purifier.on ? 'ON' : 'OFF') + '</span>' +
+      (app.purifier.pm25 ? '<span class="card-val warn">' + app.purifier.pm25 + ' μg</span>' : '') + '</div>';
+  }
+
+  // Vacuum
+  if (app.vacuum && app.vacuum !== 'idle') {
+    html += '<div class="divider"></div><div class="card-row"><span class="card-icon">🤖</span><span class="card-lbl">Giuseppe</span><span class="card-val aud">' + app.vacuum + '</span></div>';
+  }
+
+  el.innerHTML = html || '<div class="card-row"><span class="card-icon">✅</span><span class="card-lbl card-sub">Vše idle</span></div>';
+}
+
+// ════════════════════════════════════════════════════
+// ZONE DETAIL RENDERER
+// ════════════════════════════════════════════════════
+// Zařízení bez dim capability (onoff only) — dle SOT v7 Device Abstraction Layer
+const ONOFF_ONLY = new Set([
+  'Stul Jidelna1',       // LIGHT_OPEN_2
+  'Led pasek',           // LIGHT_DINING_STRIP
+  'Led pasek postel',    // LIGHT_BEDROOM_STRIP
+  'ventilatore',         // FAN
+  'Zasuvka Kaffe',       // PLUG_COFFEE
+  'zasuvka kamera',      // PLUG_CAMERA
+  'Zasuvka pracovna',    // PLUG_OFFICE
+  'Boiler zasuvka',      // BOILER
+]);
+
+// Friendly name + icon per data key
+const DEVICE_DISPLAY = {
+  // Jídelna
+  light_1: { name: 'Sektorka', icon: '💡', type: 'light' },
+  light_2: { name: 'Stůl jídelna', icon: '💡', type: 'light' },
+  strip:   { name: 'Led pásek', icon: '🎗', type: 'light' },
+  // Kitchen
+  light_3: { name: 'Kuchyně 1', icon: '💡', type: 'light' },
+  light_4: { name: 'Kuchyně 2', icon: '💡', type: 'light' },
+  // Bedroom
+  light:     { name: 'Žárovka', icon: '💡', type: 'light' },
+  lampicka:  { name: 'Lampička', icon: '🛋', type: 'light' },
+  e14_1:     { name: 'E14 žárovka 1', icon: '💡', type: 'light' },
+  e14_2:     { name: 'E14 žárovka 2', icon: '💡', type: 'light' },
+  // Plugs
+  plug:    { name: 'PC zásuvka', icon: '🔌', type: 'plug' },
+  boiler:  { name: 'Boiler', icon: '🔥', type: 'plug' },
+  // Generic fallbacks by key pattern
+};
+
+// Config proměnné per zóna
+const ZONE_CFG = {
+  // ── Jídelna ───────────────────────────────────────────────
+  jidelna: [
+    { name: 'sh_cfg_lux_roleta_open',        label: 'Roleta — práh (den)',     unit: 'lux',
+      desc: 'Hystereze: zavře se pod X lux, otevře se nad X+150 lux. Senzor měří přes zavřenou roletu → hodnoty jsou nižší než venkovní světlo.' },
+    { name: 'sh_cfg_lux_roleta_morning',      label: 'Roleta — práh (ráno)',    unit: 'lux',
+      desc: 'Ranní otevření: roleta se otevře jen pokud lux > tato hodnota A nespím (sh_spim = no).' },
+    { name: 'sh_cfg_lux_open_on',             label: 'Open space — plné světlo', unit: 'lux',
+      desc: 'Pod touto hodnotou lux se při detekci přítomnosti rozsvítí plné světlo (Sektorka1 + Stul Jidelna1).' },
+    { name: 'sh_cfg_lux_open_partial',        label: 'Open space — částečné světlo', unit: 'lux',
+      desc: 'Mezi partial a plným prahem se rozsvítí jen Led pasek (méně rušivé).' },
+    { name: 'sh_cfg_blind_safety_threshold',  label: 'Roleta — safety práh (0.0–1.0)', unit: '', type: 'text',
+      desc: 'Práh pro detekci "roleta je otevřená". 0.2 = roleta alespoň 20% otevřená. Interlock: otevřená roleta → světla nesmí svítit v open space.' },
+    { name: 'sh_cfg_lux_roleta_shade',        label: 'Roleta — stínění (silné slunce)', unit: 'lux',
+      desc: 'Nad touto hodnotou roleta sjede na částečnou pozici (stínění). Hystereze 3000 lux.' },
+    { name: 'sh_cfg_blind_shade_position',    label: 'Roleta — pozice stínění (0.0–1.0)', unit: '', type: 'text',
+      desc: '0.5 = 50% otevřená. Používá se při silném slunci místo plně otevřené.' },
+    { name: 'sh_cfg_lux_roleta_evening_close',label: 'Roleta — večerní zavření', unit: 'lux',
+      desc: 'Večer se roleta zavře až lux klesne pod tuto hodnotu. V noci zavře vždy.' },
+  ],
+  // ── Kitchen ───────────────────────────────────────────────
+  kitchen: [
+    { name: 'sh_cfg_lux_kitchen',             label: 'Kuchyně — práh rozsvícení', unit: 'lux',
+      desc: 'Kuchyňská světla (Sektorka1) se rozsvítí při pohybu pokud lux klesne pod tuto hodnotu.' },
+    { name: 'sh_cfg_lux_autolight',           label: 'Auto-light — spouštěcí práh', unit: 'lux',
+      desc: 'Obecný práh pro automatické rozsvícení v kuchyni a open space. Pod touto hodnotou = tma = rozsvítit.' },
+    { name: 'sh_cfg_plug_temp_warn',          label: 'Zásuvka — teplota varování', unit: '°C',
+      desc: 'Shelly Plug S (trouba, mikrovlnka): při překročení přijde TTS varování.' },
+    { name: 'sh_cfg_plug_temp_critical',      label: 'Zásuvka — teplota kritická (auto-vypnutí)', unit: '°C',
+      desc: 'Shelly Plug S: při překročení se zásuvka automaticky vypne. Ochrana před přehřátím.' },
+    { name: 'sh_cfg_plug_inactivity_w',       label: 'Zásuvka — práh nečinnosti', unit: 'W',
+      desc: 'Pod touto spotřebou je spotřebič považován za zapomenutý/nečinný (trouba zapnutá ale nic v ní).' },
+    { name: 'sh_cfg_power_alert',             label: 'Celková spotřeba — upozornění', unit: 'W',
+      desc: 'Pokud celková spotřeba domácnosti překročí tuto hodnotu, přijde TTS upozornění.' },
+  ],
+  // ── Ložnice ───────────────────────────────────────────────
+  bedroom: [
+    { name: 'sh_cfg_tv_standby_w',            label: 'TV zasuvka — stand-by práh', unit: 'W',
+      desc: 'Pod touto spotřebou = TV ve stand-by. Nad = aktivně sleduje. Používá se pro auto-vypnutí po době nečinnosti.' },
+    { name: 'sh_cfg_tv_temp_warn',            label: 'TV zasuvka — teplota varování', unit: '°C',
+      desc: 'Shelly Plug S u TV: varování při překročení teploty.' },
+    { name: 'sh_cfg_tv_temp_critical',        label: 'TV zasuvka — teplota kritická (auto-vypnutí)', unit: '°C',
+      desc: 'Shelly Plug S u TV: automatické vypnutí při přehřátí.' },
+    { name: 'sh_cfg_humidity_low',            label: 'Zvlhčovač — zapnout pod', unit: '%',
+      desc: 'Pokud vlhkost v ložnici klesne pod tuto hodnotu, zvlhčovač se automaticky zapne.' },
+    { name: 'sh_cfg_humidity_high',           label: 'Zvlhčovač — vypnout nad', unit: '%',
+      desc: 'Pokud vlhkost stoupne nad tuto hodnotu, zvlhčovač se automaticky vypne.' },
+  ],
+  // ── Koupelna ──────────────────────────────────────────────
+  bathroom: [
+    { name: 'sh_cfg_temp_alert_high',         label: 'Teplota — upozornění (horko)', unit: '°C',
+      desc: 'Při překročení teploty v koupelně přijde TTS upozornění na Kuchyn.' },
+    { name: 'sh_cfg_humidity_alert_low',      label: 'Vlhkost — upozornění (sucho)', unit: '%',
+      desc: 'Při poklesu vlhkosti pod tuto hodnotu přijde upozornění. Normální vlhkost koupelny: 50–70%.' },
+  ],
+  // ── Prádelna ──────────────────────────────────────────────
+  pradelna: [
+    { name: 'sh_cfg_power_alert',             label: 'Power alert (boiler)', unit: 'W',
+      desc: 'Upozornění pokud boiler nebo pračka překročí tuto spotřebu mimo obvyklou dobu.' },
+  ],
+};
+
+// Config proměnné per ZAŘÍZENÍ (pro device detail overlay)
+const DEVICE_CFG = {
+  // ── Jídelna lights ──
+  light_1: [
+    { name: 'sh_cfg_lux_open_on', label: 'Plné světlo — lux práh', unit: 'lux',
+      desc: 'Pod touto hodnotou lux se rozsvítí plné světlo (Sektorka + Stůl).' },
+  ],
+  light_2: [
+    { name: 'sh_cfg_lux_open_on', label: 'Plné světlo — lux práh', unit: 'lux',
+      desc: 'Pod touto hodnotou lux se rozsvítí plné světlo (Sektorka + Stůl).' },
+  ],
+  strip: [
+    { name: 'sh_cfg_lux_open_partial', label: 'Částečné světlo — lux práh', unit: 'lux',
+      desc: 'Mezi partial a plným prahem se rozsvítí jen Led pasek.' },
+  ],
+  // ── Kitchen lights ──
+  light_3: [
+    { name: 'sh_cfg_lux_kitchen', label: 'Práh rozsvícení', unit: 'lux',
+      desc: 'Pod touto hodnotou + pohyb = rozsvítit kuchyňská světla.' },
+    { name: 'sh_cfg_lux_autolight', label: 'Auto-light práh', unit: 'lux',
+      desc: 'Obecný práh pro automatické rozsvícení. Pod touto hodnotou = tma.' },
+  ],
+  light_4: [
+    { name: 'sh_cfg_lux_kitchen', label: 'Práh rozsvícení', unit: 'lux',
+      desc: 'Pod touto hodnotou + pohyb = rozsvítit kuchyňská světla.' },
+  ],
+  // ── Kitchen plugs ──
+  oven: [
+    { name: 'sh_cfg_plug_temp_warn', label: 'Teplota — varování', unit: '°C',
+      desc: 'Shelly Plug S: při překročení přijde TTS varování.' },
+    { name: 'sh_cfg_plug_temp_critical', label: 'Teplota — kritická', unit: '°C',
+      desc: 'Shelly Plug S: auto-vypnutí při přehřátí.' },
+    { name: 'sh_cfg_plug_inactivity_w', label: 'Práh nečinnosti', unit: 'W',
+      desc: 'Pod touto spotřebou = zapomenutý spotřebič.' },
+  ],
+  micro: [
+    { name: 'sh_cfg_plug_temp_warn', label: 'Teplota — varování', unit: '°C',
+      desc: 'Shelly Plug S: při překročení přijde TTS varování.' },
+    { name: 'sh_cfg_plug_temp_critical', label: 'Teplota — kritická', unit: '°C',
+      desc: 'Shelly Plug S: auto-vypnutí při přehřátí.' },
+    { name: 'sh_cfg_plug_inactivity_w', label: 'Práh nečinnosti', unit: 'W',
+      desc: 'Pod touto spotřebou = zapomenutý spotřebič.' },
+  ],
+  // ── Bedroom ──
+  tv: [
+    { name: 'sh_cfg_tv_standby_w', label: 'Stand-by práh', unit: 'W',
+      desc: 'Pod touto spotřebou = TV ve stand-by.' },
+    { name: 'sh_cfg_tv_temp_warn', label: 'Teplota — varování', unit: '°C',
+      desc: 'Varování při překročení teploty.' },
+    { name: 'sh_cfg_tv_temp_critical', label: 'Teplota — kritická', unit: '°C',
+      desc: 'Auto-vypnutí při přehřátí.' },
+  ],
+  humidifier: [
+    { name: 'sh_cfg_humidity_low', label: 'Zapnout pod', unit: '%',
+      desc: 'Zvlhčovač se zapne při poklesu vlhkosti.' },
+    { name: 'sh_cfg_humidity_high', label: 'Vypnout nad', unit: '%',
+      desc: 'Zvlhčovač se vypne při dostatečné vlhkosti.' },
+  ],
+  // ── Boiler ──
+  boiler: [
+    { name: 'sh_cfg_power_alert', label: 'Power alert', unit: 'W',
+      desc: 'Upozornění při překročení spotřeby mimo obvyklou dobu.' },
+  ],
+  // ── Roleta (special key) ──
+  roleta: [
+    { name: 'sh_cfg_lux_roleta_open', label: 'Práh den', unit: 'lux',
+      desc: 'Hystereze: zavře pod X, otevře nad X+150.' },
+    { name: 'sh_cfg_lux_roleta_morning', label: 'Práh ráno', unit: 'lux',
+      desc: 'Ranní otevření jen pokud lux > práh A nespím.' },
+    { name: 'sh_cfg_blind_safety_threshold', label: 'Safety práh (0.0–1.0)', unit: '', type: 'text',
+      desc: 'Interlock: otevřená roleta → světla nesmí svítit.' },
+    { name: 'sh_cfg_lux_roleta_shade', label: 'Stínění (silné slunce)', unit: 'lux',
+      desc: 'Nad touto hodnotou roleta sjede na stínící pozici.' },
+    { name: 'sh_cfg_blind_shade_position', label: 'Pozice stínění (0.0–1.0)', unit: '', type: 'text',
+      desc: '0.5 = 50%. Pozice při silném slunci.' },
+    { name: 'sh_cfg_lux_roleta_evening_close', label: 'Večerní zavření', unit: 'lux',
+      desc: 'Večer se roleta zavře pod touto hodnotou.' },
+  ],
+};
+
+
+const ZONE_META = {
+  jidelna:  { name: 'Jídelna', sub: 'Stul Jidelna1 · Led pasek · Roleta · Okno', icon: '🛋' },
+  kitchen:  { name: 'Kitchen', sub: 'Sektorka1 · 3× Smart · Kuchyn · Zásuvky', icon: '🍳', speaker: true },
+  bedroom:  { name: 'Ložnice', sub: 'Zarovka · LED pásek · TV · Nest Hub Max', icon: '🛏', speaker: 'bedroom' },
+  bathroom: { name: 'Koupelna', sub: 'Světlo · Temp · Motion · Speaker', icon: '🚿', speaker: 'bathroom' },
+  pracovna: { name: 'Pracovna', sub: 'Světlo · PC zasuvka · Tiskárna', icon: '💻' },
+  pradelna: { name: 'Prádelna', sub: 'Světlo · Boiler', icon: '🧺' },
+  predsin:  { name: 'Předsíň', sub: 'Světlo · Kamera · Kontaktní senzor', icon: '🚪' },
+  toilet:   { name: 'Toaleta', sub: 'Světlo · Pohyb', icon: '🚽' },
+  spolecne: { name: 'Společné', sub: 'Cubo T1 · Dálkové ovládání', icon: '🏠' },
+};
+
+const ZONE_ACTIONS = {
+  jidelna: [
+    ['💡 ON', 'sh_light_request', 'open_space_on'],
+    ['💡 OFF', 'sh_light_request', 'open_space_off'],
+    ['💡 Večerní', 'sh_light_request', 'open_space_evening'],
+    ['▬ Roleta recheck', 'sh_jidelna_roleta_trigger', 'privacy_recheck'],
+  ],
+  kitchen: [
+    ['💡 Full ON', 'sh_light_request', 'kitchen_full_on'],
+    ['💡 Partial', 'sh_light_request', 'kitchen_partial_on'],
+    ['💡 OFF', 'sh_light_request', 'kitchen_off'],
+    ['🔊 Radio', 'sh_audio_request', 'radio_kitchen'],
+    ['⏹ Audio stop', 'sh_audio_request', 'stop'],
+  ],
+  bedroom: [
+    ['💡 Soft ON', 'sh_light_request', 'bedroom_soft_on'],
+    ['💡 OFF', 'sh_light_request', 'bedroom_off'],
+    ['💡 LED ON', 'sh_light_request', 'bed_led_on'],
+    ['💡 LED OFF', 'sh_light_request', 'bed_led_off'],
+  ],
+  bathroom: [
+    ['💡 ON', 'sh_light_request', 'bathroom_on'],
+    ['💡 OFF', 'sh_light_request', 'bathroom_off'],
+    ['🔊 Radio', 'sh_audio_request', 'radio_bathroom'],
+  ],
+  pracovna: [
+    ['💡 ON', 'sh_light_request', 'pracovna_on'],
+    ['💡 OFF', 'sh_light_request', 'pracovna_off'],
+  ],
+  pradelna: [
+    ['💡 ON', 'sh_light_request', 'laundry_on'],
+    ['💡 OFF', 'sh_light_request', 'laundry_off'],
+  ],
+  predsin: [
+    ['💡 ON', 'sh_light_request', 'entry_on'],
+    ['💡 OFF', 'sh_light_request', 'entry_off'],
+  ],
+  toilet: [
+    ['💡 ON', 'sh_light_request', 'toilet_on'],
+    ['💡 OFF', 'sh_light_request', 'toilet_off'],
+  ],
+  spolecne: [],
+};
+
+let _tileData = [];
+
+function renderZoneDetail(zone) {
+  _tileData = []; // Reset tile data for this render
+  const meta = ZONE_META[zone] || { name: zone, sub: '', icon: '📍' };
+  const r = DATA?.rooms?.[zone] || {};
+  // open_space a kitchen jsou oddělené zóny — NESLUČOVAT
+  const roomData = r;
+
+  document.getElementById('zdTitle').textContent = meta.icon + ' ' + meta.name;
+  document.getElementById('zdSub').textContent = meta.sub;
+
+  let html = '';
+
+  // Sensors → compact tiles
+  const sensors = [];
+  if ('temp' in roomData && roomData.temp !== null) sensors.push(['🌡', 'Teplota', roomData.temp + '°C', '']);
+  if ('humidity' in roomData && roomData.humidity !== null) sensors.push(['💧', 'Vlhkost', roomData.humidity + '%', '']);
+  if ('lux' in roomData && roomData.lux !== null) sensors.push(['☀️', 'Lux', Math.round(roomData.lux) + ' lux', '']);
+  if ('presence' in roomData) sensors.push(['👁', 'Přítomnost', roomData.presence ? 'ANO' : 'idle', roomData.presence ? 'on' : 'off']);
+  if ('motion' in roomData) sensors.push(['👁', 'Pohyb', roomData.motion ? 'ANO' : 'idle', roomData.motion ? 'on' : 'off']);
+  if ('window' in roomData) sensors.push(['🪟', 'Okno', roomData.window ? 'OTEVŘENO' : 'zavřeno', roomData.window ? 'warn' : 'off']);
+
+  if (sensors.length) {
+    html += '<div class="sect">Senzory</div><div class="sensor-tiles">';
+    sensors.forEach(([icon, lbl, val, cls]) => {
+      html += '<div class="sensor-tile">' +
+        '<div class="st-icon">' + icon + '</div>' +
+        '<div class="st-info"><div class="st-lbl">' + lbl + '</div><div class="st-val ' + cls + '">' + val + '</div></div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+
+  // Lights & Plugs — split by device type
+  const allDevices = Object.entries(roomData).filter(([k,v]) => v && typeof v === 'object' && 'on' in v);
+
+  function getDeviceDisplay(key) {
+    if (DEVICE_DISPLAY[key]) return DEVICE_DISPLAY[key];
+    const k = key.toLowerCase();
+    if (k.includes('plug') || k.includes('boiler') || k.includes('office') || k.includes('zasuvka')) return { name: key, icon: '🔌', type: 'plug' };
+    if (k.includes('strip')) return { name: key, icon: '🎗', type: 'light' };
+    if (k.includes('lampicka') || k.includes('lamp')) return { name: key, icon: '🛋', type: 'light' };
+    if (k.includes('tv')) return { name: key, icon: '📺', type: 'plug' };
+    return { name: key, icon: '💡', type: 'light' };
+  }
+
+  const lightDevs = allDevices.filter(([k]) => getDeviceDisplay(k).type === 'light');
+  const plugDevs = allDevices.filter(([k]) => getDeviceDisplay(k).type === 'plug');
+
+  function renderDeviceSection(title, devices) {
+    if (!devices.length) return '';
+    let out = '<div class="sect">' + title + '</div><div class="dev-tiles">';
+    devices.forEach(([k, lv]) => {
+      const dd = getDeviceDisplay(k);
+      const rawName = lv.name || k;
+      const isRawKey = /^[A-Z_]+$/.test(rawName) || rawName.includes('_');
+      const devName = dd.name !== k ? dd.name : (isRawKey ? k.replace(/_/g,' ').toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()) : rawName);
+      const dimVal = Math.round((lv.dim || 0) * 100);
+      const isOn = !!lv.on;
+      const hasDim = lv.dim !== undefined && !ONOFF_ONLY.has(devName) && dd.type === 'light';
+      const hasTemp = lv.light_temperature !== undefined && !ONOFF_ONLY.has(devName);
+      const safeName = devName.replace(/['"]/g, '');
+      // Store tile data in global array, pass index
+      const tIdx = _tileData.length;
+      // FIX 2026-04-20: rawName = Homey physical device name (z bridge data),
+      //   name = friendly label ("Stůl jídelna"). API calls používají rawName.
+      _tileData.push({key:k, name:safeName, rawName:rawName, icon:dd.icon, type:dd.type, on:isOn,
+        dim: lv.dim !== undefined ? lv.dim : null,
+        hasDim: hasDim, hasTemp: hasTemp,
+        temp: lv.light_temperature !== undefined ? lv.light_temperature : null,
+        power: lv.power !== undefined ? lv.power : null,
+        plugTemp: lv.temperature !== undefined ? lv.temperature : null});
+      const hasCfg = (DEVICE_CFG[k] || []).length > 0;
+      out += '<div class="dev-tile' + (isOn ? ' tile-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+        (hasCfg ? '<div class="tile-cfg">⚙</div>' : '') +
+        '<div class="tile-icon">' + dd.icon + '</div>' +
+        '<div class="tile-name">' + devName + '</div>' +
+        '<div class="tile-state ' + (isOn ? 'on' : 'off') + '">' + (isOn ? (hasDim ? dimVal+'%' : 'ON') : 'OFF') + '</div>' +
+        (hasDim && isOn ? '<div class="tile-dim"><div class="tile-dim-fill" style="width:'+dimVal+'%"></div></div>' : '') +
+        '</div>';
+    });
+    out += '</div>';
+    return out;
+  }
+
+  html += renderDeviceSection('Světla', lightDevs);
+  html += renderDeviceSection('Zásuvky · Monitoring', plugDevs);
+
+  // Kitchen plugs monitoring → tiles
+  if (zone === 'kitchen') {
+    const plugs = DATA?.plugs || {};
+    const kplugs = [
+      { key: 'oven',    label: 'Trouba',     icon: '🍞' },
+      { key: 'micro',   label: 'Mikrovlnka', icon: '📡' },
+      { key: 'fridge',  label: 'Lednice',    icon: '🧊' },
+      { key: 'coffee',  label: 'Kávovar',    icon: '☕' },
+    ];
+    const hasPlugData = kplugs.some(p => plugs[p.key]);
+    if (hasPlugData) {
+      html += '<div class="sect">Spotřebiče</div><div class="dev-tiles">';
+      kplugs.forEach(p => {
+        const d = plugs[p.key];
+        if (!d) return;
+        const isOn = !!d.on;
+        const powerW = d.power !== null && d.power !== undefined ? Math.round(d.power) : null;
+        const tIdx = _tileData.length;
+        _tileData.push({key:p.key, name:d.name||p.label, icon:p.icon, type:'plug', on:isOn,
+          dim:null, hasDim:false, hasTemp:false, temp:null,
+          power:d.power!==undefined?d.power:null, plugTemp:d.temp!==undefined?d.temp:null});
+        const hasCfg = (DEVICE_CFG[p.key] || []).length > 0;
+      html += '<div class="dev-tile' + (isOn ? ' tile-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+          (hasCfg ? '<div class="tile-cfg">⚙</div>' : '') +
+          '<div class="tile-icon">' + p.icon + '</div>' +
+          '<div class="tile-name">' + p.label + '</div>' +
+          '<div class="tile-state ' + (isOn ? 'on' : 'off') + '">' + (isOn ? (powerW !== null ? powerW+'W' : 'ON') : 'OFF') + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  // Speaker (kitchen) → tile
+  if (zone === 'kitchen') {
+    const a = DATA?.audio || {};
+    const spkPlaying = a.playing === 'yes';
+    html += '<div class="sect">Reproduktor</div><div class="dev-tiles">';
+    const tIdx = _tileData.length;
+    _tileData.push({key:'speaker_kitchen', name:'Kuchyn', icon:'🔊', type:'speaker', on:spkPlaying,
+      dim:null, hasDim:false, hasTemp:false, temp:null, power:null, plugTemp:null,
+      speakerName:'Kuchyn', volume:30});
+    html += '<div class="dev-tile' + (spkPlaying ? ' tile-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+      '<div class="tile-icon">🔊</div>' +
+      '<div class="tile-name">Kuchyň</div>' +
+      '<div class="tile-state ' + (spkPlaying ? 'on' : 'off') + '">' + (spkPlaying ? 'hraje' : 'idle') + '</div>' +
+    '</div>';
+    html += '</div>';
+  }
+
+  // Speaker (bathroom) → tile
+  if (zone === 'bathroom') {
+    html += '<div class="sect">Reproduktor</div><div class="dev-tiles">';
+    const tIdx = _tileData.length;
+    _tileData.push({key:'speaker_bathroom', name:'Speaker koupelna', icon:'🔊', type:'speaker', on:false,
+      dim:null, hasDim:false, hasTemp:false, temp:null, power:null, plugTemp:null,
+      speakerName:'Speaker koupelna', volume:30});
+    html += '<div class="dev-tile" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+      '<div class="tile-icon">🔊</div>' +
+      '<div class="tile-name">Speaker</div>' +
+      '<div class="tile-state off">koupelna</div>' +
+    '</div>';
+    html += '</div>';
+  }
+
+  // Ložnice — zásuvky → tiles
+  if (zone === 'bedroom') {
+    const plugs = DATA?.plugs || {};
+    const bplugs = [
+      { key: 'tv',         label: 'TV zasuvka', icon: '📺' },
+      { key: 'humidifier', label: 'Zvlhčovač',  icon: '💧' },
+    ];
+    const hasBedPlugData = bplugs.some(p => plugs[p.key]);
+    if (hasBedPlugData) {
+      html += '<div class="sect">Zásuvky</div><div class="dev-tiles">';
+      bplugs.forEach(p => {
+        const d = plugs[p.key];
+        if (!d) return;
+        const isOn = !!d.on;
+        const powerW = d.power !== null && d.power !== undefined ? Math.round(d.power) : null;
+        const tIdx = _tileData.length;
+        _tileData.push({key:p.key, name:d.name||p.label, icon:p.icon, type:'plug', on:isOn,
+          dim:null, hasDim:false, hasTemp:false, temp:null,
+          power:d.power!==undefined?d.power:null, plugTemp:d.temp!==undefined?d.temp:null});
+        const hasCfg = (DEVICE_CFG[p.key] || []).length > 0;
+      html += '<div class="dev-tile' + (isOn ? ' tile-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+          (hasCfg ? '<div class="tile-cfg">⚙</div>' : '') +
+          '<div class="tile-icon">' + p.icon + '</div>' +
+          '<div class="tile-name">' + p.label + '</div>' +
+          '<div class="tile-state ' + (isOn ? 'on' : 'off') + '">' + (isOn ? (powerW !== null ? powerW+'W' : 'ON') : 'OFF') + '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    }
+  }
+
+  // TV zasuvka standalone monitoring (bedroom fallback)
+  if (zone === 'bedroom_DISABLED') {
+    const tv = DATA?.plugs?.tv;  // TV zasuvka ložnice
+    if (tv) {
+      const tvTemp = tv.temp !== null ? Math.round(tv.temp) : null;
+      const tvPower = tv.power !== null ? Math.round(tv.power) : null;
+      const tvTempCls = tvTemp !== null ? (tvTemp >= 75 ? 'err' : tvTemp >= 60 ? 'warn' : '') : '';
+      const tvWarnT = Number(ALL_VARS['sh_cfg_tv_temp_warn']?.value || 60);
+      const tvCritT = Number(ALL_VARS['sh_cfg_tv_temp_critical']?.value || 75);
+      const tvTempClsDyn = tvTemp !== null ? (tvTemp >= tvCritT ? 'err' : tvTemp >= tvWarnT ? 'warn' : '') : '';
+      const tvPwStr = tvPower !== null ? '<span class="card-val" style="min-width:44px">' + tvPower + 'W</span>' : '';
+      const tvTmpStr = tvTemp !== null ? '<span class="card-val ' + tvTempClsDyn + '">' + tvTemp + '°C</span>' : '';
+      html += '<div class="sect">TV zasouvka</div><div class="card">' +
+        '<div class="card-row">' +
+          '<span class="card-icon">📺</span>' +
+          '<span class="card-lbl">TV zasouvka</span>' +
+          '<span class="card-val ' + (tv.on ? 'on' : 'off') + '">' + (tv.on ? 'ON' : 'OFF') + '</span>' +
+          tvPwStr + tvTmpStr +
+        '</div>' +
+        '<div class="divider"></div>' +
+        '<div class="btn-row">' +
+          '<div class="btn danger" onclick="setDeviceCap(\'TV zasouvka\',\'onoff\',false)">⏹ Vypnout</div>' +
+          '<div class="btn" onclick="setDeviceCap(\'TV zasouvka\',\'onoff\',true)">▶ Zapnout</div>' +
+        '</div>' +
+      '</div>';
+    }
+  }
+
+  // Speaker (bedroom — ZRUŠEN, vše přes Kuchyň)
+  if (zone === 'bedroom') {
+    html += '<div class="sect">Audio</div><div class="card">';
+    html += '<div class="card-row"><span class="card-icon">🔊</span><span class="card-lbl">Veškeré audio (TTS, briefing, rádio) jde přes reproduktor Kuchyň</span></div>';
+    html += '</div>';
+  }
+
+  // Prádelna — boiler → tile
+  if (zone === 'pradelna') {
+    const plugs = DATA?.plugs || {};
+    const boiler = plugs.boiler;
+    if (boiler) {
+      const isOn = !!boiler.on;
+      const powerW = boiler.power !== null && boiler.power !== undefined ? Math.round(boiler.power) : null;
+      html += '<div class="sect">Boiler</div><div class="dev-tiles">';
+      const tIdx = _tileData.length;
+      _tileData.push({key:'boiler', name:'Boiler zasuvka', icon:'🔥', type:'plug', on:isOn,
+        dim:null, hasDim:false, hasTemp:false, temp:null,
+        power:boiler.power!==undefined?boiler.power:null, plugTemp:boiler.temp!==undefined?boiler.temp:null});
+      const hasCfgB = (DEVICE_CFG['boiler'] || []).length > 0;
+      html += '<div class="dev-tile' + (isOn ? ' tile-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+        (hasCfgB ? '<div class="tile-cfg">⚙</div>' : '') +
+        '<div class="tile-icon">🔥</div>' +
+        '<div class="tile-name">Boiler</div>' +
+        '<div class="tile-state ' + (isOn ? 'on' : 'off') + '">' + (isOn ? (powerW !== null ? powerW+'W' : 'ON') : 'OFF') + '</div>' +
+        '</div>';
+      html += '</div>';
+    }
+  }
+
+  // Roleta (jídelna) → tile
+  if (zone === 'jidelna' && roomData.blind) {
+    const blindPct = Math.round((roomData.blind.position || 0) * 100);
+    const blindState = roomData.blind.state || '?';
+    const tIdx = _tileData.length;
+    _tileData.push({key:'roleta', name:'Roleta Fyrtur1', icon:'▬', type:'blind', on:blindPct > 5,
+      dim:roomData.blind.position, hasDim:true, hasTemp:false, temp:null, power:null, plugTemp:null,
+      blindPct:blindPct, blindState:blindState});
+    const hasCfg = (DEVICE_CFG['roleta'] || []).length > 0;
+    html += '<div class="sect">Roleta</div><div class="dev-tiles">';
+    html += '<div class="dev-tile' + (blindPct > 5 ? ' tile-on' : '') + '" onclick="openDeviceDetail(_tileData[' + tIdx + '])">' +
+      (hasCfg ? '<div class="tile-cfg">⚙</div>' : '') +
+      '<div class="tile-icon">▬</div>' +
+      '<div class="tile-name">Roleta Fyrtur</div>' +
+      '<div class="tile-state ' + (blindPct > 5 ? 'on' : 'off') + '">' + blindPct + '% · ' + blindState + '</div>' +
+      (blindPct > 0 ? '<div class="tile-dim"><div class="tile-dim-fill" style="width:' + blindPct + '%"></div></div>' : '') +
+    '</div>';
+    html += '</div>';
+  }
+
+  // Actions
+  const actions = ZONE_ACTIONS[zone] || [];
+  if (actions.length) {
+    html += '<div class="sect">Akce</div><div class="card"><div class="btn-row">';
+    actions.forEach(([lbl, varName, val]) => {
+      // Audio stop → dedikovaný skript místo pipeline
+      if (varName === 'sh_audio_request' && val === 'stop') {
+        html += '<div class="btn" onclick="audioStop()">' + lbl + '</div>';
+      } else {
+        html += '<div class="btn" onclick="sendReq(\'' + varName + '\',\'' + val + '\')">' + lbl + '</div>';
+      }
+    });
+    html += '</div></div>';
+  }
+
+  // Roleta diagnostika přesunuta do detailu rolety
+
+
+  // Zone config odstraněn — konfigurace je nyní v detailu každého zařízení
+
+  // AI notes per zone
+  html += '<div class="sect">AI poznámky</div>' +
+    '<div class="card">' +
+      '<div class="card-row"><span class="card-icon">🧠</span><span class="card-lbl card-sub" id="zd-ai-' + zone + '">Načítám…</span></div>' +
+    '</div>';
+
+  document.getElementById('zdContent').innerHTML = html;
+
+  // Fill AI notes
+  const aiNote = ALL_VARS['sh_ai_zone_' + zone]?.value || 'Žádné poznámky pro tuto zónu.';
+  const aiNoteEl = document.getElementById('zd-ai-' + zone);
+  if (aiNoteEl) aiNoteEl.textContent = aiNote;
+}
+
+// ════════════════════════════════════════════════════
+// SETTINGS FORMS
+// ════════════════════════════════════════════════════
+const CFG_VARS = {
+  lux: [
+    { name: 'sh_cfg_lux_roleta_open',    label: 'Roleta — práh zavření/otevření (den)', unit: 'lux',
+      desc: 'Hystereze: zavře se pod touto hodnotou, otevře se nad (hodnota + 150 lux). Senzor měří přes zavřenou roletu → hodnoty jsou nižší než venkovní světlo.' },
+    { name: 'sh_cfg_lux_roleta_morning', label: 'Roleta — práh otevření (ráno)', unit: 'lux',
+      desc: 'Ranní otevření: roleta se otevře jen pokud lux > tato hodnota A zároveň nespím (sh_spim = no).' },
+    { name: 'sh_cfg_lux_autolight',      label: 'Auto-light — práh rozsvícení (kuchyně)', unit: 'lux',
+      desc: 'Kuchyně se automaticky rozsvítí při pohybu pokud lux na senzoru klesne pod tuto hodnotu.' },
+    { name: 'sh_cfg_lux_open_on',        label: 'Open space — práh plného světla', unit: 'lux',
+      desc: 'Jídelna/obývák: pod touto hodnotou luх se rozsvítí plné světlo při detekci přítomnosti.' },
+    { name: 'sh_cfg_lux_open_partial',   label: 'Open space — práh částečného světla', unit: 'lux',
+      desc: 'Jídelna/obývák: mezi partial a plným prahem se rozsvítí jen část světel (Led pasek).' },
+    { name: 'sh_cfg_lux_kitchen',        label: 'Kuchyně — práh rozsvícení', unit: 'lux',
+      desc: 'Oddělený práh pro kuchyňská světla (Sektorka1). Pod touto hodnotou + pohyb = rozsvítit.' },
+    { name: 'sh_cfg_lux_roleta_shade',   label: 'Roleta — stínění (silné slunce)', unit: 'lux',
+      desc: 'Nad touto hodnotou roleta sjede na částečnou pozici. Hystereze 3000 lux.' },
+    { name: 'sh_cfg_blind_shade_position',label: 'Roleta — pozice stínění (0.0–1.0)', unit: '', type: 'text',
+      desc: '0.5 = 50%. Používá se při silném slunci místo plně otevřené.' },
+    { name: 'sh_cfg_lux_roleta_evening_close', label: 'Roleta — večerní zavření', unit: 'lux',
+      desc: 'Večer se roleta zavře až lux klesne pod tuto hodnotu. V noci zavře vždy.' },
+  ],
+  climate: [
+    { name: 'sh_cfg_humidity_low',       label: 'Zvlhčovač — zapnout pod', unit: '%',
+      desc: 'Pokud vlhkost klesne pod tuto hodnotu, zvlhčovač se automaticky zapne.' },
+    { name: 'sh_cfg_humidity_high',      label: 'Zvlhčovač — vypnout nad', unit: '%',
+      desc: 'Pokud vlhkost stoupne nad tuto hodnotu, zvlhčovač se automaticky vypne.' },
+    { name: 'sh_cfg_temp_alert_high',    label: 'Teplota — upozornění (horko)', unit: '°C',
+      desc: 'Při překročení této teploty v místnosti přijde TTS upozornění na Kuchyn.' },
+    { name: 'sh_cfg_humidity_alert_low', label: 'Vlhkost — upozornění (sucho)', unit: '%',
+      desc: 'Při poklesu vlhkosti pod tuto hodnotu přijde upozornění.' },
+  ],
+  energy: [
+    { name: 'sh_cfg_power_alert',              label: 'Celková spotřeba — upozornění', unit: 'W',
+      desc: 'Pokud celková spotřeba domácnosti překročí tuto hodnotu, přijde TTS upozornění.' },
+    { name: 'sh_cfg_blind_safety_threshold',   label: 'Roleta — safety práh (0.0–1.0)', unit: '', type: 'text',
+      desc: 'Práh pro detekci "roleta je otevřená": 0.2 = roleta alespoň na 20% otevřená. Používá se pro interlock (roleta otevřená → světla nesmí svítit v open space).' },
+  ],
+  plugs: [
+    { name: 'sh_cfg_plug_temp_warn',     label: 'Zásuvka — teplota varování', unit: '°C',
+      desc: 'Shelly Plug S: při překročení této teploty přijde TTS varování.' },
+    { name: 'sh_cfg_plug_temp_critical', label: 'Zásuvka — teplota kritická (vypnout)', unit: '°C',
+      desc: 'Shelly Plug S: při překročení se zásuvka automaticky vypne (ochrana před požárem).' },
+    { name: 'sh_cfg_plug_inactivity_w',  label: 'Zásuvka — práh nečinnosti', unit: 'W',
+      desc: 'Pod touto spotřebou je spotřebič považován za nečinný/zapomenutý (trouba, žehlička).' },
+    { name: 'sh_cfg_tv_standby_w',       label: 'TV zasuvka — stand-by práh', unit: 'W',
+      desc: 'Pod touto spotřebou je TV považována za stand-by. Nad = aktivní sledování.' },
+    { name: 'sh_cfg_tv_temp_warn',       label: 'TV zasuvka — teplota varování', unit: '°C',
+      desc: 'TV Shelly Plug: varování při překročení teploty.' },
+    { name: 'sh_cfg_tv_temp_critical',   label: 'TV zasuvka — teplota kritická (vypnout)', unit: '°C',
+      desc: 'TV Shelly Plug: automatické vypnutí při přehřátí.' },
+  ],
+  ai: [
+    { name: 'sh_ai_autonomy_level', label: 'AI autonomie (1–4)', unit: '', type: 'number',
+      desc: '1=jen loguj | 2=loguj+TTS návrh | 3=ptej se před akcí | 4=jednej automaticky.' },
+    { name: 'sh_predict_enabled',   label: 'Prediktivní chování (yes/no)', unit: '', type: 'text',
+      desc: 'yes = AI předvídá akce dle návyků (sh_predict_engine). no = vypnuto.' },
+    { name: 'sh_sheets_url',        label: 'Google Sheets Webhook URL', unit: '', type: 'text',
+      desc: 'URL Apps Scriptu pro logování do Google Sheets. Bez URL se logy neukládají.' },
+  ],
+};
+
+// ═══ CONFIG VALIDATION ENGINE ══════════════════════════════
+const CFG_RULES = {
+  // ── LUX ─────────────────────────────────────────────
+  sh_cfg_lux_roleta_open:    { min:10, max:2000, gt:'sh_cfg_lux_roleta_morning',
+    errLt:'Musí být vyšší než ranní práh ({ref} lux), jinak se roleta ráno nikdy neotevře.',
+    tip:'Doporučeno 200–600 lux.' },
+  sh_cfg_lux_roleta_morning: { min:5, max:1000, lt:'sh_cfg_lux_roleta_open',
+    errGt:'Musí být nižší než denní práh ({ref} lux), jinak se ranní otevření nikdy nespustí.',
+    tip:'Doporučeno 30–150 lux.' },
+  sh_cfg_lux_autolight:      { min:5, max:500, tip:'Doporučeno 30–100 lux.' },
+  sh_cfg_lux_open_on:        { min:50, max:1000, gt:'sh_cfg_lux_open_partial',
+    errLt:'Musí být vyšší než partial práh ({ref} lux), jinak se plné světlo nikdy neaktivuje.',
+    tip:'Doporučeno 200–500 lux.' },
+  sh_cfg_lux_open_partial:   { min:10, max:500, lt:'sh_cfg_lux_open_on',
+    errGt:'Musí být nižší než práh plného světla ({ref} lux), jinak partial režim nikdy nenastane.',
+    tip:'Doporučeno 50–200 lux.' },
+  sh_cfg_lux_kitchen:        { min:5, max:500, tip:'Doporučeno 30–120 lux.' },
+  sh_cfg_lux_roleta_shade:   { min:1000, max:50000, tip:'Doporučeno 5000–20000 lux. Hystereze 3000.' },
+  sh_cfg_blind_shade_position:{ min:0.05, max:0.95, isFloat:true,
+    tip:'0.3–0.6 je typické. 0.5 = napůl.' },
+  sh_cfg_lux_roleta_evening_close:{ min:5, max:200, tip:'Doporučeno 10–50 lux.' },
+
+  // ── CLIMATE ─────────────────────────────────────────
+  sh_cfg_humidity_low:       { min:20, max:50, lt:'sh_cfg_humidity_high',
+    errGt:'Musí být nižší než vypínací práh ({ref}%), jinak se zvlhčovač zapíná a vypíná zároveň.',
+    tip:'Doporučeno 35–45%.' },
+  sh_cfg_humidity_high:      { min:40, max:80, gt:'sh_cfg_humidity_low',
+    errLt:'Musí být vyšší než zapínací práh ({ref}%), jinak zvlhčovač nikdy nevypne.',
+    tip:'Doporučeno 55–65%.' },
+  sh_cfg_temp_alert_high:    { min:25, max:45, tip:'Doporučeno 28–35°C.' },
+  sh_cfg_humidity_alert_low: { min:15, max:45, tip:'Doporučeno 25–35%.' },
+
+  // ── ENERGY ──────────────────────────────────────────
+  sh_cfg_power_alert:        { min:100, max:10000, tip:'Doporučeno 2000–5000 W.' },
+  sh_cfg_blind_safety_threshold:{ min:0.05, max:0.95, isFloat:true,
+    tip:'0.15–0.3 je typické. Pod touto hodnotou = roleta zavřená.' },
+
+  // ── PLUGS ───────────────────────────────────────────
+  sh_cfg_plug_temp_warn:     { min:30, max:70, lt:'sh_cfg_plug_temp_critical',
+    errGt:'Musí být nižší než kritická teplota ({ref}°C), jinak varování přijde až po vypnutí.',
+    tip:'Doporučeno 50–65°C.' },
+  sh_cfg_plug_temp_critical: { min:50, max:90, gt:'sh_cfg_plug_temp_warn',
+    errLt:'Musí být vyšší než varovná teplota ({ref}°C), jinak se zásuvka vypne dřív než přijde varování.',
+    tip:'Doporučeno 70–80°C.' },
+  sh_cfg_plug_inactivity_w:  { min:1, max:50, tip:'Doporučeno 3–10 W.' },
+  sh_cfg_tv_standby_w:       { min:1, max:30, tip:'Doporučeno 5–15 W.' },
+  sh_cfg_tv_temp_warn:       { min:30, max:70, lt:'sh_cfg_tv_temp_critical',
+    errGt:'Musí být nižší než kritická teplota TV ({ref}°C).', tip:'Doporučeno 50–65°C.' },
+  sh_cfg_tv_temp_critical:   { min:50, max:90, gt:'sh_cfg_tv_temp_warn',
+    errLt:'Musí být vyšší než varovná teplota TV ({ref}°C).', tip:'Doporučeno 70–80°C.' },
+
+  // ── AI ──────────────────────────────────────────────
+  sh_ai_autonomy_level:      { min:1, max:4, tip:'1=log, 2=suggest, 3=ask, 4=auto.' },
+  sh_predict_enabled:        { enum:['yes','no'], tip:'Pouze "yes" nebo "no".' },
+  sh_sheets_url:             { pattern:/^https:\/\/.+/, patternMsg:'URL musí začínat https://', tip:'Apps Script webhook URL.' },
+};
+
+function validateCfgInput(name, prefix) {
+  const pfx = prefix || 'cfg';
+  const input = document.getElementById(pfx + '_' + name);
+  const vld = document.getElementById('vld_' + pfx + '_' + name);
+  if (!input || !vld) return true;
+
+  const rule = CFG_RULES[name];
+  if (!rule) { vld.className = 'cfg-vld'; input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,''); return true; }
+
+  const raw = input.value.trim();
+  if (raw === '') { vld.className = 'cfg-vld'; input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,''); return true; }
+
+  let val = rule.isFloat || rule.enum || rule.pattern ? raw : Number(raw);
+
+  // Enum check
+  if (rule.enum) {
+    if (!rule.enum.includes(val)) {
+      vld.className = 'cfg-vld err';
+      vld.innerHTML = '❌ Neplatná hodnota. Povolené: <b>' + rule.enum.join(', ') + '</b>';
+      input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' invalid';
+      return false;
+    }
+    vld.className = 'cfg-vld ok'; vld.textContent = '✅ ' + (rule.tip || 'OK');
+    input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' valid-ok';
+    return true;
+  }
+
+  // Pattern check
+  if (rule.pattern) {
+    if (!rule.pattern.test(val)) {
+      vld.className = 'cfg-vld err'; vld.textContent = '❌ ' + (rule.patternMsg || 'Neplatný formát');
+      input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' invalid';
+      return false;
+    }
+    vld.className = 'cfg-vld ok'; vld.textContent = '✅ ' + (rule.tip || 'OK');
+    input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' valid-ok';
+    return true;
+  }
+
+  if (rule.isFloat) val = parseFloat(val);
+
+  // Range check
+  if (rule.min !== undefined && val < rule.min) {
+    vld.className = 'cfg-vld err'; vld.textContent = '❌ Minimum je ' + rule.min + '. ' + (rule.tip || '');
+    input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' invalid';
+    return false;
+  }
+  if (rule.max !== undefined && val > rule.max) {
+    vld.className = 'cfg-vld err'; vld.textContent = '❌ Maximum je ' + rule.max + '. ' + (rule.tip || '');
+    input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' invalid';
+    return false;
+  }
+
+  // Cross-reference: gt (this must be > ref)
+  if (rule.gt) {
+    const refInput = document.getElementById(pfx + '_' + rule.gt);
+    let refVal = refInput ? (rule.isFloat ? parseFloat(refInput.value) : Number(refInput.value)) : null;
+    // Fallback: read from ALL_VARS if input not in DOM (cross-device config)
+    if (refVal === null && ALL_VARS[rule.gt]) {
+      refVal = rule.isFloat ? parseFloat(ALL_VARS[rule.gt].value) : Number(ALL_VARS[rule.gt].value);
+    }
+    if (refVal !== null && !isNaN(refVal) && val <= refVal) {
+      const msg = (rule.errLt || 'Musí být vyšší než {ref}.').replace('{ref}', refVal);
+      vld.className = 'cfg-vld err'; vld.textContent = '❌ ' + msg;
+      input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' invalid';
+      return false;
+    }
+  }
+
+  // Cross-reference: lt (this must be < ref)
+  if (rule.lt) {
+    const refInput = document.getElementById(pfx + '_' + rule.lt);
+    let refVal = refInput ? (rule.isFloat ? parseFloat(refInput.value) : Number(refInput.value)) : null;
+    // Fallback: read from ALL_VARS if input not in DOM (cross-device config)
+    if (refVal === null && ALL_VARS[rule.lt]) {
+      refVal = rule.isFloat ? parseFloat(ALL_VARS[rule.lt].value) : Number(ALL_VARS[rule.lt].value);
+    }
+    if (refVal !== null && !isNaN(refVal) && val >= refVal) {
+      const msg = (rule.errGt || 'Musí být nižší než {ref}.').replace('{ref}', refVal);
+      vld.className = 'cfg-vld err'; vld.textContent = '❌ ' + msg;
+      input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' invalid';
+      return false;
+    }
+  }
+
+  // All OK
+  vld.className = 'cfg-vld ok'; vld.textContent = '✅ ' + (rule.tip || 'OK');
+  input.className = input.className.replace(/\s*(invalid|warning|valid-ok)/g,'') + ' valid-ok';
+  return true;
+}
+
+function validateAllCfg() {
+  let allOk = true;
+  for (const group of Object.keys(CFG_VARS)) {
+    for (const v of CFG_VARS[group]) {
+      if (!validateCfgInput(v.name, 'cfg')) allOk = false;
+    }
+  }
+  return allOk;
+}
+
+function renderSettingsForms() {
+  ['lux','climate','energy','plugs','ai'].forEach(group => {
+    const container = document.getElementById('cfg' + group.charAt(0).toUpperCase() + group.slice(1));
+    if (!container) return;
+    const vars = CFG_VARS[group];
+    let html = '';
+    vars.forEach((v, i) => {
+      const cur = ALL_VARS[v.name]?.value ?? '';
+      const missing = !ALL_VARS[v.name];
+      const iType = v.type === 'text' ? 'text' : 'number';
+      const step = v.unit === '0-1' ? '0.05' : '1';
+      html += '<div class="cfg-row' + (missing ? ' cfg-missing' : '') + '">' +
+        '<span class="cfg-label">' + v.label + (missing ? ' <span style="color:var(--red);font-size:9px;">⚠ chybí</span>' : '') + '</span>' +
+        '<input type="' + iType + '" id="cfg_' + v.name + '" value="' + cur + '" step="' + step + '"' +
+        ' oninput="validateCfgInput(\'' + v.name + '\',\'cfg\')"' +
+        ' onchange="validateCfgInput(\'' + v.name + '\',\'cfg\')">' +
+        '<span class="cfg-unit">' + v.unit + '</span>' +
+        '</div>' +
+        '<div class="cfg-vld" id="vld_cfg_' + v.name + '"></div>' +
+        (v.desc ? '<div class="cfg-hint">' + v.desc + '</div>' : '');
+    });
+    container.innerHTML = html;
+  });
+
+  // Interval
+  const iv = document.getElementById('settInterval');
+  if (iv) iv.value = CFG.interval;
+
+  // Host display
+  const hd = document.getElementById('cfgHostDisplay');
+  if (hd) hd.textContent = CFG.host || '—';
+}
+
+async function saveAllConfig() {
+  const btn = document.getElementById('saveAllBtn');
+
+  // Validate first
+  if (!validateAllCfg()) {
+    btn.textContent = '❌ Oprav chyby před uložením';
+    btn.style.background = 'var(--red)';
+    setTimeout(() => { btn.textContent = '💾 Uložit všechny změny'; btn.style.background = ''; }, 3000);
+    return;
+  }
+
+  btn.textContent = '⏳ Ukládám…';
+  let saved = 0, errors = 0;
+  for (const group of Object.keys(CFG_VARS)) {
+    for (const v of CFG_VARS[group]) {
+      const input = document.getElementById('cfg_' + v.name);
+      if (!input) continue;
+      const newVal = v.type === 'text' ? input.value.trim() : Number(input.value);
+      if (String(newVal) !== String(ALL_VARS[v.name]?.value ?? '')) {
+        try { await writeVar(v.name, newVal); saved++; } catch(e) { errors++; }
+      }
+    }
+  }
+  // Interval
+  const iv = document.getElementById('settInterval');
+  if (iv) {
+    CFG.interval = parseInt(iv.value) || 10;
+    localStorage.setItem('sh_dashboard_cfg', JSON.stringify(CFG));
+    if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = setInterval(poll, CFG.interval * 1000); }
+  }
+  btn.textContent = '✅ Uloženo (' + saved + ' změn)';
+  btn.classList.add('saved');
+  setTimeout(() => { btn.textContent = '💾 Uložit všechny změny'; btn.classList.remove('saved'); }, 3000);
+}
+
+// ════════════════════════════════════════════════════
+// POLLING
+// ════════════════════════════════════════════════════
+async function poll() {
+  try {
+    const data = await fetchDashboardData();
+    updateUI(data);
+    const led = document.getElementById('connLed');
+    led.textContent = '●';
+    led.className = 'conn-led';
+  } catch(e) {
+    const led = document.getElementById('connLed');
+    led.textContent = '●';
+    led.className = 'conn-led off';
+  }
+}
+
+function startPolling() {
+  if (refreshTimer) clearInterval(refreshTimer);
+  loadVarMap().then(() => {
+    poll();
+    refreshTimer = setInterval(poll, CFG.interval * 1000);
+  }).catch(e => {
+    flash('Připojení selhalo: ' + e.message);
+    document.getElementById('connLed').className = 'conn-led off';
+  });
+}
+
+// ════════════════════════════════════════════════════
+// CLOCK
+// ════════════════════════════════════════════════════
+setInterval(() => {
+  document.getElementById('clock').textContent = new Date().toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+// ════════════════════════════════════════════════════
+// CAMERA
+// ════════════════════════════════════════════════════
+const CAM_URL = 'http://192.168.1.178:88/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2&usr=kamera1&pwd=bkamera11969';
+const CAM_BASE = 'http://192.168.1.178:88/cgi-bin/CGIProxy.fcgi?usr=kamera1&pwd=bkamera11969';
+const CAM_INTERVAL = 3000;
+let irMode = 2; // 0=day(color), 1=night(IR), 2=auto
+const IR_LABELS = ['☀ IR: DAY', '🌙 IR: NIGHT', '🔄 IR: AUTO'];
+const IR_CLASSES = ['cyan', '', ''];
+
+async function toggleIR() {
+  irMode = (irMode + 1) % 3;
+  const btn = document.getElementById('irBtn');
+  if (btn) {
+    btn.textContent = IR_LABELS[irMode];
+    btn.className = 'btn ' + (IR_CLASSES[irMode] || '');
+    btn.style.cssText = 'padding:2px 7px;font-size:9px;';
+  }
+  try {
+    await fetch(CAM_BASE + '&cmd=setInfraLedConfig&mode=' + irMode);
+    flash('Kamera IR → ' + ['DAY (barva)', 'NIGHT (IR)', 'AUTO'][irMode]);
+  } catch(e) {
+    flash('⚠ Kamera nedostupná: ' + e.message);
+  }
+}
+
+function refreshCamera() {
+  const img = document.getElementById('camImg');
+  const off = document.getElementById('camOff');
+  const live = document.getElementById('camLive');
+  const imgMini = document.getElementById('camImgMini');
+  const offMini = document.getElementById('camOffMini');
+  const liveMini = document.getElementById('camLiveMini');
+  if (!img && !imgMini) return;
+  const ni = new Image();
+  ni.onload = function() {
+    if (img) { img.src = this.src; img.style.display = 'block'; }
+    if (off) off.style.display = 'none';
+    if (live) live.style.display = '';
+    if (imgMini) { imgMini.src = this.src; imgMini.style.display = 'block'; }
+    if (offMini) offMini.style.display = 'none';
+    if (liveMini) liveMini.style.display = '';
+  };
+  ni.onerror = function() {
+    if (img) img.style.display = 'none';
+    if (off) off.style.display = 'flex';
+    if (live) live.style.display = 'none';
+    if (imgMini) imgMini.style.display = 'none';
+    if (offMini) offMini.style.display = 'flex';
+    if (liveMini) liveMini.style.display = 'none';
+  };
+  ni.src = CAM_URL + '&t=' + Date.now();
+}
+
+refreshCamera();
+setInterval(() => refreshCamera(), CAM_INTERVAL);
+
+// ════════════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════════════
+// Dynamic gap — set pages top based on actual topbar height
+function fixGap() {
+  const tb = document.querySelector('.topbar');
+  const pg = document.querySelector('.pages') || document.getElementById('pagesContainer');
+  if (tb && pg) {
+    const h = Math.max(tb.offsetHeight, tb.getBoundingClientRect().height, 36);
+    const gap = Math.round(h) + 10;
+    pg.style.setProperty('top', gap + 'px', 'important');
+    console.log('[GAP] topbar=' + Math.round(h) + 'px → pages.top=' + gap + 'px');
+  }
+}
+// Run after paint + on resize
+setTimeout(fixGap, 50);
+setTimeout(fixGap, 200);
+setTimeout(fixGap, 500);
+window.addEventListener('resize', fixGap);
+if (loadConfig() && CFG.host && CFG.token) {
+  document.getElementById('configOverlay').classList.add('hidden');
+  document.getElementById('cfgHostDisplay').textContent = CFG.host;
+  startPolling();
+}
+
+// ═══ EVENT LOG API ════════════════════════════════════════
+async function fetchEventLog() {
+  try {
+    const sheetsUrl = (ALL_VARS['sh_sheets_url'] || {}).value || '';
+    if (!sheetsUrl) {
+      el('el-summary').innerHTML = '<span style="color:var(--orange);">⚠ sh_sheets_url nenalezena</span>';
+      return;
+    }
+    el('el-summary').textContent = 'Načítám...';
+
+    // Fetch stats
+    const statsResp = await fetch(sheetsUrl + '?mode=stats&hours=24');
+    const statsData = await statsResp.json();
+    const st = statsData.stats || {};
+
+    // Build stats summary
+    let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;">';
+    html += '<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--green);">' + (st.total || 0) + '</div><div style="font-size:8px;color:var(--tx3);">CELKEM</div></div>';
+    html += '<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:' + ((st.errors || 0) > 0 ? 'var(--red)' : 'var(--green)') + ';">' + (st.errors || 0) + '</div><div style="font-size:8px;color:var(--tx3);">CHYBY</div></div>';
+    const scriptKeys = Object.keys(st.by_script || {});
+    html += '<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--cyan);">' + scriptKeys.length + '</div><div style="font-size:8px;color:var(--tx3);">SKRIPTŮ</div></div>';
+    const zoneKeys = Object.keys(st.by_zone || {});
+    html += '<div style="text-align:center;"><div style="font-size:18px;font-weight:700;color:var(--purple);">' + zoneKeys.length + '</div><div style="font-size:8px;color:var(--tx3);">ZÓN</div></div>';
+    html += '</div>';
+
+    // Top scripts
+    if (scriptKeys.length > 0) {
+      const sorted = scriptKeys.sort(function(a,b) { return (st.by_script[b]||0) - (st.by_script[a]||0); }).slice(0, 5);
+      html += '<div style="color:var(--tx3);font-size:9px;margin-bottom:2px;">TOP SKRIPTY:</div>';
+      sorted.forEach(function(s) {
+        const short = s.replace('sh_','').replace('_v1','').replace('_v2','');
+        html += '<div style="display:flex;justify-content:space-between;padding:1px 0;"><span style="color:var(--cyan);">' + short + '</span><span>' + st.by_script[s] + '×</span></div>';
+      });
+    }
+    el('el-summary').innerHTML = html;
+
+    // Fetch recent events
+    const evResp = await fetch(sheetsUrl + '?mode=events&hours=4');
+    const evData = await evResp.json();
+    const rows = evData.rows || [];
+
+    if (rows.length > 0) {
+      document.getElementById('eventlog-recent').style.display = 'block';
+      let rhtml = '';
+      rows.slice(0, 20).forEach(function(r) {
+        const ts = String(r.timestamp || '').substring(11, 19);
+        const scr = String(r.script || '').replace('sh_','').replace('_v1','').replace('_v2','');
+        const ev = r.event || '';
+        const err = r.error || '';
+        const color = err ? 'var(--red)' : 'var(--tx2)';
+        rhtml += '<div style="display:flex;gap:6px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05);color:' + color + ';">';
+        rhtml += '<span style="color:var(--tx3);flex-shrink:0;">' + ts + '</span>';
+        rhtml += '<span style="color:var(--cyan);flex-shrink:0;min-width:100px;">' + scr + '</span>';
+        rhtml += '<span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + ev + '</span>';
+        if (err) rhtml += '<span style="color:var(--red);flex-shrink:0;">⚠</span>';
+        rhtml += '</div>';
+      });
+      el('el-rows').innerHTML = rhtml;
+    }
+  } catch(e) {
+    el('el-summary').innerHTML = '<span style="color:var(--red);">Chyba: ' + e.message + '</span>';
+  }
+}
+
+// ═══ WEATHER ═══════════════════════════════════════════
+const WX_LAT = 50.6012, WX_LON = 15.4950;
+let wxLastFetch = 0;
+const WX_COOLDOWN = 600000; // 10 min
+
+function wxIconImg(code, size) {
+  if (!code) return '<span style="font-size:'+size+'px;">🌡</span>';
+  return '<img src="https://openweathermap.org/img/wn/' + code + '@2x.png" style="width:'+size+'px;height:'+size+'px;filter:brightness(1.1) drop-shadow(0 2px 6px rgba(0,0,0,.4));" alt="">';
+}
+function wxIcon(code) {
+  if (!code) return '🌡';
+  const c = String(code);
+  if (c.startsWith('01')) return '☀️';
+  if (c.startsWith('02')) return '⛅';
+  if (c.startsWith('03')) return '☁️';
+  if (c.startsWith('04')) return '☁️';
+  if (c.startsWith('09')) return '🌧';
+  if (c.startsWith('10')) return '🌦';
+  if (c.startsWith('11')) return '⛈';
+  if (c.startsWith('13')) return '❄️';
+  if (c.startsWith('50')) return '🌫';
+  return '🌡';
+}
+
+function wxTime(unix) {
+  const d = new Date(unix * 1000);
+  return d.toLocaleTimeString('cs-CZ', { timeZone: 'Europe/Prague', hour: '2-digit', minute: '2-digit' });
+}
+
+function wxDay(unix) {
+  const d = new Date(unix * 1000);
+  return d.toLocaleDateString('cs-CZ', { timeZone: 'Europe/Prague', weekday: 'short', day: 'numeric', month: 'numeric' });
+}
+
+async function fetchWeather() {
+  const now = Date.now();
+  if (now - wxLastFetch < WX_COOLDOWN) return;
+  wxLastFetch = now;
+
+  const key = ALL_VARS?.sh_owm_api_key?.value || '';
+  if (!key) {
+    document.getElementById('wx-loading').textContent = 'OWM API klíč chybí (sh_owm_api_key)';
+    return;
+  }
+
+  try {
+    // Current weather
+    const curRes = await fetch(
+      `https://api.openweathermap.org/data/2.5/weather?lat=${WX_LAT}&lon=${WX_LON}&units=metric&lang=cz&appid=${key}`
+    );
+    const cur = await curRes.json();
+
+    // 5-day forecast
+    const fcRes = await fetch(
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${WX_LAT}&lon=${WX_LON}&units=metric&lang=cz&cnt=16&appid=${key}`
+    );
+    const fc = await fcRes.json();
+
+    renderWeather(cur, fc);
+  } catch (e) {
+    document.getElementById('wx-loading').textContent = 'Chyba: ' + e.message;
+  }
+}
+
+function renderWeather(cur, fc) {
+  const el = id => document.getElementById(id);
+  const iconCode = cur.weather?.[0]?.icon || '';
+  const temp = Math.round(cur.main?.temp ?? 0);
+  const feels = Math.round(cur.main?.feels_like ?? 0);
+  const desc = cur.weather?.[0]?.description || '—';
+  const wind = Math.round((cur.wind?.speed ?? 0) * 3.6);
+  const hum = cur.main?.humidity ?? '—';
+  const rain = cur.rain?.['1h'] ?? cur.rain?.['3h'] ?? 0;
+  const pressure = cur.main?.pressure ?? '—';
+  const sunrise = cur.sys?.sunrise ? wxTime(cur.sys.sunrise) : '—';
+  const sunset = cur.sys?.sunset ? wxTime(cur.sys.sunset) : '—';
+
+  el('wx-icon').innerHTML = wxIconImg(iconCode, 64);
+  el('wx-temp').textContent = temp + '°C';
+  el('wx-desc').textContent = desc.toUpperCase();
+  el('wx-feels').textContent = 'Pocitová ' + feels + '°C';
+  el('wx-wind').textContent = wind;
+  el('wx-humidity').textContent = hum;
+  el('wx-rain').textContent = rain > 0 ? rain.toFixed(1) : '0';
+  el('wx-pressure').textContent = pressure;
+  el('wx-sunrise').textContent = sunrise;
+  el('wx-sunset').textContent = sunset;
+
+  // Forecast — 2 rows × 4 cols = 8 items, compact
+  let html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">';
+  const items = fc.list || [];
+  for (let i = 0; i < Math.min(items.length, 8); i++) {
+    const f = items[i];
+    const fTemp = Math.round(f.main?.temp ?? 0);
+    const fTime = wxTime(f.dt);
+    const fDay = wxDay(f.dt);
+    const fDesc = f.weather?.[0]?.description || '';
+    const fWind = Math.round((f.wind?.speed ?? 0) * 3.6);
+    const fRain = f.rain?.['3h'] ?? 0;
+    const fIconHtml = wxIconImg(f.weather?.[0]?.icon || '', 48);
+
+    html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:8px 6px;text-align:center;">' +
+      '<div style="font-size:9px;color:var(--tx3);">' + fDay + '</div>' +
+      '<div style="font-size:12px;color:var(--cyan);font-weight:600;">' + fTime + '</div>' +
+      '<div style="margin:2px 0;line-height:1;">' + fIconHtml + '</div>' +
+      '<div style="font-size:20px;font-weight:700;color:var(--tx1);">' + fTemp + '°</div>' +
+      '<div style="font-size:9px;color:var(--tx2);margin-top:1px;">' + fDesc + '</div>' +
+      '<div style="font-size:9px;color:var(--tx3);">💨' + fWind + (fRain > 0 ? ' 🌧' + fRain.toFixed(1) : '') + '</div>' +
+    '</div>';
+  }
+  html += '</div>';
+  el('wx-forecast').innerHTML = html;
+  el('wx-updated').textContent = 'Aktualizováno: ' + new Date().toLocaleTimeString('cs-CZ', { timeZone: 'Europe/Prague' });
+
+  el('wx-loading').style.display = 'none';
+  el('wx-main').style.display = 'block';
+}
+
+// Fetch weather on page switch and every 10 min
+const origSwitchPage = switchPage;
+switchPage = function(name) {
+  origSwitchPage(name);
+  if (name === 'weather') fetchWeather();
+  if (name === 'camera') refreshCamera();
+  if (name === 'ai') fetchEventLog();
+};
+setInterval(() => { if (currentPage === 'weather') fetchWeather(); }, WX_COOLDOWN);
+
+</script>
+</body>
+</html>
+</body>
+</html>
