@@ -989,7 +989,7 @@ body {
 <body>
 
 <div id="demo-banner" style="background:linear-gradient(90deg,rgba(168,85,247,0.15),rgba(74,158,255,0.15));border-bottom:1px solid rgba(168,85,247,0.3);padding:8px 16px;text-align:center;font-size:12px;color:var(--tx-2);">
-  🎨 <strong>Demo Preview</strong> — Statická ukázka designu Smart Home dashboardu v2. Všechny hodnoty jsou mock data.
+  🎨 <strong>Demo Preview</strong> — Statická ukázka designu Smart Home dashboardu v2.
 </div>
 
 <!-- ═══════════════════════════════════════════════════════════════
@@ -1585,15 +1585,16 @@ body {
         </div>
       </div>
 
-      <!-- PŘEPISY (overrides) -->
+      <!-- PŘEPISY (overrides) — klikací řádky toggle -->
       <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">🎛 PŘEPISY · OVERRIDES</span></div>
+        <div class="section-head"><span class="section-title">🎛 PŘEPISY · OVERRIDES (klikni pro toggle)</span></div>
         <div class="activity-list" id="sys-overrides-list">
-          <div class="activity-row"><div class="activity-ico yellow">💡</div><div class="activity-info"><div class="activity-title">Light override</div><div class="activity-sub">sh_manual_override_light</div></div><div class="activity-time" id="ov-light">—</div></div>
-          <div class="activity-row"><div class="activity-ico purple">🔒</div><div class="activity-info"><div class="activity-title">Privacy guard</div><div class="activity-sub">sh_privacy_guard_enabled</div></div><div class="activity-time" id="ov-privacy">—</div></div>
-          <div class="activity-row"><div class="activity-ico blue">🧪</div><div class="activity-info"><div class="activity-title">Simulation mode</div><div class="activity-sub">sh_simulation_mode</div></div><div class="activity-time" id="ov-sim">—</div></div>
-          <div class="activity-row"><div class="activity-ico green">🔮</div><div class="activity-info"><div class="activity-title">Predict enabled</div><div class="activity-sub">sh_predict_enabled</div></div><div class="activity-time" id="ov-predict">—</div></div>
-          <div class="activity-row"><div class="activity-ico orange">🔕</div><div class="activity-info"><div class="activity-title">Tiché ráno zítra</div><div class="activity-sub">sh_morning_skip_tomorrow</div></div><div class="activity-time" id="ov-skip-morning">—</div></div>
+          <div class="activity-row" style="cursor:pointer;" onclick="toggleOverride('sh_manual_override_light', DATA?.overrides?.manual_override_light)"><div class="activity-ico yellow">💡</div><div class="activity-info"><div class="activity-title">Light override</div><div class="activity-sub">Ruční — automatizace nesahá na světla</div></div><div class="activity-time" id="ov-light">—</div></div>
+          <div class="activity-row" style="cursor:pointer;" onclick="toggleOverride('sh_privacy_guard_enabled', DATA?.overrides?.privacy_guard)"><div class="activity-ico purple">🔒</div><div class="activity-info"><div class="activity-title">Privacy guard</div><div class="activity-sub">Roleta nahoře → open space OFF</div></div><div class="activity-time" id="ov-privacy">—</div></div>
+          <div class="activity-row" style="cursor:pointer;" onclick="toggleOverride('sh_simulation_mode', DATA?.overrides?.simulation_mode)"><div class="activity-ico blue">🧪</div><div class="activity-info"><div class="activity-title">Simulation mode</div><div class="activity-sub">Skripty jen loguje, žádné akce</div></div><div class="activity-time" id="ov-sim">—</div></div>
+          <div class="activity-row" style="cursor:pointer;" onclick="toggleOverride('sh_predict_enabled', DATA?.overrides?.predict_enabled)"><div class="activity-ico green">🔮</div><div class="activity-info"><div class="activity-title">Predict enabled</div><div class="activity-sub">AI predikce aktivní</div></div><div class="activity-time" id="ov-predict">—</div></div>
+          <div class="activity-row" style="cursor:pointer;" onclick="toggleOverride('sh_morning_skip_tomorrow', DATA?.overrides?.skip_morning)"><div class="activity-ico orange">🔕</div><div class="activity-info"><div class="activity-title">Tiché ráno zítra</div><div class="activity-sub">Skip zítřejší rutiny</div></div><div class="activity-time" id="ov-skip-morning">—</div></div>
+          <div class="activity-row" style="cursor:pointer;" onclick="toggleOverride('sh_cfg_heating_ai_enabled', DATA?.heating?.ai_enabled)"><div class="activity-ico purple">🧠</div><div class="activity-info"><div class="activity-title">Heating AI vrstvy</div><div class="activity-sub">Fáze C: preWakeBoost + weatherAdjust + occupancy</div></div><div class="activity-time" id="ov-heating-ai">—</div></div>
         </div>
       </div>
 
@@ -1601,18 +1602,18 @@ body {
       <div class="section-card" style="margin-top:16px;">
         <div class="section-head"><span class="section-title">🔬 DIAGNOSTICKÉ AKCE</span></div>
         <div class="ctrl-grid" style="grid-template-columns:repeat(4,1fr);">
-          <button class="ctrl-btn" onclick="toast('🏥 Health check')"><div class="ctrl-ico green">🏥</div><div class="ctrl-text"><div class="ctrl-title">Health</div><div class="ctrl-sub">sh_system_health</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🔄 Self-heal')"><div class="ctrl-ico blue">🔄</div><div class="ctrl-text"><div class="ctrl-title">Self-heal</div><div class="ctrl-sub">Orphans fix</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🔍 Devices check')"><div class="ctrl-ico cyan">🔍</div><div class="ctrl-text"><div class="ctrl-title">Devices</div><div class="ctrl-sub">Critical check</div></div></button>
-          <button class="ctrl-btn" onclick="toast('⚠ Anomálie detektor')"><div class="ctrl-ico orange">⚠</div><div class="ctrl-text"><div class="ctrl-title">Anomálie</div><div class="ctrl-sub">Detect outliers</div></div></button>
+          <button class="ctrl-btn" onclick="runHealthCheck()"><div class="ctrl-ico green">🏥</div><div class="ctrl-text"><div class="ctrl-title">Health</div><div class="ctrl-sub">sh_system_health</div></div></button>
+          <button class="ctrl-btn" onclick="runSelfHeal()"><div class="ctrl-ico blue">🔄</div><div class="ctrl-text"><div class="ctrl-title">Self-heal</div><div class="ctrl-sub">Orphans fix</div></div></button>
+          <button class="ctrl-btn" onclick="runCriticalDevices()"><div class="ctrl-ico cyan">🔍</div><div class="ctrl-text"><div class="ctrl-title">Devices</div><div class="ctrl-sub">Critical check</div></div></button>
+          <button class="ctrl-btn" onclick="runAnomaly()"><div class="ctrl-ico orange">⚠</div><div class="ctrl-text"><div class="ctrl-title">Anomálie</div><div class="ctrl-sub">Detect outliers</div></div></button>
           <button class="ctrl-btn" onclick="wakeUpV2()"><div class="ctrl-ico orange">🌅</div><div class="ctrl-text"><div class="ctrl-title">Probudit</div><div class="ctrl-sub">Force wake</div></div></button>
-          <button class="ctrl-btn" onclick="toast('⏰ Time sync')"><div class="ctrl-ico blue">⏰</div><div class="ctrl-text"><div class="ctrl-title">Time Sync</div><div class="ctrl-sub">Fix timezone</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🧠 Meta Brain full scan')"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Meta Brain</div><div class="ctrl-sub">Full scan</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🩹 AutoFix')"><div class="ctrl-ico green">🩹</div><div class="ctrl-text"><div class="ctrl-title">AutoFix</div><div class="ctrl-sub">Known issues</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🔄 Reconcile')"><div class="ctrl-ico cyan">🔄</div><div class="ctrl-text"><div class="ctrl-title">Reconcile</div><div class="ctrl-sub">Sync state</div></div></button>
-          <button class="ctrl-btn" onclick="toast('📋 Morning audit')"><div class="ctrl-ico orange">📋</div><div class="ctrl-text"><div class="ctrl-title">Morning Audit</div><div class="ctrl-sub">Routine check</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🛑 Conflict guard')"><div class="ctrl-ico red">🛑</div><div class="ctrl-text"><div class="ctrl-title">Conflicts</div><div class="ctrl-sub">Script clashes</div></div></button>
-          <button class="ctrl-btn" onclick="if(confirm('Emergency reset — vypne vše?')) toast('⚠ EMERGENCY')"><div class="ctrl-ico red">🚨</div><div class="ctrl-text"><div class="ctrl-title">Emergency</div><div class="ctrl-sub">All lights/audio OFF</div></div></button>
+          <button class="ctrl-btn" onclick="runTimeSync()"><div class="ctrl-ico blue">⏰</div><div class="ctrl-text"><div class="ctrl-title">Time Sync</div><div class="ctrl-sub">Fix timezone</div></div></button>
+          <button class="ctrl-btn" onclick="runMetaBrain()"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Meta Brain</div><div class="ctrl-sub">Full scan</div></div></button>
+          <button class="ctrl-btn" onclick="runAutofix()"><div class="ctrl-ico green">🩹</div><div class="ctrl-text"><div class="ctrl-title">AutoFix</div><div class="ctrl-sub">Known issues</div></div></button>
+          <button class="ctrl-btn" onclick="runReconcile()"><div class="ctrl-ico cyan">🔄</div><div class="ctrl-text"><div class="ctrl-title">Reconcile</div><div class="ctrl-sub">Sync state</div></div></button>
+          <button class="ctrl-btn" onclick="runMorningAudit()"><div class="ctrl-ico orange">📋</div><div class="ctrl-text"><div class="ctrl-title">Morning Audit</div><div class="ctrl-sub">Routine check</div></div></button>
+          <button class="ctrl-btn" onclick="runConflictGuard()"><div class="ctrl-ico red">🛑</div><div class="ctrl-text"><div class="ctrl-title">Conflicts</div><div class="ctrl-sub">Script clashes</div></div></button>
+          <button class="ctrl-btn" onclick="runEmergencyReset()"><div class="ctrl-ico red">🚨</div><div class="ctrl-text"><div class="ctrl-title">Emergency</div><div class="ctrl-sub">All lights/audio OFF</div></div></button>
         </div>
       </div>
 
@@ -1621,9 +1622,9 @@ body {
         <div class="section-head"><span class="section-title">🎬 MANUÁLNÍ AKCE</span></div>
         <div class="ctrl-grid" style="grid-template-columns:repeat(4,1fr);">
           <button class="ctrl-btn" onclick="sceneRun('relax')"><div class="ctrl-ico purple">🌙</div><div class="ctrl-text"><div class="ctrl-title">Relax scéna</div><div class="ctrl-sub">Tlumené + ambient</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🪟 Roleta recheck')"><div class="ctrl-ico cyan">🪟</div><div class="ctrl-text"><div class="ctrl-title">Roleta recheck</div><div class="ctrl-sub">Re-eval lux</div></div></button>
+          <button class="ctrl-btn" onclick="runRoletaRecheck()"><div class="ctrl-ico cyan">🪟</div><div class="ctrl-text"><div class="ctrl-title">Roleta recheck</div><div class="ctrl-sub">Re-eval lux</div></div></button>
           <button class="ctrl-btn" onclick="wakeUpV2()"><div class="ctrl-ico orange">🌅</div><div class="ctrl-text"><div class="ctrl-title">Force ranní</div><div class="ctrl-sub">Test bez alarmu</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🌆 Evening test')"><div class="ctrl-ico orange">🌆</div><div class="ctrl-text"><div class="ctrl-title">Evening test</div><div class="ctrl-sub">Relax + audio</div></div></button>
+          <button class="ctrl-btn" onclick="runEveningAuto()"><div class="ctrl-ico orange">🌆</div><div class="ctrl-text"><div class="ctrl-title">Evening test</div><div class="ctrl-sub">Relax + audio</div></div></button>
         </div>
       </div>
 
@@ -1750,6 +1751,8 @@ let CFG = loadCfg();
 const CONFIG = { varName: 'sh_dashboard_data', get demoMode() { return true; } };
 
 let ALL_VARS = {};
+let ALL_SCRIPTS = {};
+let ALL_DEVICES = {};
 let varMapLoaded = false;
 
 // ── DEMO DATA (Phase 47-51 — statický preview) ──────────
@@ -2247,12 +2250,13 @@ function renderSystemDetail(d) {
   setHTML('ov-sim', pill(overrides.simulation_mode));
   setHTML('ov-predict', pill(overrides.predict_enabled));
   setHTML('ov-skip-morning', pill(overrides.skip_morning));
+  setHTML('ov-heating-ai', pill((d.heating || {}).ai_enabled));
 }
 
 // ── Systém page helpers ──
-function wakeUpV2() {
-  toast('🌅 Probudit (wake up) triggered');
-  // In live mode: would call apiPut on sh_morning_event = motion_detected
+async function wakeUpV2() {
+  await writeVar('sh_morning_event', 'motion_detected');
+  await writeVar('sh_morning_audit_trigger', 'dashboard_v2');
 }
 
 async function openLogV2(varName, title) {
@@ -2526,15 +2530,13 @@ function renderActivities(acts) {
 // ╔════════════════════════════════════════════════════════╗
 // ║ INTERACTIONS (Phase 48-51 — demo feedback)             ║
 // ╚════════════════════════════════════════════════════════╝
-function lightDim(id, val, slider) {
-  // Find in DEMO_DATA, update (demo-only — real integration in Phase 47b)
+// ── Lights per-room (agregovaný switch přes sh_light_request) ──
+// V Homey máš flow handler co reaguje na sh_light_request = "<zone>_on/off/dim_NN"
+async function lightDim(id, val, slider) {
   const light = (DATA?.lights || []).find(l => l.id === id);
-  if (light) {
-    light.dim = val / 100;
-    light.on = val > 0;
-  }
-  // Update UI part
-  const tile = slider.closest('.light-tile');
+  if (light) { light.dim = val / 100; light.on = val > 0; }
+  // Update UI inline
+  const tile = slider ? slider.closest('.light-tile') : document.querySelector(`[data-light="${id}"]`);
   if (tile) {
     tile.classList.toggle('off', val == 0);
     const bulb = tile.querySelector('.light-bulb');
@@ -2548,47 +2550,127 @@ function lightDim(id, val, slider) {
     }
     if (pct) pct.textContent = val + '%';
   }
-  toast(`💡 ${light?.name || id}: ${val}%`);
+  // Write to Homey: request var (flow handler aplikuje na zone)
+  const cmd = val == 0 ? id + '_off' : (val == 100 ? id + '_on' : id + '_dim_' + val);
+  await writeVar('sh_light_request', cmd);
 }
 
-function allLights(state) {
-  toast(state === 'on' ? '💡 Všechna světla ZAP' : '💡 Všechna světla VYP');
+async function allLights(state) {
   (DATA?.lights || []).forEach(l => {
     l.on = state === 'on';
     l.dim = state === 'on' ? (l.dim || 0.5) : 0;
   });
   renderLights(DATA.lights);
+  await writeVar('sh_light_request', state === 'on' ? 'all_on' : 'all_off');
 }
 
-function sceneRun(id) {
+async function sceneRun(id) {
   const s = (DATA?.scenes || []).find(x => x.id === id);
-  toast(`🎬 Spuštěna scéna: ${s?.name || id}`);
+  const label = s?.name || id;
+  await writeVar('sh_scene_active_request', id);
+  const lbl = $('scene-active-lbl');
+  if (lbl) lbl.textContent = 'Aktivní: ' + label;
 }
 
-function camOpen(id) { toast(`📹 Kamera: ${id}`); }
+function camOpen(id) { toast('📹 Kamera: ' + id + ' (live preview)'); }
 
-function audioToggle(id) {
+async function audioToggle(id) {
   const a = (DATA?.audio || []).find(x => x.id === id);
-  if (a) { a.playing = !a.playing; renderAudio(DATA.audio); toast(`🔊 ${a.name}: ${a.playing ? 'Play' : 'Pause'}`); }
+  if (!a) return;
+  a.playing = !a.playing;
+  renderAudio(DATA.audio);
+  renderAudioDetail(DATA.audio);
+  // Map zone → Homey request
+  const req = a.playing ? (id === 'kitchen' ? 'radio_kitchen' : id + '_play') : 'stop';
+  await writeVar('sh_audio_request', req);
 }
-function audioSkip(id, dir) { toast(`🔊 ${dir === 'next' ? 'Další' : 'Předchozí'} skladba · ${id}`); }
-function audioVol(id, v) {
+
+async function audioSkip(id, dir) {
+  await writeVar('sh_audio_request', (id === 'kitchen' ? 'kitchen' : id) + '_' + (dir === 'next' ? 'next' : 'prev'));
+}
+
+async function audioVol(id, v) {
   const a = (DATA?.audio || []).find(x => x.id === id);
-  if (a) { a.volume = Number(v); }
-  // Update inline bez re-render (plynulejší)
-  const row = document.querySelector(`.audio-card [onclick*="audioToggle('${id}')"]`)?.closest('.audio-card');
-  if (row) {
-    const val = row.querySelector('.audio-vol-val');
-    if (val) val.textContent = v + '%';
+  if (a) a.volume = Number(v);
+  const rows = document.querySelectorAll('.audio-vol-val');
+  rows.forEach(r => {
+    const slider = r.previousElementSibling;
+    if (slider && slider.value == v) r.textContent = v + '%';
+  });
+  // Debounce: write jen when user releases (onchange, ne oninput)
+  // Pro zjednodušení: volat vždy, Homey API takt handles
+  await writeVar('sh_audio_volume_request', id + '=' + v);
+}
+
+async function audioStop() {
+  (DATA?.audio || []).forEach(a => a.playing = false);
+  renderAudio(DATA.audio);
+  renderAudioDetail(DATA.audio);
+  await writeVar('sh_audio_request', 'stop');
+}
+
+async function closeBlinds() {
+  await writeVar('sh_jidelna_roleta_event', 'close');
+}
+
+async function setMode(m) {
+  // home/away/sleep → sh_presence_event nebo sh_sleep_event
+  if (m === 'sleep') {
+    await writeVar('sh_sleep_event', 'sleep');
+  } else {
+    await writeVar('sh_presence_event', m);
+    await writeVar('sh_presence_source', 'dashboard_v2');
   }
 }
-function audioStop() { toast('⏹ Audio zastaveno ve všech zónách'); (DATA?.audio || []).forEach(a => a.playing = false); renderAudio(DATA.audio); }
-function closeBlinds() { toast('🪟 Žaluzie: zavírání všech'); }
-function setMode(m) { toast(`🏠 Režim: ${m}`); }
-function klimaAdj(id, delta) {
+
+async function klimaAdj(id, delta) {
   const k = (DATA?.klima || []).find(x => x.id === id);
-  if (k) { k.target = Math.round((k.target + delta) * 10) / 10; renderKlima(DATA.klima); toast(`🌡 ${k.room}: ${k.target.toFixed(1)} °C`); }
+  if (!k) return;
+  k.target = Math.round((k.target + delta) * 10) / 10;
+  renderKlima(DATA.klima);
+  renderKlimaDetail(DATA.klima, DATA.heating);
+  // Write přímo do heating zone target
+  await writeVar('sh_heating_zone_' + id + '_target_temp', k.target);
 }
+
+// ── Heating mode/preset ──
+async function setHeatingMode(m) {
+  await writeVar('sh_heating_mode', m);
+}
+async function setHeatingPreset(p) {
+  if (p === 'boost') {
+    // Boost 30 min — nastavit preset + boost_duration
+    await writeVar('sh_heating_preset', 'boost');
+    toast('🔥 Boost +2 °C na 30 min');
+  } else {
+    await writeVar('sh_heating_preset', p);
+  }
+}
+
+// ── Overrides toggles (pro Systém page) ──
+async function toggleOverride(varName, current) {
+  const newVal = current === 'yes' ? 'no' : 'yes';
+  await writeVar(varName, newVal);
+  setTimeout(refresh, 500);
+}
+
+// ── AI modul triggers ──
+async function runHealthCheck() { await runScript('sh_system_health_v1'); }
+async function runSelfHeal() { await runScript('sh_self_healing_v4'); }
+async function runMetaBrain() { await runScript('sh_meta_brain_v1'); }
+async function runAutofix() { await runScript('sh_autofix_engine_v1'); }
+async function runReconcile() { await runScript('sh_system_reconcile_v1'); }
+async function runAnomaly() { await runScript('sh_anomaly_detector_v1'); }
+async function runTimeSync() { await runScript('sh_time_sync_guard_v1'); }
+async function runMorningAudit() { await runScript('sh_morning_audit_v1'); }
+async function runConflictGuard() { await runScript('sh_conflict_guard_v1'); }
+async function runCriticalDevices() { await runScript('sh_critical_devices_v1'); }
+async function runEmergencyReset() {
+  if (!confirm('⚠ EMERGENCY RESET\n\nVypne všechna světla, audio, scény. Pokračovat?')) return;
+  await writeVar('sh_emergency_reset', 'trigger');
+}
+async function runEveningAuto() { await runScript('sh_evening_auto_v1'); }
+async function runRoletaRecheck() { await writeVar('sh_jidelna_roleta_event', 'recheck'); }
 
 // ╔════════════════════════════════════════════════════════╗
 // ║ CONFIG OVERLAY (Phase 47b)                             ║
@@ -2640,7 +2722,7 @@ async function saveCfgBtn() {
   }
 }
 
-// Auto-open DISABLED in demo build
+// Auto-open DISABLED
 
 // ╔════════════════════════════════════════════════════════╗
 // ║ TOAST (lightweight flash notification)                 ║
@@ -2686,7 +2768,90 @@ async function loadVarMap() {
   const data = await apiGet('/api/manager/logic/variable/');
   ALL_VARS = {};
   for (const [id, v] of Object.entries(data)) ALL_VARS[v.name] = { id, value: v.value };
+  try {
+    const scripts = await apiGet('/api/app/com.athom.homeyscript/script/');
+    ALL_SCRIPTS = {};
+    for (const [id, s] of Object.entries(scripts)) ALL_SCRIPTS[(s.name || '').replace('.js','')] = { id, name: s.name };
+  } catch (e) { console.warn('[v2] scripts load failed', e.message); }
+  try {
+    const devs = await apiGet('/api/manager/devices/device/');
+    ALL_DEVICES = {};
+    for (const [id, d] of Object.entries(devs)) ALL_DEVICES[d.name] = { id, caps: d.capabilities || [], capsObj: d.capabilitiesObj || {} };
+  } catch (e) { console.warn('[v2] devices load failed', e.message); }
   varMapLoaded = true;
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase WRITE — writeVar + runScript + setDeviceCap      ║
+// ╚════════════════════════════════════════════════════════╝
+async function writeVar(name, value) {
+  if (CONFIG.demoMode) {
+    toast('✓ (demo) ' + name + ' = ' + value);
+    return true;
+  }
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const v = ALL_VARS[name];
+    if (!v) { toast('⚠ Proměnná ' + name + ' neexistuje'); return false; }
+    const r = await fetch(CFG.host + '/api/manager/logic/variable/' + v.id, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + CFG.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value }),
+    });
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    ALL_VARS[name].value = value;
+    toast('✓ ' + name.replace('sh_','') + ' = ' + value);
+    return true;
+  } catch (e) {
+    toast('✗ ' + name + ': ' + e.message);
+    return false;
+  }
+}
+
+async function runScript(scriptName, arg) {
+  if (CONFIG.demoMode) {
+    toast('▶ (demo) run ' + scriptName + (arg ? '(' + arg + ')' : ''));
+    return true;
+  }
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const s = ALL_SCRIPTS[scriptName];
+    if (!s) { toast('⚠ Skript ' + scriptName + ' neexistuje'); return false; }
+    const r = await fetch(CFG.host + '/api/app/com.athom.homeyscript/script/' + s.id + '/run', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + CFG.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ args: arg ? [String(arg)] : [] }),
+    });
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    toast('▶ ' + scriptName);
+    return true;
+  } catch (e) {
+    toast('✗ ' + scriptName + ': ' + e.message);
+    return false;
+  }
+}
+
+async function setDeviceCap(deviceName, capability, value) {
+  if (CONFIG.demoMode) {
+    toast('✓ (demo) ' + deviceName + '.' + capability + ' = ' + value);
+    return true;
+  }
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const d = ALL_DEVICES[deviceName];
+    if (!d) { toast('⚠ Zařízení ' + deviceName + ' neexistuje'); return false; }
+    const r = await fetch(CFG.host + '/api/manager/devices/device/' + d.id + '/capability/' + capability, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + CFG.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value }),
+    });
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    toast('✓ ' + deviceName + ' · ' + capability + ' = ' + value);
+    return true;
+  } catch (e) {
+    toast('✗ ' + deviceName + ': ' + e.message);
+    return false;
+  }
 }
 
 // ── Transform bridge raw → v2 UI shape ──────────────────
@@ -2782,22 +2947,35 @@ function transformBridge(raw) {
       spim: state.spim,
       phase: state.phase || state.cast_dne || d.context?.phase,
     },
-    health: { score: Number(health.score || 0), power_total: powerW },
+    health: { score: Number(health.score || 0), power_total: powerW, errors_30m: health.errors_30m },
     weather: {
       temp: outdoorTemp,
       desc: weather.desc || d.context?.pocasiText || '—',
       icon: weather.icon || '☁️',
     },
     energy: {
-      kwh_today: kwhToday,
-      delta_pct: null,  // bridge neposkytuje
+      kwh_today: d.energy?.kwh_today != null ? d.energy.kwh_today : kwhToday,
+      kwh_yesterday: d.energy?.kwh_yesterday,
+      delta_pct: d.energy?.delta_pct,
     },
     lights: lights.length ? lights : DEMO_DATA.lights,
-    scenes,
-    cameras: DEMO_DATA.cameras,  // bridge neposkytuje camera list
+    scenes: Array.isArray(d.scenes) && d.scenes.length ? d.scenes : DEMO_DATA.scenes,
+    cameras: Array.isArray(d.cameras) && d.cameras.length ? d.cameras : DEMO_DATA.cameras,
     audio: audio.length ? audio : DEMO_DATA.audio,
     klima: klima.length ? klima : DEMO_DATA.klima,
     activities,
+    heating: {
+      ...(d.heating || {}),
+      ai_enabled: d.heating?.ai_enabled,  // z cfg
+    },
+    overrides: d.overrides || {},
+    ai: d.ai || {},
+    appliances: d.appliances || {},
+    plugs: d.plugs || {},
+    offline: d.offline || [],
+    device_count: d.device_count,
+    finance: d.finance || DEMO_DATA.finance,
+    top_devices: deriveTopDevices(d),  // computed from live plugs
   };
 }
 
