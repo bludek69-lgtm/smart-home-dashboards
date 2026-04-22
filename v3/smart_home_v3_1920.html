@@ -1335,6 +1335,147 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
   #page-home .hg-apps   { grid-column: 1 !important; grid-row: 6 !important; }
 }
 /* ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🎨 v3 TOPBAR polish — final touch (23.4. večer, end-of-session)  */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Top status bar — glass blur + gradient */
+.topbar {
+  background: linear-gradient(90deg, rgba(17,23,41,0.95) 0%, rgba(26,34,54,0.92) 50%, rgba(17,23,41,0.95) 100%) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(74,158,255,0.15) !important;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.04);
+  height: 44px !important;
+}
+
+/* SEMILY logo — gradient text s glow */
+.topbar-logo {
+  font-family: var(--mono) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  letter-spacing: 4px !important;
+  background: linear-gradient(90deg, var(--cyan) 0%, var(--blue) 100%);
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent;
+  color: transparent !important;
+  filter: drop-shadow(0 0 8px rgba(34,211,238,0.4));
+  padding-right: 14px;
+  border-right: 1px solid rgba(74,158,255,0.12);
+}
+
+/* Status chips — pretty pills s per-status glow */
+.topbar .chip {
+  padding: 4px 11px !important;
+  border-radius: 999px !important;
+  font-size: 11px !important;
+  font-family: var(--sans) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.4px !important;
+  text-transform: uppercase !important;
+  background: var(--bg3) !important;
+  border: 1px solid var(--bd) !important;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2) !important;
+  transition: all var(--tr-fast) !important;
+  cursor: default;
+}
+.topbar .chip:hover {
+  transform: translateY(-1px);
+  border-color: var(--bda) !important;
+  box-shadow: 0 0 8px rgba(74,158,255,0.25), 0 2px 6px rgba(0,0,0,0.2) !important;
+}
+
+/* Status chip dot — větší, colored per status */
+.topbar .chip .cd {
+  width: 7px !important;
+  height: 7px !important;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* Per-status chip styling (via text content matching) */
+/* HOME — green */
+.topbar .chip[title*="Doma"], .topbar .chip:has-text("HOME") {
+  background: linear-gradient(135deg, var(--greend), rgba(59,201,125,0.05)) !important;
+  border-color: rgba(59,201,125,0.4) !important;
+  color: var(--green);
+  box-shadow: 0 0 10px rgba(59,201,125,0.2) !important;
+}
+
+/* Universal — detect by inline style color (v1 renderer) */
+.topbar .chip {
+  color: var(--tx1);
+}
+
+/* Time display — prominent */
+.topbar-time {
+  font-family: var(--mono) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: var(--tx1) !important;
+  letter-spacing: 0.5px;
+  padding-left: 10px;
+  border-left: 1px solid rgba(74,158,255,0.12);
+}
+
+/* Connection LED — glow efekt */
+#connLed {
+  font-size: 14px !important;
+  transition: all var(--tr-med);
+  cursor: pointer;
+}
+#connLed:not(.off) {
+  color: var(--green) !important;
+  filter: drop-shadow(0 0 6px var(--green));
+  animation: v3-led-pulse 3s ease-in-out infinite;
+}
+#connLed.off {
+  color: var(--red) !important;
+  filter: drop-shadow(0 0 6px var(--red));
+}
+@keyframes v3-led-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px var(--green)); }
+  50% { filter: drop-shadow(0 0 12px var(--green)); }
+}
+
+/* API config button — pretty */
+.topbar > span:last-child {
+  padding: 5px 12px !important;
+  border-radius: 999px !important;
+  font-size: 10px !important;
+  font-family: var(--sans) !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, var(--cyand), rgba(74,158,255,0.06)) !important;
+  border: 1px solid var(--cyanb) !important;
+  color: var(--cyan) !important;
+  letter-spacing: 0.5px;
+  transition: all var(--tr-fast) !important;
+  cursor: pointer !important;
+}
+.topbar > span:last-child:hover {
+  background: linear-gradient(135deg, var(--cyanb), var(--cyand)) !important;
+  box-shadow: 0 0 14px rgba(34,211,238,0.4) !important;
+  transform: translateY(-1px);
+}
+
+/* v3 banner — integrated do topbar area */
+body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
+  top: 9px !important;
+  right: 14px !important;
+  font-size: 9px !important;
+  padding: 3px 9px !important;
+  background: linear-gradient(135deg, rgba(168,85,247,0.2), rgba(74,158,255,0.1)) !important;
+  border: 1px solid rgba(168,85,247,0.35) !important;
+  color: var(--purple) !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 1 !important;
+  z-index: 101 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
 </style>
 </head>
 <body>
