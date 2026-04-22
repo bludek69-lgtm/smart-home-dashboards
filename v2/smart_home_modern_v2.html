@@ -1461,28 +1461,93 @@ body {
     <section class="page" data-page="system">
       <div class="page-header">
         <div class="greeting">
-          <h1>⚙️ Systém</h1>
-          <p>Health · AI vrstvy · Diagnostika · Odkaz na v1 pro detailní akce</p>
+          <h1>⚙️ Systém / AI</h1>
+          <p>Health · AI vrstvy · Diagnostika · Manuální akce · Log snapshots</p>
         </div>
       </div>
+
+      <!-- AI CONTROL CENTER — 4 stat tiles -->
       <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="stat-tile"><div class="stat-label">HEALTH SCORE</div><div class="stat-ico green">🛡</div><div class="stat-value" id="sys-health-val">—</div><div class="stat-sub">System zdraví</div></div>
-        <div class="stat-tile"><div class="stat-label">DEMAND ZÓNY</div><div class="stat-ico orange">🔥</div><div class="stat-value" id="sys-demand-val">—</div><div class="stat-sub">Heating</div></div>
-        <div class="stat-tile"><div class="stat-label">OFFLINE DEVICES</div><div class="stat-ico blue">📡</div><div class="stat-value" id="sys-offline-val">—</div><div class="stat-sub">Nedostupné</div></div>
-        <div class="stat-tile"><div class="stat-label">CELKEM DEVICES</div><div class="stat-ico purple">🔢</div><div class="stat-value" id="sys-total-val">—</div><div class="stat-sub">V Homey</div></div>
+        <div class="stat-tile"><div class="stat-label">HEALTH</div><div class="stat-ico green" id="sys-health-ico">🛡</div><div class="stat-value" id="sys-health-val">—</div><div class="stat-sub">Systém</div></div>
+        <div class="stat-tile"><div class="stat-label">CHYBY/30M</div><div class="stat-ico orange">⚠️</div><div class="stat-value" id="sys-errors-val">0</div><div class="stat-sub">Monitor</div></div>
+        <div class="stat-tile"><div class="stat-label">VÝKON</div><div class="stat-ico purple">⚡</div><div class="stat-value" id="sys-power-val">—</div><div class="stat-sub">Energie</div></div>
+        <div class="stat-tile"><div class="stat-label">OFFLINE</div><div class="stat-ico blue">📡</div><div class="stat-value" id="sys-offline-val">—</div><div class="stat-sub">Zařízení</div></div>
       </div>
+
+      <!-- AI MODULY -->
       <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">RYCHLÉ AKCE</span></div>
+        <div class="section-head"><span class="section-title">🧠 AI MODULY</span></div>
         <div class="ctrl-grid" style="grid-template-columns:repeat(3,1fr);">
-          <button class="ctrl-btn" onclick="toast('🏥 Health check triggered')"><div class="ctrl-ico green">🏥</div><div class="ctrl-text"><div class="ctrl-title">Health check</div><div class="ctrl-sub">sh_system_health_v1</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🔄 Self-heal triggered')"><div class="ctrl-ico blue">🔄</div><div class="ctrl-text"><div class="ctrl-title">Self-heal</div><div class="ctrl-sub">Fix orphans</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🧠 Meta Brain triggered')"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Meta Brain</div><div class="ctrl-sub">Full scan</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🧠 Meta Brain: ' + (DATA?.ai?.meta_last || 'idle'))"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Meta Brain</div><div class="ctrl-sub" id="sys-meta-sub">—</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🔮 Predict: ' + (DATA?.ai?.predict_last || 'idle'))"><div class="ctrl-ico blue">🔮</div><div class="ctrl-text"><div class="ctrl-title">Predict</div><div class="ctrl-sub" id="sys-predict-sub">—</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🤝 Coordinator: ' + (DATA?.ai?.coord_last || 'idle'))"><div class="ctrl-ico green">🤝</div><div class="ctrl-text"><div class="ctrl-title">Coordinator</div><div class="ctrl-sub" id="sys-coord-sub">—</div></div></button>
         </div>
       </div>
+
+      <!-- PŘEPISY (overrides) -->
       <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">DETAILNÍ OVLÁDÁNÍ</span></div>
-        <p style="color:var(--tx-3);font-size:13px;margin-bottom:12px;">Pro plnou AI kontrolu (PŘEPISY, DIAGNOSTICKÉ AKCE, MANUÁLNÍ AKCE, LOG SNAPSHOTS, GEMINI DIAGNOSTIKA) použij v1 dashboard:</p>
-        <a href="../smart_home_1920x1080.html" class="cam-btn-all" style="text-decoration:none;">→ Otevřít v1 AI page</a>
+        <div class="section-head"><span class="section-title">🎛 PŘEPISY · OVERRIDES</span></div>
+        <div class="activity-list" id="sys-overrides-list">
+          <div class="activity-row"><div class="activity-ico yellow">💡</div><div class="activity-info"><div class="activity-title">Light override</div><div class="activity-sub">sh_manual_override_light</div></div><div class="activity-time" id="ov-light">—</div></div>
+          <div class="activity-row"><div class="activity-ico purple">🔒</div><div class="activity-info"><div class="activity-title">Privacy guard</div><div class="activity-sub">sh_privacy_guard_enabled</div></div><div class="activity-time" id="ov-privacy">—</div></div>
+          <div class="activity-row"><div class="activity-ico blue">🧪</div><div class="activity-info"><div class="activity-title">Simulation mode</div><div class="activity-sub">sh_simulation_mode</div></div><div class="activity-time" id="ov-sim">—</div></div>
+          <div class="activity-row"><div class="activity-ico green">🔮</div><div class="activity-info"><div class="activity-title">Predict enabled</div><div class="activity-sub">sh_predict_enabled</div></div><div class="activity-time" id="ov-predict">—</div></div>
+          <div class="activity-row"><div class="activity-ico orange">🔕</div><div class="activity-info"><div class="activity-title">Tiché ráno zítra</div><div class="activity-sub">sh_morning_skip_tomorrow</div></div><div class="activity-time" id="ov-skip-morning">—</div></div>
+        </div>
+      </div>
+
+      <!-- DIAGNOSTICKÉ AKCE -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🔬 DIAGNOSTICKÉ AKCE</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(4,1fr);">
+          <button class="ctrl-btn" onclick="toast('🏥 Health check')"><div class="ctrl-ico green">🏥</div><div class="ctrl-text"><div class="ctrl-title">Health</div><div class="ctrl-sub">sh_system_health</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🔄 Self-heal')"><div class="ctrl-ico blue">🔄</div><div class="ctrl-text"><div class="ctrl-title">Self-heal</div><div class="ctrl-sub">Orphans fix</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🔍 Devices check')"><div class="ctrl-ico cyan">🔍</div><div class="ctrl-text"><div class="ctrl-title">Devices</div><div class="ctrl-sub">Critical check</div></div></button>
+          <button class="ctrl-btn" onclick="toast('⚠ Anomálie detektor')"><div class="ctrl-ico orange">⚠</div><div class="ctrl-text"><div class="ctrl-title">Anomálie</div><div class="ctrl-sub">Detect outliers</div></div></button>
+          <button class="ctrl-btn" onclick="wakeUpV2()"><div class="ctrl-ico orange">🌅</div><div class="ctrl-text"><div class="ctrl-title">Probudit</div><div class="ctrl-sub">Force wake</div></div></button>
+          <button class="ctrl-btn" onclick="toast('⏰ Time sync')"><div class="ctrl-ico blue">⏰</div><div class="ctrl-text"><div class="ctrl-title">Time Sync</div><div class="ctrl-sub">Fix timezone</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🧠 Meta Brain full scan')"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Meta Brain</div><div class="ctrl-sub">Full scan</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🩹 AutoFix')"><div class="ctrl-ico green">🩹</div><div class="ctrl-text"><div class="ctrl-title">AutoFix</div><div class="ctrl-sub">Known issues</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🔄 Reconcile')"><div class="ctrl-ico cyan">🔄</div><div class="ctrl-text"><div class="ctrl-title">Reconcile</div><div class="ctrl-sub">Sync state</div></div></button>
+          <button class="ctrl-btn" onclick="toast('📋 Morning audit')"><div class="ctrl-ico orange">📋</div><div class="ctrl-text"><div class="ctrl-title">Morning Audit</div><div class="ctrl-sub">Routine check</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🛑 Conflict guard')"><div class="ctrl-ico red">🛑</div><div class="ctrl-text"><div class="ctrl-title">Conflicts</div><div class="ctrl-sub">Script clashes</div></div></button>
+          <button class="ctrl-btn" onclick="if(confirm('Emergency reset — vypne vše?')) toast('⚠ EMERGENCY')"><div class="ctrl-ico red">🚨</div><div class="ctrl-text"><div class="ctrl-title">Emergency</div><div class="ctrl-sub">All lights/audio OFF</div></div></button>
+        </div>
+      </div>
+
+      <!-- MANUÁLNÍ AKCE -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🎬 MANUÁLNÍ AKCE</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(4,1fr);">
+          <button class="ctrl-btn" onclick="sceneRun('relax')"><div class="ctrl-ico purple">🌙</div><div class="ctrl-text"><div class="ctrl-title">Relax scéna</div><div class="ctrl-sub">Tlumené + ambient</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🪟 Roleta recheck')"><div class="ctrl-ico cyan">🪟</div><div class="ctrl-text"><div class="ctrl-title">Roleta recheck</div><div class="ctrl-sub">Re-eval lux</div></div></button>
+          <button class="ctrl-btn" onclick="wakeUpV2()"><div class="ctrl-ico orange">🌅</div><div class="ctrl-text"><div class="ctrl-title">Force ranní</div><div class="ctrl-sub">Test bez alarmu</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🌆 Evening test')"><div class="ctrl-ico orange">🌆</div><div class="ctrl-text"><div class="ctrl-title">Evening test</div><div class="ctrl-sub">Relax + audio</div></div></button>
+        </div>
+      </div>
+
+      <!-- LOG SNAPSHOTS — 12 tiles ve 2 sloupcích -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">📦 LOG SNAPSHOTS</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(3,1fr);">
+          <button class="ctrl-btn" onclick="openLogV2('sh_ai_learn_last_report', '🎓 AI Learning')"><div class="ctrl-ico purple">🎓</div><div class="ctrl-text"><div class="ctrl-title">AI Learning</div><div class="ctrl-sub">Gemini doporučení</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_daily_report', '📅 Denní report')"><div class="ctrl-ico blue">📅</div><div class="ctrl-text"><div class="ctrl-title">Denní report</div><div class="ctrl-sub">Gemini souhrn</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_weekly_report', '📆 Týdenní')"><div class="ctrl-ico cyan">📆</div><div class="ctrl-text"><div class="ctrl-title">Týdenní</div><div class="ctrl-sub">Týden souhrn</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_gemini_daily_briefing', '🌅 Briefing')"><div class="ctrl-ico orange">🌅</div><div class="ctrl-text"><div class="ctrl-title">Briefing</div><div class="ctrl-sub">Ranní</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_debug_last_report', '🔬 Debug')"><div class="ctrl-ico yellow">🔬</div><div class="ctrl-text"><div class="ctrl-title">Debug</div><div class="ctrl-sub">Dump systému</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_diag_last_report', '🔍 Diag')"><div class="ctrl-ico blue">🔍</div><div class="ctrl-text"><div class="ctrl-title">Diag</div><div class="ctrl-sub">Diag engine</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_self_heal_last_action', '🔄 Self-heal log')"><div class="ctrl-ico green">🔄</div><div class="ctrl-text"><div class="ctrl-title">Self-heal</div><div class="ctrl-sub">Poslední fix</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_autofix_last', '🩹 AutoFix')"><div class="ctrl-ico green">🩹</div><div class="ctrl-text"><div class="ctrl-title">AutoFix</div><div class="ctrl-sub">Poslední oprava</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_anomaly_last', '⚠ Anomálie')"><div class="ctrl-ico orange">⚠</div><div class="ctrl-text"><div class="ctrl-title">Anomálie</div><div class="ctrl-sub">Detekce</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_last_decision', '🧠 Decision')"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Decision</div><div class="ctrl-sub">Poslední rozh.</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_learning_summary', '📊 Learning')"><div class="ctrl-ico cyan">📊</div><div class="ctrl-text"><div class="ctrl-title">Learning</div><div class="ctrl-sub">Metrics</div></div></button>
+          <button class="ctrl-btn" onclick="openLogV2('sh_predict_last_action', '🔮 Predict')"><div class="ctrl-ico blue">🔮</div><div class="ctrl-text"><div class="ctrl-title">Predict</div><div class="ctrl-sub">Poslední predikce</div></div></button>
+        </div>
+      </div>
+
+      <!-- Fallback link to v1 for power users -->
+      <div style="text-align:center;color:var(--tx-3);font-size:11px;margin-top:20px;">
+        Pro Gemini Diagnostiku + vytvoření AI Tasks: <a href="../smart_home_1920x1080.html" style="color:var(--acc-blue);">→ Otevřít v1 dashboard</a>
       </div>
     </section>
 
@@ -1894,11 +1959,89 @@ function renderEnergieDetail(energy, health) {
 
 function renderSystemDetail(d) {
   const health = d.health || {};
-  const heating = d.heating || {};
-  setText('sys-health-val', (health.score || 0) + '%');
-  setText('sys-demand-val', (heating.demand_count || 0) + '/4');
+  const ai = d.ai || {};
+  const overrides = d.overrides || {};
+
+  // Top stats
+  const score = Number(health.score || 0);
+  setText('sys-health-val', score + '%');
+  const ico = $('sys-health-ico');
+  if (ico) {
+    ico.textContent = score >= 90 ? '🛡' : score >= 70 ? '⚠️' : '🔴';
+    ico.className = 'stat-ico ' + (score >= 90 ? 'green' : score >= 70 ? 'orange' : 'red');
+  }
+  setText('sys-errors-val', health.errors_30m != null ? health.errors_30m : 0);
+  setText('sys-power-val', health.power_total != null ? Math.round(health.power_total) + ' W' : '—');
   setText('sys-offline-val', (d.offline || []).length);
-  setText('sys-total-val', d.device_count || '—');
+
+  // AI moduly last action (truncated)
+  const trunc = (s, n) => String(s || '—').substring(0, n);
+  setText('sys-meta-sub', trunc(ai.meta_last || ai.last_decision, 26));
+  setText('sys-predict-sub', trunc(ai.predict_last, 26));
+  setText('sys-coord-sub', trunc(ai.coord_last, 26));
+
+  // Overrides states (ON/OFF pills)
+  const pill = (val) => {
+    const on = String(val || '').toLowerCase() === 'yes' || val === true;
+    return `<span style="padding:2px 8px;border-radius:var(--r-full);font-size:10px;font-weight:600;background:${on ? 'var(--acc-green-soft)' : 'var(--bg-2)'};color:${on ? 'var(--acc-green)' : 'var(--tx-3)'};">${on ? 'ON' : 'OFF'}</span>`;
+  };
+  setHTML('ov-light', pill(overrides.manual_override_light));
+  setHTML('ov-privacy', pill(overrides.privacy_guard));
+  setHTML('ov-sim', pill(overrides.simulation_mode));
+  setHTML('ov-predict', pill(overrides.predict_enabled));
+  setHTML('ov-skip-morning', pill(overrides.skip_morning));
+}
+
+// ── Systém page helpers ──
+function wakeUpV2() {
+  toast('🌅 Probudit (wake up) triggered');
+  // In live mode: would call apiPut on sh_morning_event = motion_detected
+}
+
+async function openLogV2(varName, title) {
+  // Simple modal — fetch var value + display v preformatted block
+  let content = 'Načítám ...';
+  if (CONFIG.demoMode) {
+    content = '(demo mode — hodnota proměnné ' + varName + ' by se zobrazila v live režimu)';
+  } else {
+    try {
+      if (!varMapLoaded) await loadVarMap();
+      const v = ALL_VARS[varName];
+      if (!v) {
+        content = 'Proměnná ' + varName + ' neexistuje';
+      } else {
+        const fresh = await apiGet('/api/manager/logic/variable/' + v.id);
+        let raw = String(fresh.value || '');
+        // Try pretty-print JSON
+        try { raw = JSON.stringify(JSON.parse(raw), null, 2); } catch(e) {}
+        content = raw || '(prázdné)';
+      }
+    } catch (e) {
+      content = 'Chyba: ' + e.message;
+    }
+  }
+
+  let m = document.getElementById('v2-log-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'v2-log-modal';
+    m.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(10,15,28,0.85);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;padding:20px;';
+    m.innerHTML = `
+      <div style="background:var(--bg-2);border:1px solid var(--border-acc);border-radius:var(--r-lg);padding:var(--sp-5);max-width:800px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-4);">
+          <h2 id="lm-title" style="font-size:var(--fs-md);color:var(--tx-1);"></h2>
+          <button onclick="this.closest('#v2-log-modal').remove()" style="background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-md);cursor:pointer;">✕</button>
+        </div>
+        <pre id="lm-body" style="background:var(--bg-0);padding:var(--sp-4);border-radius:var(--r-md);overflow:auto;font-size:12px;font-family:var(--font-mono);color:var(--tx-2);flex:1;white-space:pre-wrap;word-break:break-word;margin:0;"></pre>
+        <div id="lm-var" style="margin-top:var(--sp-3);font-size:11px;color:var(--tx-3);font-family:var(--font-mono);"></div>
+      </div>`;
+    document.body.appendChild(m);
+  } else {
+    m.style.display = 'flex';
+  }
+  m.querySelector('#lm-title').textContent = title;
+  m.querySelector('#lm-body').textContent = content;
+  m.querySelector('#lm-var').textContent = 'Proměnná: ' + varName;
 }
 
 function renderHistorieDetail(activities) {
