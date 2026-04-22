@@ -2409,18 +2409,18 @@ const DEMO_DATA = {
     { id: 'koupelna',  name: 'Koupelna',           on: false, dim: 0 },
     { id: 'chodba',    name: 'Chodba',             on: true,  dim: 0.20 },
   ],
+  // 🆕 23.4. — reálné scény z v1 (ne placeholder vecerni/film/rano)
   scenes: [
-    { id: 'vecerni', name: 'Večerní pohoda', ico: '🌙', color: 'purple' },
-    { id: 'film',    name: 'Film',           ico: '🎬', color: 'red' },
-    { id: 'rano',    name: 'Dobré ráno',     ico: '☀️', color: 'orange' },
-    { id: 'noc',     name: 'Noc',            ico: '🌙', color: 'blue' },
-    { id: 'odchod',  name: 'Odchod z domu',  ico: '🏠', color: 'green' },
+    { id: 'relax',     name: 'Relax',     ico: '🌙', color: 'purple', title: 'Relax scéna — večerní osvětlení (dim 40%), CRo Vltava rádio tiché, roleta napůl. Vhodné na odpočinek.' },
+    { id: 'work',      name: 'Work',      ico: '💼', color: 'blue',   title: 'Work scéna — plné osvětlení (dim 85%), studená teplota, CRo Plus. Vhodné na soustředění.' },
+    { id: 'audio',     name: 'Audio',     ico: '🎵', color: 'cyan',   title: 'Audio scéna — tlumené světlo, Radio Sanremo hlasitě v kuchyni. Vhodné na poslech hudby.' },
+    { id: 'vareni',    name: 'Vaření',    ico: '🍳', color: 'orange', title: 'Vaření scéna — plné kuchyňské světlo, CRo Radio Wave, kávovar ready. Vhodné při vaření.' },
+    { id: 'kino',      name: 'Kino',      ico: '🎬', color: 'red',    title: 'Kino scéna — téměř tma (dim 5%), roleta dolů (blackout), TV ON, sound bar. Pro film.' },
+    { id: 'romantika', name: 'Romantika', ico: '🕯', color: 'yellow', title: 'Romantika scéna — velmi tlumené teplé světlo (dim 15%, warm), roleta 20%, Italia 80.' },
+    { id: 'reset',     name: 'Reset',     ico: '↺', color: 'gray',   title: 'Reset — ukončí aktivní scénu, obnoví normální auto-osvětlení dle fáze dne a lux.' },
   ],
   cameras: [
-    { id: 'vchod',   name: 'Vchod',    time: '21:42:10' },
-    { id: 'zahrada', name: 'Zahrada',  time: '21:42:10' },
-    { id: 'garaz',   name: 'Garáž',    time: '21:42:10' },
-    { id: 'kuchyne', name: 'Kuchyně',  time: '21:42:10' },
+    { id: 'vchod',   name: 'Kamera venkovní (Foscam)', url: 'http://192.168.1.178/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2', time: '—' },
   ],
   audio: [
     { id: 'kuchyne', name: 'Kuchyně',   source: 'Spotify',   playing: true,  volume: 45 },
@@ -2755,37 +2755,85 @@ function renderHeatingSchedule(klima, heating) {
 }
 
 function renderCamsDetail(cams) {
-  if (!shouldRender('cams-detail', cams)) return;
   const el = $('cams-grid-full');
   if (!el) return;
-  el.innerHTML = cams.map(c => `
-    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;" onclick="camOpen('${c.id}')">
-      <div style="height:180px;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));display:grid;place-items:center;position:relative;">
-        <span class="cam-live-badge" style="top:8px;left:8px;font-size:10px;padding:3px 8px;">LIVE</span>
-        <span style="font-size:48px;opacity:0.3;">📹</span>
-      </div>
-      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
-        <div>
-          <div style="font-weight:600;">${c.name}</div>
-          <div style="font-size:11px;color:var(--tx-3);font-family:var(--font-mono);">${c.time || ''}</div>
+  if (!shouldRender('cams-detail', cams)) return;  // 🩹 23.4. anti-flicker
+  // 🆕 23.4. — v1 port: live Foscam snapshot + IR toggle + zasuvka kamera control
+  el.innerHTML = cams.map((c, i) => {
+    const camId = 'cam-img-' + i;
+    const snapUrl = c.url || ('http://192.168.1.178/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2&_=' + Date.now());
+    return `
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;">
+      <div style="height:220px;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));display:grid;place-items:center;position:relative;">
+        <span class="cam-live-badge" style="position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;background:var(--acc-red);color:white;border-radius:var(--r-sm);z-index:2;">● LIVE</span>
+        <img id="${camId}" src="${snapUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+        <div style="display:none;flex-direction:column;align-items:center;gap:8px;padding:20px;text-align:center;color:var(--tx-3);">
+          <span style="font-size:48px;opacity:0.3;">📹</span>
+          <span style="font-size:12px;">Kamera nedostupná (Foscam 192.168.1.178)</span>
         </div>
-        <span style="color:var(--tx-3);">▸</span>
       </div>
-    </div>
-  `).join('');
+      <div style="padding:12px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div>
+            <div style="font-weight:600;">${c.name || 'Kamera'}</div>
+            <div style="font-size:11px;color:var(--tx-3);font-family:var(--font-mono);">${c.url ? 'Foscam HTTP' : '192.168.1.178'}</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button title="Stáhnout nový snímek z kamery" onclick="refreshCameraV2('${camId}', '${c.url || ''}')" style="flex:1;min-width:100px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">↻ Obnovit</button>
+          <button title="Přepnout IR režim (AUTO/ON/OFF)" onclick="toggleCameraIRV2()" style="flex:1;min-width:100px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔄 IR: AUTO</button>
+          <button title="Zapnout/vypnout zásuvka kamera (vnitřní USB kamera v ložnici)" onclick="toggleCameraPlugV2()" style="flex:1;min-width:100px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--acc-purple);color:var(--acc-purple);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔌 Zásuvka</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function refreshCameraV2(imgId, baseUrl) {
+  const img = $(imgId);
+  if (!img) return;
+  const url = (baseUrl || 'http://192.168.1.178/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2') +
+              (baseUrl.includes('?') ? '&_=' : '?_=') + Date.now();
+  img.src = url;
+  img.style.display = 'block';
+  const fallback = img.nextElementSibling;
+  if (fallback) fallback.style.display = 'none';
+  toast('📷 Obnovuji snímek...');
+}
+
+async function toggleCameraIRV2() {
+  try {
+    await writeVar('sh_camera_ir_mode', 'toggle');
+    toast('🔄 IR režim přepnut (auto/on/off)');
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function toggleCameraPlugV2() {
+  try {
+    // sh_camera_router_v1 ovládá "zasuvka kamera" — trigger přes presence pipeline
+    const curRezim = (DATA && DATA.state && DATA.state.rezim_doma) || 'home';
+    // Manual override — toggle zasuvka kamera přímo
+    await runScript('sh_camera_router_v1');
+    toast('🔌 Kamera zásuvka — router spuštěn (' + curRezim + ' mód)');
+  } catch (e) { toast('✗ ' + e.message); }
 }
 
 function renderScenyDetail(scenes) {
-  if (!shouldRender('sceny-detail', scenes)) return;
   const el = $('sceny-grid');
   if (!el) return;
-  el.innerHTML = scenes.map(s => `
-    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;cursor:pointer;transition:all 180ms;" onclick="sceneRun('${s.id}')" onmouseenter="this.style.background='var(--surface-hover)'" onmouseleave="this.style.background='var(--bg-3)'">
+  if (!shouldRender('sceny-detail', scenes)) return;  // 🩹 23.4. anti-flicker
+  // 🆕 23.4. — tooltip z scene.title (v1 port) + reset má distinct styling
+  el.innerHTML = scenes.map(s => {
+    const isReset = s.id === 'reset';
+    const tip = s.title ? s.title.replace(/"/g, '&quot;') : ('Aktivovat scénu ' + s.name);
+    const bg = isReset ? 'linear-gradient(135deg,rgba(150,150,150,.08),rgba(100,100,100,.04))' : 'var(--bg-3)';
+    const border = isReset ? '1px dashed var(--border-soft)' : '1px solid var(--border-soft)';
+    return `<div title="${tip}" style="background:${bg};border:${border};border-radius:var(--r-lg);padding:20px;cursor:pointer;transition:all 180ms;" onclick="sceneRun('${s.id}')" onmouseenter="this.style.background='var(--surface-hover)'" onmouseleave="this.style.background='${bg}'">
       <div class="scene-ico ${s.color}" style="width:48px;height:48px;font-size:22px;margin-bottom:12px;">${s.ico}</div>
       <div style="font-weight:600;font-size:16px;margin-bottom:4px;">${s.name}</div>
-      <div style="color:var(--tx-3);font-size:12px;">Klikni pro aktivaci ▸</div>
-    </div>
-  `).join('');
+      <div style="color:var(--tx-3);font-size:12px;">${isReset ? 'Zrušit aktivní scénu ▸' : 'Klikni pro aktivaci ▸'}</div>
+    </div>`;
+  }).join('');
 }
 
 function renderEnergieDetail(energy, health) {
@@ -5096,13 +5144,14 @@ function renderScenes(scenes) {
   if (!shouldRender('scenes', scenes)) return;
   const list = $('scenes-list');
   if (!list) return;
-  list.innerHTML = scenes.map(s => `
-    <div class="scene-row" onclick="sceneRun('${s.id}')">
+  list.innerHTML = scenes.map(s => {
+    const tip = s.title ? s.title.replace(/"/g, '&quot;') : ('Aktivovat scénu ' + s.name);
+    return `<div class="scene-row" title="${tip}" onclick="sceneRun('${s.id}')">
       <div class="scene-ico ${s.color}">${s.ico}</div>
       <div class="scene-name">${s.name}</div>
-      <div class="scene-play">▶</div>
-    </div>
-  `).join('');
+      <div class="scene-play">${s.id === 'reset' ? '↺' : '▶'}</div>
+    </div>`;
+  }).join('');
 }
 
 // ╔════════════════════════════════════════════════════════╗
