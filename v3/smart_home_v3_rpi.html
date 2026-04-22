@@ -1250,6 +1250,49 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
 }
 /* ═══════════════════════════════════════════════════════════════ */
 
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🏠 v3 HOME GRID FIX — user: "čtverce jsou pořad velké"           */
+/* Root cause: .home-grid{grid-template-rows:auto auto 1fr 1fr}     */
+/* zone row = 1fr = polovina viewport → tiles obrovské.             */
+/* Fix: fixed compact height pro zone row, víc pro scénes/apps.     */
+/* ═══════════════════════════════════════════════════════════════ */
+
+#page-home .home-grid {
+  grid-template-rows: auto auto 160px 1fr !important;
+  gap: 6px !important;
+}
+
+/* Responsive — menší obrazovky */
+@media (max-width: 1366px) {
+  #page-home .home-grid {
+    grid-template-rows: auto auto 140px 1fr !important;
+  }
+}
+
+@media (max-width: 1024px) {
+  #page-home .home-grid {
+    grid-template-rows: auto auto 120px 1fr !important;
+  }
+}
+
+/* Zone tiles — při pevné výšce jsou nyní pěkně kompaktní */
+#page-home .hg-rooms .room {
+  padding: 4px 3px !important;
+  gap: 0 !important;
+}
+
+/* Emoji ještě jemně zmenšit — aby bylo poměrově OK v 80px tile */
+#page-home .hg-rooms .rm-icon {
+  font-size: clamp(20px, 2vw, 28px) !important;
+  margin-bottom: 2px !important;
+}
+
+#page-home .hg-rooms .room-name {
+  font-size: clamp(10px, 0.95vw, 12px) !important;
+  line-height: 1.15;
+}
+/* ═══════════════════════════════════════════════════════════════ */
 </style>
 </head>
 <body>
