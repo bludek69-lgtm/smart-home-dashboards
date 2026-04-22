@@ -1,0 +1,2178 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart Home · MacBook Pro 2880</title>
+<!-- ═══════════════════════════════════════════════════════════════
+     Smart Home Dashboard v2 — Modern Redesign
+     Phase 45 (2026-04-22) — Design tokens + CSS theme skeleton
+     Target: mockup inspiration from user (sidebar nav, glow accents, rounded cards)
+     Data source: sh_dashboard_data (Homey Logic, bridge v1.9+)
+     ═══════════════════════════════════════════════════════════════ -->
+<style>
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ DESIGN TOKENS                                                  ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+:root {
+  /* ── Backgrounds ────────────────────────────────────────────── */
+  --bg-0: #0a0f1c;                    /* root bg */
+  --bg-1: #111729;                    /* sidebar */
+  --bg-2: #1a2236;                    /* card elevated */
+  --bg-3: #232c44;                    /* card hover */
+  --bg-gradient: linear-gradient(180deg, #0a0f1c 0%, #13192b 100%);
+
+  /* ── Surface / cards ────────────────────────────────────────── */
+  --surface:       rgba(26, 34, 54, 0.6);
+  --surface-hover: rgba(35, 44, 68, 0.75);
+  --surface-glass: rgba(26, 34, 54, 0.4);
+
+  /* ── Borders ────────────────────────────────────────────────── */
+  --border-soft: rgba(255, 255, 255, 0.06);
+  --border-med:  rgba(255, 255, 255, 0.10);
+  --border-acc:  rgba(74, 158, 255, 0.35);
+
+  /* ── Text ───────────────────────────────────────────────────── */
+  --tx-1: #ffffff;
+  --tx-2: #a3adc2;
+  --tx-3: #6b7489;
+  --tx-disabled: #4a5166;
+
+  /* ── Accent palette (z mockupu) ─────────────────────────────── */
+  --acc-green:  #3bc97d;
+  --acc-blue:   #4a9eff;
+  --acc-purple: #a855f7;
+  --acc-orange: #ff9f40;
+  --acc-yellow: #fbbf24;
+  --acc-red:    #ef4444;
+  --acc-pink:   #ec4899;
+  --acc-cyan:   #22d3ee;
+
+  /* Acc soft (pro backgrounds icon circles) */
+  --acc-green-soft:  rgba(59, 201, 125, 0.14);
+  --acc-blue-soft:   rgba(74, 158, 255, 0.14);
+  --acc-purple-soft: rgba(168, 85, 247, 0.14);
+  --acc-orange-soft: rgba(255, 159, 64, 0.14);
+  --acc-yellow-soft: rgba(251, 191, 36, 0.14);
+  --acc-red-soft:    rgba(239, 68, 68, 0.14);
+
+  /* ── Radii ──────────────────────────────────────────────────── */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-full: 999px;
+
+  /* ── Shadows ────────────────────────────────────────────────── */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+
+  /* ── Glows (pro icon backgrounds) ───────────────────────────── */
+  --glow-green:  0 0 24px rgba(59, 201, 125, 0.4);
+  --glow-blue:   0 0 24px rgba(74, 158, 255, 0.4);
+  --glow-purple: 0 0 24px rgba(168, 85, 247, 0.4);
+  --glow-orange: 0 0 24px rgba(255, 159, 64, 0.4);
+  --glow-yellow: 0 0 24px rgba(251, 191, 36, 0.4);
+  --glow-red:    0 0 24px rgba(239, 68, 68, 0.4);
+
+  /* ── Spacing ────────────────────────────────────────────────── */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+
+  /* ── Typography ─────────────────────────────────────────────── */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  --fs-xs:  11px;
+  --fs-sm:  13px;
+  --fs-base:15px;
+  --fs-md:  17px;
+  --fs-lg:  20px;
+  --fs-xl:  28px;
+  --fs-xxl: 36px;
+
+  --fw-regular:  400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* ── Layout ─────────────────────────────────────────────────── */
+  --sidebar-w: 240px;
+  --header-h: 88px;
+  --content-max: 1600px;
+
+  /* ── Transitions ────────────────────────────────────────────── */
+  --tr-fast: 120ms ease-out;
+  --tr-med:  200ms ease-out;
+  --tr-slow: 320ms ease-out;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ RESET + BASE                                                   ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: var(--fs-base);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  color: var(--tx-1);
+  font-family: var(--font-sans);
+  line-height: 1.4;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-med); border-radius: var(--r-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--tx-3); }
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ LAYOUT — sidebar + content                                     ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+.app {
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+  min-height: 100vh;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--bg-1);
+  border-right: 1px solid var(--border-soft);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+}
+.brand-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--r-md);
+  background: linear-gradient(135deg, var(--acc-blue) 0%, var(--acc-purple) 100%);
+  display: grid; place-items: center;
+  font-size: var(--fs-lg);
+  box-shadow: var(--glow-blue);
+}
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+}
+.brand-name {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-bold);
+  letter-spacing: 0.8px;
+}
+.brand-sub {
+  font-size: var(--fs-xs);
+  color: var(--tx-3);
+  font-weight: var(--fw-regular);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-top: var(--sp-4);
+  flex: 1;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-radius: var(--r-md);
+  color: var(--tx-2);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  transition: all var(--tr-fast);
+  border-left: 3px solid transparent;
+  user-select: none;
+}
+.nav-item:hover {
+  background: var(--surface);
+  color: var(--tx-1);
+}
+.nav-item.active {
+  background: linear-gradient(90deg, var(--acc-blue-soft) 0%, transparent 100%);
+  color: var(--acc-blue);
+  border-left-color: var(--acc-blue);
+}
+.nav-item .nav-ico { font-size: var(--fs-md); line-height: 1; }
+
+.health-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.health-dot {
+  width: 40px; height: 40px;
+  border-radius: var(--r-full);
+  background: var(--acc-green-soft);
+  display: grid; place-items: center;
+  box-shadow: var(--glow-green);
+  color: var(--acc-green);
+  font-size: var(--fs-md);
+}
+.health-text { display: flex; flex-direction: column; line-height: 1.2; }
+.health-label { font-size: var(--fs-xs); color: var(--tx-3); }
+.health-value { font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--acc-green); }
+.health-pct { font-size: var(--fs-xs); color: var(--tx-2); }
+
+.user-card {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  border-top: 1px solid var(--border-soft);
+  margin-top: auto;
+}
+.user-avatar {
+  width: 36px; height: 36px;
+  border-radius: var(--r-full);
+  background: linear-gradient(135deg, var(--acc-purple), var(--acc-pink));
+  display: grid; place-items: center;
+  font-weight: var(--fw-bold);
+  font-size: var(--fs-sm);
+}
+.user-info { flex: 1; line-height: 1.2; }
+.user-name { font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.user-loc  { font-size: var(--fs-xs); color: var(--tx-3); }
+.user-menu {
+  color: var(--tx-3);
+  cursor: pointer;
+  padding: var(--sp-1) var(--sp-2);
+}
+
+/* ── Main content ───────────────────────────────────────────────── */
+.content {
+  padding: var(--sp-6) var(--sp-8);
+  max-width: var(--content-max);
+  width: 100%;
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--sp-6);
+  gap: var(--sp-6);
+  flex-wrap: wrap;
+}
+.greeting h1 {
+  font-size: var(--fs-xxl);
+  font-weight: var(--fw-bold);
+  line-height: 1.15;
+}
+.greeting p {
+  color: var(--tx-2);
+  font-size: var(--fs-base);
+  margin-top: var(--sp-2);
+}
+.greeting .mode-accent { color: var(--acc-green); font-weight: var(--fw-semibold); }
+
+.header-info {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.info-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+}
+.chip-icon {
+  width: 36px; height: 36px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+}
+.chip-icon.blue { background: var(--acc-blue-soft); color: var(--acc-blue); }
+.chip-icon.cyan { background: rgba(34, 211, 238, 0.14); color: var(--acc-cyan); }
+.chip-icon.purple { background: var(--acc-purple-soft); color: var(--acc-purple); }
+.chip-text { line-height: 1.2; }
+.chip-title { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
+.chip-sub { font-size: var(--fs-xs); color: var(--tx-3); }
+
+.mode-switcher {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+  min-width: 200px;
+  cursor: pointer;
+  transition: border-color var(--tr-fast);
+}
+.mode-switcher:hover { border-color: var(--border-acc); }
+.mode-switcher-label { font-size: var(--fs-xs); color: var(--tx-3); }
+.mode-switcher-value {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--acc-green);
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ COMPONENTS — stat tiles, cards, sliders, buttons               ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+
+/* ── Stat tiles (horní řada s 6 boxy) ───────────────────────────── */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-6);
+}
+.stat-tile {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--sp-3);
+  transition: all var(--tr-med);
+}
+.stat-tile:hover {
+  background: var(--surface-hover);
+  transform: translateY(-2px);
+}
+.stat-label {
+  font-size: var(--fs-xs);
+  color: var(--tx-3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+.stat-ico {
+  width: 56px; height: 56px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+  font-size: var(--fs-lg);
+}
+.stat-ico.green  { background: var(--acc-green-soft);  color: var(--acc-green);  box-shadow: var(--glow-green); }
+.stat-ico.blue   { background: var(--acc-blue-soft);   color: var(--acc-blue);   box-shadow: var(--glow-blue); }
+.stat-ico.orange { background: var(--acc-orange-soft); color: var(--acc-orange); box-shadow: var(--glow-orange); }
+.stat-ico.purple { background: var(--acc-purple-soft); color: var(--acc-purple); box-shadow: var(--glow-purple); }
+.stat-ico.yellow { background: var(--acc-yellow-soft); color: var(--acc-yellow); box-shadow: var(--glow-yellow); }
+.stat-value {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-bold);
+  color: var(--tx-1);
+}
+.stat-sub {
+  font-size: var(--fs-xs);
+  color: var(--tx-3);
+}
+
+/* ── Generic card / section ─────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+}
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-4);
+}
+.card-title {
+  font-size: var(--fs-xs);
+  color: var(--tx-3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: var(--fw-semibold);
+}
+.card-action {
+  font-size: var(--fs-sm);
+  color: var(--tx-2);
+  cursor: pointer;
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-md);
+  transition: background var(--tr-fast);
+}
+.card-action:hover { background: var(--bg-3); color: var(--tx-1); }
+
+/* ── Light tile (dimmer room) ───────────────────────────────────── */
+.light-tile {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--sp-4) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  transition: all var(--tr-med);
+}
+.light-tile:hover { border-color: var(--border-acc); }
+.light-tile.off { opacity: 0.7; }
+.light-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.light-bulb {
+  width: 36px; height: 36px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+  background: var(--bg-3);
+  color: var(--tx-3);
+}
+.light-bulb.on {
+  background: var(--acc-yellow-soft);
+  color: var(--acc-yellow);
+  box-shadow: var(--glow-yellow);
+}
+.light-name { flex: 1; font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+.light-state {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-bold);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-full);
+  letter-spacing: 0.5px;
+}
+.light-state.on { background: var(--acc-yellow-soft); color: var(--acc-yellow); }
+.light-state.off { background: var(--bg-3); color: var(--tx-3); }
+.light-pct { text-align: right; font-size: var(--fs-sm); color: var(--tx-2); font-weight: var(--fw-semibold); }
+
+/* Custom slider */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--bg-3);
+  border-radius: var(--r-full);
+  outline: none;
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px; height: 14px;
+  border-radius: var(--r-full);
+  background: var(--acc-yellow);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+  cursor: pointer;
+}
+.slider::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: var(--r-full);
+  background: var(--acc-yellow);
+  border: none;
+  cursor: pointer;
+}
+
+/* ── Scene row ──────────────────────────────────────────────────── */
+.scene-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-3);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--tr-fast);
+}
+.scene-row:hover { background: var(--surface-hover); }
+.scene-ico {
+  width: 36px; height: 36px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+}
+.scene-name { flex: 1; font-weight: var(--fw-medium); font-size: var(--fs-sm); }
+.scene-play { color: var(--tx-3); }
+.scene-row:hover .scene-play { color: var(--acc-blue); }
+
+/* ── Camera live ────────────────────────────────────────────────── */
+.cam-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border-radius: var(--r-md);
+  cursor: pointer;
+}
+.cam-row:hover { background: var(--surface-hover); }
+.cam-thumb {
+  width: 72px; height: 48px;
+  background: var(--bg-2);
+  border-radius: var(--r-sm);
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.cam-live-badge {
+  position: absolute;
+  top: 4px; left: 4px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-size: 9px;
+  font-weight: var(--fw-bold);
+  padding: 1px 5px;
+  border-radius: var(--r-sm);
+  letter-spacing: 0.5px;
+}
+.cam-live-badge::before {
+  content: '';
+  display: inline-block;
+  width: 5px; height: 5px;
+  background: var(--acc-red);
+  border-radius: var(--r-full);
+  margin-right: 3px;
+  vertical-align: middle;
+  animation: blink 1.5s infinite;
+}
+@keyframes blink { 50% { opacity: 0.3; } }
+.cam-info { flex: 1; line-height: 1.2; }
+.cam-name { font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+.cam-time { font-size: var(--fs-xs); color: var(--tx-3); font-family: var(--font-mono); }
+
+/* ── Action button ──────────────────────────────────────────────── */
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all var(--tr-fast);
+  text-align: left;
+  color: var(--tx-1);
+  width: 100%;
+}
+.action-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-acc);
+  transform: translateY(-1px);
+}
+.action-ico {
+  width: 36px; height: 36px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+}
+.action-text { flex: 1; line-height: 1.2; }
+.action-title { font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+.action-sub { font-size: var(--fs-xs); color: var(--tx-3); }
+
+/* ── Status footer ──────────────────────────────────────────────── */
+.status-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--sp-4) var(--sp-8);
+  border-top: 1px solid var(--border-soft);
+  color: var(--tx-3);
+  font-size: var(--fs-xs);
+  margin-top: var(--sp-6);
+}
+.status-dot-green::before {
+  content: '•';
+  color: var(--acc-green);
+  margin-right: var(--sp-1);
+  font-size: var(--fs-md);
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ OVERVIEW GRIDS (Phase 48-51)                                   ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+.overview-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+.overview-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: var(--sp-4);
+  margin-bottom: var(--sp-4);
+}
+.section-card {
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-lg);
+  padding: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+}
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--sp-4);
+  gap: var(--sp-3);
+}
+.section-title {
+  font-size: var(--fs-xs);
+  color: var(--tx-3);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  font-weight: var(--fw-semibold);
+}
+.section-action {
+  font-size: var(--fs-xs);
+  color: var(--tx-2);
+  cursor: pointer;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  display: flex; align-items: center; gap: var(--sp-1);
+  background: var(--bg-3);
+  transition: all var(--tr-fast);
+}
+.section-action:hover { background: var(--surface-hover); color: var(--tx-1); border-color: var(--border-acc); }
+
+/* ── Phase 48: Lights grid ──────────────────────────────── */
+.lights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--sp-3);
+}
+
+/* ── Phase 49: Scenes list ──────────────────────────────── */
+.scenes-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.scene-ico.purple { background: var(--acc-purple-soft); color: var(--acc-purple); box-shadow: var(--glow-purple); }
+.scene-ico.red    { background: var(--acc-red-soft); color: var(--acc-red); box-shadow: var(--glow-red); }
+.scene-ico.orange { background: var(--acc-orange-soft); color: var(--acc-orange); box-shadow: var(--glow-orange); }
+.scene-ico.blue   { background: var(--acc-blue-soft); color: var(--acc-blue); box-shadow: var(--glow-blue); }
+.scene-ico.green  { background: var(--acc-green-soft); color: var(--acc-green); box-shadow: var(--glow-green); }
+
+/* ── Phase 49: Cameras list ─────────────────────────────── */
+.cams-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  flex: 1;
+}
+.cam-btn-all {
+  margin-top: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  color: var(--tx-1);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-medium);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: var(--sp-2);
+  transition: background var(--tr-fast);
+}
+.cam-btn-all:hover { background: var(--surface-hover); border-color: var(--border-acc); }
+
+/* ── Phase 50: Audio zones ──────────────────────────────── */
+.audio-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.audio-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-4);
+}
+.audio-head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-3);
+}
+.audio-ico {
+  width: 36px; height: 36px;
+  border-radius: var(--r-sm);
+  background: var(--acc-green-soft);
+  color: var(--acc-green);
+  display: grid; place-items: center;
+}
+.audio-ico.off { background: var(--bg-2); color: var(--tx-3); }
+.audio-info { line-height: 1.2; flex: 1; }
+.audio-zone-name { font-weight: var(--fw-semibold); font-size: var(--fs-sm); }
+.audio-source { font-size: var(--fs-xs); color: var(--tx-3); }
+.audio-source.playing { color: var(--acc-green); }
+.audio-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.audio-vol-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  height: 4px;
+  background: var(--bg-2);
+  border-radius: var(--r-full);
+  cursor: pointer;
+}
+.audio-vol-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px; height: 12px;
+  border-radius: var(--r-full);
+  background: var(--acc-blue);
+  cursor: pointer;
+}
+.audio-vol-val { font-size: var(--fs-xs); color: var(--tx-2); font-family: var(--font-mono); min-width: 32px; text-align: right; }
+.audio-btn {
+  width: 32px; height: 32px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+  background: var(--bg-2);
+  color: var(--tx-2);
+  cursor: pointer;
+  border: 1px solid var(--border-soft);
+  transition: all var(--tr-fast);
+}
+.audio-btn:hover { background: var(--surface-hover); color: var(--tx-1); }
+.audio-btn.primary { background: var(--acc-blue-soft); color: var(--acc-blue); }
+
+/* ── Phase 50: Klima cards ──────────────────────────────── */
+.klima-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.klima-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  padding: var(--sp-4);
+}
+.klima-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: var(--sp-2);
+}
+.klima-room { font-size: var(--fs-sm); color: var(--tx-2); font-weight: var(--fw-medium); }
+.klima-target {
+  font-size: var(--fs-xl);
+  font-weight: var(--fw-bold);
+  color: var(--acc-orange);
+}
+.klima-target-unit { font-size: var(--fs-sm); color: var(--tx-3); margin-left: 2px; }
+.klima-current { font-size: var(--fs-xs); color: var(--tx-3); }
+.klima-ctrl {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-3);
+  justify-content: space-between;
+}
+.klima-btn {
+  width: 32px; height: 32px;
+  border-radius: var(--r-md);
+  display: grid; place-items: center;
+  background: var(--bg-2);
+  color: var(--tx-2);
+  cursor: pointer;
+  border: 1px solid var(--border-soft);
+  transition: all var(--tr-fast);
+}
+.klima-btn:hover { background: var(--surface-hover); color: var(--tx-1); }
+.klima-btn.fan { background: var(--acc-blue-soft); color: var(--acc-blue); }
+
+/* ── Phase 51: Activity feed ────────────────────────────── */
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.activity-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-radius: var(--r-sm);
+  transition: background var(--tr-fast);
+}
+.activity-row:hover { background: var(--bg-3); }
+.activity-ico {
+  width: 32px; height: 32px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+  font-size: var(--fs-sm);
+  flex-shrink: 0;
+}
+.activity-ico.purple { background: var(--acc-purple-soft); color: var(--acc-purple); }
+.activity-ico.yellow { background: var(--acc-yellow-soft); color: var(--acc-yellow); }
+.activity-ico.blue   { background: var(--acc-blue-soft); color: var(--acc-blue); }
+.activity-ico.green  { background: var(--acc-green-soft); color: var(--acc-green); }
+.activity-ico.orange { background: var(--acc-orange-soft); color: var(--acc-orange); }
+.activity-info { flex: 1; line-height: 1.2; min-width: 0; }
+.activity-title { font-size: var(--fs-sm); font-weight: var(--fw-semibold); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-sub   { font-size: var(--fs-xs); color: var(--tx-3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.activity-time  { font-size: var(--fs-xs); color: var(--tx-3); font-family: var(--font-mono); }
+
+/* ── Phase 51: Quick controls grid ──────────────────────── */
+.ctrl-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-2);
+}
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-3);
+  background: var(--bg-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r-md);
+  cursor: pointer;
+  color: var(--tx-1);
+  transition: all var(--tr-fast);
+  text-align: left;
+}
+.ctrl-btn:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-acc);
+  transform: translateY(-1px);
+}
+.ctrl-ico {
+  width: 32px; height: 32px;
+  border-radius: var(--r-full);
+  display: grid; place-items: center;
+  font-size: var(--fs-sm);
+  flex-shrink: 0;
+}
+.ctrl-ico.yellow { background: var(--acc-yellow-soft); color: var(--acc-yellow); }
+.ctrl-ico.gray   { background: var(--bg-2); color: var(--tx-3); }
+.ctrl-ico.red    { background: var(--acc-red-soft); color: var(--acc-red); }
+.ctrl-ico.cyan   { background: rgba(34,211,238,0.14); color: var(--acc-cyan); }
+.ctrl-ico.green  { background: var(--acc-green-soft); color: var(--acc-green); }
+.ctrl-ico.orange { background: var(--acc-orange-soft); color: var(--acc-orange); }
+.ctrl-text { line-height: 1.2; min-width: 0; }
+.ctrl-title { font-size: var(--fs-sm); font-weight: var(--fw-semibold); }
+.ctrl-sub   { font-size: var(--fs-xs); color: var(--tx-3); }
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ PAGE ROUTING (Phase 46)                                        ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+.page { display: none; animation: fadeIn var(--tr-med); }
+.page.active { display: block; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.page-placeholder {
+  min-height: 400px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+  border: 1px dashed var(--border-med);
+  border-radius: var(--r-lg);
+  padding: var(--sp-8);
+  text-align: center;
+}
+.placeholder-ico {
+  font-size: 64px;
+  margin-bottom: var(--sp-4);
+  opacity: 0.5;
+}
+.placeholder-title {
+  font-size: var(--fs-lg);
+  font-weight: var(--fw-semibold);
+  color: var(--tx-2);
+  margin-bottom: var(--sp-2);
+}
+.placeholder-sub {
+  color: var(--tx-3);
+  font-size: var(--fs-sm);
+  max-width: 480px;
+  line-height: 1.6;
+}
+.placeholder-phase {
+  display: inline-block;
+  margin-top: var(--sp-4);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--acc-blue-soft);
+  color: var(--acc-blue);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  border-radius: var(--r-full);
+  letter-spacing: 0.5px;
+}
+
+/* ╔═══════════════════════════════════════════════════════════════╗
+   ║ RESPONSIVE                                                     ║
+   ╚═══════════════════════════════════════════════════════════════╝ */
+@media (max-width: 1600px) {
+  .overview-bottom { grid-template-columns: 1fr 1fr; }
+  .lights-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 1400px) {
+  .stat-grid { grid-template-columns: repeat(3, 1fr); }
+  .overview-main { grid-template-columns: 1fr 1fr; }
+  .overview-main > :nth-child(3) { grid-column: span 2; }
+}
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 72px; }
+  .brand-text, .nav-item span:not(.nav-ico), .user-info, .health-text { display: none; }
+  .content { padding: var(--sp-4); }
+  .overview-main { grid-template-columns: 1fr; }
+  .overview-main > :nth-child(3) { grid-column: span 1; }
+  .overview-bottom { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    height: auto; width: 100%;
+    flex-direction: row; overflow-x: auto;
+    padding: var(--sp-3);
+    z-index: 100;
+  }
+  .brand, .health-card, .user-card { display: none; }
+  .nav { flex-direction: row; gap: var(--sp-2); }
+  .nav-item { flex-shrink: 0; border-left: none; border-bottom: 3px solid transparent; }
+  .nav-item.active { border-left: none; border-bottom-color: var(--acc-blue); }
+  .content { padding: var(--sp-3); padding-bottom: 80px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .lights-grid { grid-template-columns: 1fr; }
+  .ctrl-grid { grid-template-columns: 1fr; }
+  .page-header { flex-direction: column; }
+  .header-info { width: 100%; }
+  .greeting h1 { font-size: var(--fs-xl); }
+}
+
+/* RESOLUTION VARIANT: 2880x1800 */
+/* 2880x1800 high-DPI variant: bigger content */
+:root {
+  --sidebar-w: 280px !important;
+  --content-max: 2200px !important;
+  --fs-base: 16px !important;
+  --fs-md: 19px !important;
+  --fs-lg: 22px !important;
+  --fs-xl: 32px !important;
+  --fs-xxl: 42px !important;
+}
+.stat-tile { padding: 24px !important; }
+.stat-ico { width: 64px !important; height: 64px !important; font-size: 24px !important; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     PHASE 45 — skeleton placeholder. Obsah doplňují další phases.
+     ═══════════════════════════════════════════════════════════════ -->
+
+<!-- ══════════ CONFIG OVERLAY (Phase 47b) ══════════ -->
+<div id="cfg-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,15,28,0.85);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:var(--bg-2);border:1px solid var(--border-acc);border-radius:var(--r-lg);padding:var(--sp-6);max-width:520px;width:90%;box-shadow:var(--shadow-lg);">
+    <h2 style="font-size:var(--fs-lg);margin-bottom:var(--sp-4);color:var(--tx-1);">⚙ API konfigurace</h2>
+    <p style="color:var(--tx-3);font-size:var(--fs-sm);margin-bottom:var(--sp-5);line-height:1.5;">
+      Dashboard potřebuje Bearer token pro přístup k Homey API. Token najdeš v existujícím v1 dashboardu<br>(otevři Config → zkopíruj token) nebo vytvoř nový v <strong>Homey Web → Settings → Personal access tokens</strong>.
+    </p>
+
+    <label style="display:block;margin-bottom:var(--sp-3);">
+      <div style="color:var(--tx-2);font-size:var(--fs-sm);font-weight:var(--fw-semibold);margin-bottom:var(--sp-1);">Homey IP / Host</div>
+      <input id="cfg-host" type="text" placeholder="http://192.168.1.142" style="width:100%;padding:var(--sp-3);background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);color:var(--tx-1);font-family:var(--font-mono);font-size:var(--fs-sm);">
+    </label>
+
+    <label style="display:block;margin-bottom:var(--sp-3);">
+      <div style="color:var(--tx-2);font-size:var(--fs-sm);font-weight:var(--fw-semibold);margin-bottom:var(--sp-1);">Bearer Token</div>
+      <input id="cfg-token" type="password" placeholder="homey.XXXXXXXX..." style="width:100%;padding:var(--sp-3);background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);color:var(--tx-1);font-family:var(--font-mono);font-size:var(--fs-sm);">
+    </label>
+
+    <label style="display:block;margin-bottom:var(--sp-5);">
+      <div style="color:var(--tx-2);font-size:var(--fs-sm);font-weight:var(--fw-semibold);margin-bottom:var(--sp-1);">Interval refresh (sekund)</div>
+      <input id="cfg-interval" type="number" min="3" max="300" value="10" style="width:100%;padding:var(--sp-3);background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);color:var(--tx-1);font-family:var(--font-mono);font-size:var(--fs-sm);">
+    </label>
+
+    <div id="cfg-status" style="min-height:24px;margin-bottom:var(--sp-3);font-size:var(--fs-sm);"></div>
+
+    <div style="display:flex;gap:var(--sp-3);justify-content:flex-end;">
+      <button class="section-action" onclick="clearCfg()" style="padding:var(--sp-3) var(--sp-4);">Smazat</button>
+      <button class="section-action" onclick="closeCfg()" style="padding:var(--sp-3) var(--sp-4);">Zrušit</button>
+      <button class="section-action" onclick="saveCfgBtn()" style="padding:var(--sp-3) var(--sp-4);background:var(--acc-blue-soft);color:var(--acc-blue);border-color:var(--acc-blue);font-weight:var(--fw-semibold);">💾 Uložit</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+  <!-- ══════════ SIDEBAR ══════════ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">🏠</div>
+      <div class="brand-text">
+        <span class="brand-name">SMART HOME</span>
+        <span class="brand-sub">Homey Pro 2026</span>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-item active" data-page="prehled"><span class="nav-ico">🏠</span><span>Přehled</span></div>
+      <div class="nav-item" data-page="osvetleni"><span class="nav-ico">💡</span><span>Osvětlení</span></div>
+      <div class="nav-item" data-page="audio"><span class="nav-ico">🔊</span><span>Audio</span></div>
+      <div class="nav-item" data-page="klima"><span class="nav-ico">🌡</span><span>Klimatizace</span></div>
+      <div class="nav-item" data-page="bezpecnost"><span class="nav-ico">🛡</span><span>Bezpečnost</span></div>
+      <div class="nav-item" data-page="kamery"><span class="nav-ico">📹</span><span>Kamery</span></div>
+      <div class="nav-item" data-page="sceny"><span class="nav-ico">🎬</span><span>Scény</span></div>
+      <div class="nav-item" data-page="energie"><span class="nav-ico">⚡</span><span>Energie</span></div>
+      <div class="nav-item" data-page="system"><span class="nav-ico">⚙️</span><span>Systém</span></div>
+      <div class="nav-item" data-page="historie"><span class="nav-ico">🕐</span><span>Historie</span></div>
+    </nav>
+
+    <div class="health-card">
+      <div class="health-dot">✓</div>
+      <div class="health-text">
+        <span class="health-label">SYSTÉM ZDRAVÍ</span>
+        <span class="health-value">Vše v pořádku</span>
+        <span class="health-pct">100%</span>
+      </div>
+    </div>
+
+    <div class="user-card">
+      <div class="user-avatar">LB</div>
+      <div class="user-info">
+        <div class="user-name">Luděk Budínský</div>
+        <div class="user-loc">Semily</div>
+      </div>
+      <div class="user-menu">⋮</div>
+    </div>
+  </aside>
+
+  <!-- ══════════ CONTENT ══════════ -->
+  <main class="content">
+
+    <!-- ══════════ PAGE: PŘEHLED (default) ══════════ -->
+    <section class="page active" data-page="prehled">
+
+    <!-- Page header — greeting + clock + weather + mode switcher -->
+    <div class="page-header">
+      <div class="greeting">
+        <h1 id="greeting-text">Dobrý den, Luděk <span>👋</span></h1>
+        <p id="greeting-sub">Vše je v pořádku. Dům je v režimu <span class="mode-accent" id="greeting-mode">Domov</span>.</p>
+      </div>
+      <div class="header-info">
+        <div class="info-chip">
+          <div class="chip-icon blue">🕐</div>
+          <div class="chip-text">
+            <div class="chip-title" id="hdr-time">21:42</div>
+            <div class="chip-sub" id="hdr-date">24. května 2026</div>
+          </div>
+        </div>
+        <div class="info-chip">
+          <div class="chip-icon cyan" id="hdr-wx-ico">☁️</div>
+          <div class="chip-text">
+            <div class="chip-title" id="hdr-temp">—</div>
+            <div class="chip-sub" id="hdr-wx">—</div>
+          </div>
+        </div>
+        <div class="mode-switcher" id="mode-switcher">
+          <div class="chip-icon" id="hdr-mode-ico" style="background: var(--acc-green-soft); color: var(--acc-green);">🏠</div>
+          <div class="chip-text">
+            <div class="chip-sub">REŽIM</div>
+            <div class="mode-switcher-value" id="hdr-mode-val">—</div>
+          </div>
+          <div style="color: var(--tx-3); margin-left: auto;">▾</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end;">
+          <span id="v2-mode-badge" style="padding:2px 8px;border-radius:var(--r-full);font-size:10px;font-weight:600;letter-spacing:0.5px;background:var(--acc-orange-soft);color:var(--acc-orange);">DEMO</span>
+          <span style="font-size:9px;color:var(--tx-3);">2880x1800</span>
+          <button class="section-action" onclick="openCfg()" title="API nastavení">⚙ Config</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOP STAT TILES — 6 boxes (Phase 47) -->
+    <div class="stat-grid">
+      <div class="stat-tile">
+        <div class="stat-label">REŽIM DOMU</div>
+        <div class="stat-ico green" id="st-mode-ico">🏠</div>
+        <div class="stat-value" id="st-mode-val">—</div>
+        <div class="stat-sub" id="st-mode-sub">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">PŘÍTOMNOST</div>
+        <div class="stat-ico blue" id="st-pres-ico">👥</div>
+        <div class="stat-value" id="st-pres-val">—</div>
+        <div class="stat-sub" id="st-pres-sub">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">DENNÍ FÁZE</div>
+        <div class="stat-ico orange" id="st-phase-ico">🌅</div>
+        <div class="stat-value" id="st-phase-val">—</div>
+        <div class="stat-sub" id="st-phase-sub">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">VENKOVNÍ TEPLOTA</div>
+        <div class="stat-ico blue">🌡</div>
+        <div class="stat-value" id="st-temp-val">—</div>
+        <div class="stat-sub" id="st-temp-sub">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">SPOTŘEBA DNES</div>
+        <div class="stat-ico purple">⚡</div>
+        <div class="stat-value" id="st-power-val">—</div>
+        <div class="stat-sub" id="st-power-sub">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="stat-label">SYSTÉM</div>
+        <div class="stat-ico green" id="st-sys-ico">🛡</div>
+        <div class="stat-value" id="st-sys-val">—</div>
+        <div class="stat-sub" id="st-sys-sub">—</div>
+      </div>
+    </div>
+
+    <!-- ══════════ OVERVIEW MAIN GRID (Phase 48-49) ══════════ -->
+    <div class="overview-main">
+
+      <!-- OSVĚTLENÍ — MÍSTNOSTI -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">OSVĚTLENÍ — MÍSTNOSTI</span>
+          <span class="section-action" onclick="allLights('off')">Všechna světla ▾</span>
+        </div>
+        <div class="lights-grid" id="lights-grid">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- RYCHLÉ SCÉNY -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title" style="text-transform:none;font-size:var(--fs-md);color:var(--tx-1);font-weight:var(--fw-semibold);letter-spacing:normal;">Rychlé scény</span>
+        </div>
+        <div class="scenes-list" id="scenes-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- KAMERY — ŽIVÝ NÁHLED -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">KAMERY — ŽIVÝ NÁHLED</span>
+          <span class="section-action" onclick="switchPage('kamery')">Všechny kamery ▸</span>
+        </div>
+        <div class="cams-list" id="cams-list">
+          <!-- rendered by JS -->
+        </div>
+        <button class="cam-btn-all" onclick="switchPage('kamery')">
+          <span>⛶</span> Otevřít všechny kamery
+        </button>
+      </div>
+
+    </div>
+
+    <!-- ══════════ OVERVIEW BOTTOM GRID (Phase 50-51) ══════════ -->
+    <div class="overview-bottom">
+
+      <!-- AUDIO — ZÓNY -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">AUDIO — ZÓNY</span>
+          <span class="section-action" onclick="switchPage('audio')">Spravovat audio ▸</span>
+        </div>
+        <div class="audio-list" id="audio-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- KLIMA — PŘEHLED -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">KLIMA — PŘEHLED</span>
+          <span class="section-action" onclick="switchPage('klima')">Detail klimatu ▸</span>
+        </div>
+        <div class="klima-list" id="klima-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- AKTIVITY — POSLEDNÍ UDÁLOSTI -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">AKTIVITY — POSLEDNÍ UDÁLOSTI</span>
+        </div>
+        <div class="activity-list" id="activity-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- ZÁKLADNÍ OVLÁDÁNÍ -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">ZÁKLADNÍ OVLÁDÁNÍ</span>
+        </div>
+        <div class="ctrl-grid" id="ctrl-grid">
+          <button class="ctrl-btn" onclick="allLights('on')">
+            <div class="ctrl-ico yellow">💡</div>
+            <div class="ctrl-text"><div class="ctrl-title">Všechna světla</div><div class="ctrl-sub">ON</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="allLights('off')">
+            <div class="ctrl-ico gray">💡</div>
+            <div class="ctrl-text"><div class="ctrl-title">Všechna světla</div><div class="ctrl-sub">OFF</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="audioStop()">
+            <div class="ctrl-ico red">⏹</div>
+            <div class="ctrl-text"><div class="ctrl-title">Audio stop</div><div class="ctrl-sub">Všechny zóny</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="closeBlinds()">
+            <div class="ctrl-ico cyan">🪟</div>
+            <div class="ctrl-text"><div class="ctrl-title">Žaluzie</div><div class="ctrl-sub">Zavřít vše</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="setMode('eco')">
+            <div class="ctrl-ico green">🌿</div>
+            <div class="ctrl-text"><div class="ctrl-title">Teplota ECO</div><div class="ctrl-sub">Aktivovat</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="setMode('away')">
+            <div class="ctrl-ico orange">🏠</div>
+            <div class="ctrl-text"><div class="ctrl-title">Režim pryč</div><div class="ctrl-sub">Aktivovat</div></div>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    </section>
+
+    <!-- ══════════ PAGE: OSVĚTLENÍ ══════════ -->
+    <section class="page" data-page="osvetleni">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>💡 Osvětlení</h1>
+          <p>Ovládání světel ve všech místnostech · dimmer, teplota barvy, scény</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">💡</div>
+        <div class="placeholder-title">Osvětlení — detail</div>
+        <div class="placeholder-sub">6 místností s dimmer slider + přepínač on/off.<br>Per-room controls (barva, teplota, efekty).</div>
+        <div class="placeholder-phase">⏳ Phase 48</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: AUDIO ══════════ -->
+    <section class="page" data-page="audio">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>🔊 Audio</h1>
+          <p>Multi-room audio · Kuchyň (Spotify) · Ložnice · Koupelna · TTS pipeline</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">🔊</div>
+        <div class="placeholder-title">Audio — multi-room</div>
+        <div class="placeholder-sub">Kontrola každé zóny zvlášť · play/pause/volume · queue · TTS priority</div>
+        <div class="placeholder-phase">⏳ Phase 50</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: KLIMATIZACE ══════════ -->
+    <section class="page" data-page="klima">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>🌡 Klimatizace</h1>
+          <p>Topení (Protherm 9kW + 3× TRV) · Čistička · Zvlhčovač · Ventilátor</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">🌡</div>
+        <div class="placeholder-title">Heating + klima</div>
+        <div class="placeholder-sub">Per-zone target · boost · AI vrstvy toggle · týdenní plán · kWh graf</div>
+        <div class="placeholder-phase">⏳ Phase 50</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: BEZPEČNOST ══════════ -->
+    <section class="page" data-page="bezpecnost">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>🛡 Bezpečnost</h1>
+          <p>Door/window sensors · Presence · Privacy guard · Režim pryč</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">🛡</div>
+        <div class="placeholder-title">Security dashboard</div>
+        <div class="placeholder-sub">Sensor status · history events · auto-lock rules</div>
+        <div class="placeholder-phase">⏳ budoucí</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: KAMERY ══════════ -->
+    <section class="page" data-page="kamery">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>📹 Kamery</h1>
+          <p>Vchod · Zahrada · Garáž · Kuchyně · Ložnice indoor</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">📹</div>
+        <div class="placeholder-title">Camera grid</div>
+        <div class="placeholder-sub">Live náhled všech kamer · motion snapshots archiv · timeline</div>
+        <div class="placeholder-phase">⏳ Phase 49</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: SCÉNY ══════════ -->
+    <section class="page" data-page="sceny">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>🎬 Scény</h1>
+          <p>Večerní pohoda · Film · Dobré ráno · Noc · Odchod z domu · Vaření</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">🎬</div>
+        <div class="placeholder-title">Scény editor</div>
+        <div class="placeholder-sub">Quick-play všechny scény · create/edit/duplicate · schedule</div>
+        <div class="placeholder-phase">⏳ Phase 49</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: ENERGIE ══════════ -->
+    <section class="page" data-page="energie">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>⚡ Energie</h1>
+          <p>Spotřeba dnes · měsíc · TOP 10 spotřebičů · VT/NT · Kč/kWh</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">⚡</div>
+        <div class="placeholder-title">Energy dashboard</div>
+        <div class="placeholder-sub">Graf spotřeby 24h · TOP 10 · VT/NT breakdown · měsíční projekce Kč</div>
+        <div class="placeholder-phase">⏳ budoucí</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: SYSTÉM ══════════ -->
+    <section class="page" data-page="system">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>⚙️ Systém</h1>
+          <p>Health · AI vrstvy · Diagnostika · Logy · Config · Advanced</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">⚙️</div>
+        <div class="placeholder-title">System & AI</div>
+        <div class="placeholder-sub">AI control center · diagnostické akce · manuální akce · log snapshots</div>
+        <div class="placeholder-phase">⏳ budoucí (převzít z v1)</div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: HISTORIE ══════════ -->
+    <section class="page" data-page="historie">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>🕐 Historie</h1>
+          <p>Event log · Morning routine history · Daily reports · AI rozhodnutí</p>
+        </div>
+      </div>
+      <div class="page-placeholder">
+        <div class="placeholder-ico">🕐</div>
+        <div class="placeholder-title">Activity history</div>
+        <div class="placeholder-sub">Filterable event log · timeline · export · search</div>
+        <div class="placeholder-phase">⏳ budoucí</div>
+      </div>
+    </section>
+
+    <!-- Status footer (sdílený napříč stránkami) -->
+    <div class="status-footer">
+      <div class="status-dot-green">Poslední synchronizace: 21:41:58</div>
+      <div>Homey Pro 2026 · Verze systému: 1.2.6</div>
+      <div class="status-dot-green">Všechny systémy online</div>
+    </div>
+
+  </main>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────────────────
+// Phase 45 — live clock pro header
+// Phase 46 — sidebar navigation routing (SPA-style)
+// Phase 47 — wire stat tiles + header chips
+// ─────────────────────────────────────────────────────────
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ CONFIG — localStorage persistent                       ║
+// ╚════════════════════════════════════════════════════════╝
+const DEFAULT_CFG = {
+  host: 'http://192.168.1.142',     // Homey Pro IP (LAN)
+  token: '',                         // Bearer token (user fill in config overlay)
+  interval: 10,                      // refresh seconds
+};
+function loadCfg() {
+  try {
+    const raw = localStorage.getItem('sh_v2_cfg');
+    if (raw) return { ...DEFAULT_CFG, ...JSON.parse(raw) };
+  } catch (e) {}
+  return { ...DEFAULT_CFG };
+}
+function saveCfg() { try { localStorage.setItem('sh_v2_cfg', JSON.stringify(CFG)); } catch (e) {} }
+let CFG = loadCfg();
+
+const CONFIG = {
+  varName: 'sh_dashboard_data',
+  // Demo mode fallback: používá se pokud token je prázdný nebo fetch selže
+  get demoMode() { return !CFG.token; },
+};
+
+let ALL_VARS = {};
+let varMapLoaded = false;
+
+// ── DEMO DATA (Phase 47-51 — statický preview) ──────────
+const DEMO_DATA = {
+  state: {
+    rezim_doma: 'home',
+    spim: 'no',
+    phase: 'evening',
+    house_state: 'home_normal',
+  },
+  health: {
+    score: 100,
+    power_total: 1247,
+  },
+  weather: {
+    temp: 16.8,
+    desc: 'Polojasno',
+    icon: '☁️',
+  },
+  energy: {
+    kwh_today: 12.4,
+    delta_pct: -8,
+  },
+  lights: [
+    { id: 'kuchyne',   name: 'Kuchyně + Jídelna',  on: true,  dim: 0.65 },
+    { id: 'obyvak',    name: 'Obývací pokoj',      on: true,  dim: 0.40 },
+    { id: 'loznice1',  name: 'Ložnice 1',          on: false, dim: 0 },
+    { id: 'loznice2',  name: 'Ložnice 2',          on: true,  dim: 0.35 },
+    { id: 'koupelna',  name: 'Koupelna',           on: false, dim: 0 },
+    { id: 'chodba',    name: 'Chodba',             on: true,  dim: 0.20 },
+  ],
+  scenes: [
+    { id: 'vecerni', name: 'Večerní pohoda', ico: '🌙', color: 'purple' },
+    { id: 'film',    name: 'Film',           ico: '🎬', color: 'red' },
+    { id: 'rano',    name: 'Dobré ráno',     ico: '☀️', color: 'orange' },
+    { id: 'noc',     name: 'Noc',            ico: '🌙', color: 'blue' },
+    { id: 'odchod',  name: 'Odchod z domu',  ico: '🏠', color: 'green' },
+  ],
+  cameras: [
+    { id: 'vchod',   name: 'Vchod',    time: '21:42:10' },
+    { id: 'zahrada', name: 'Zahrada',  time: '21:42:10' },
+    { id: 'garaz',   name: 'Garáž',    time: '21:42:10' },
+    { id: 'kuchyne', name: 'Kuchyně',  time: '21:42:10' },
+  ],
+  audio: [
+    { id: 'kuchyne', name: 'Kuchyně',   source: 'Spotify',   playing: true,  volume: 45 },
+    { id: 'loznice', name: 'Ložnice 2', source: 'Pozastaveno', playing: false, volume: 30 },
+  ],
+  klima: [
+    { id: 'kuchyne',  room: 'Kuchyně',   target: 22.0, current: 21.8, fan: 'medium' },
+    { id: 'loznice1', room: 'Ložnice 1', target: 21.5, current: 21.3, fan: 'low' },
+  ],
+  activities: [
+    { ico: '🌙', color: 'purple', title: 'Večerní pohoda',  sub: 'Scéna spuštěna',                time: '21:30' },
+    { ico: '💡', color: 'yellow', title: 'Kuchyně světla',  sub: 'Změna jasu na 65%',             time: '21:28' },
+    { ico: '🔊', color: 'blue',   title: 'TTS oznámení',    sub: 'Kuchyně',                       time: '21:15' },
+    { ico: '🏠', color: 'green',  title: 'Odchod z domu',   sub: 'Režim změněn na Pryč',          time: '17:45' },
+    { ico: '☀️', color: 'orange', title: 'Dobré ráno',      sub: 'Scéna spuštěna',                time: '07:15' },
+  ],
+};
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ STATE                                                  ║
+// ╚════════════════════════════════════════════════════════╝
+let DATA = null;
+let lastFetchTs = 0;
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Helpers                                                ║
+// ╚════════════════════════════════════════════════════════╝
+const $ = (id) => document.getElementById(id);
+const setText = (id, value) => { const el = $(id); if (el) el.textContent = value; };
+const setHTML = (id, value) => { const el = $(id); if (el) el.innerHTML = value; };
+
+function formatHour() {
+  return new Date().getHours();
+}
+
+function greetingByHour() {
+  const h = formatHour();
+  if (h < 5)  return 'Dobrou noc';
+  if (h < 10) return 'Dobré ráno';
+  if (h < 17) return 'Dobrý den';
+  if (h < 22) return 'Dobrý večer';
+  return 'Dobrou noc';
+}
+
+function phaseMap(p) {
+  const map = {
+    morning:  { label: 'Ráno',       ico: '🌅', sub: '05:00 – 10:00' },
+    day:      { label: 'Den',        ico: '☀️', sub: '10:00 – 17:00' },
+    evening:  { label: 'Večer',      ico: '🌆', sub: '17:00 – 22:00' },
+    night:    { label: 'Noc',        ico: '🌙', sub: '22:00 – 05:00' },
+  };
+  return map[String(p || '').toLowerCase()] || { label: '—', ico: '🕐', sub: '—' };
+}
+
+function modeMap(m) {
+  const map = {
+    home:  { label: 'Domov',   ico: '🏠' },
+    away:  { label: 'Pryč',    ico: '🚗' },
+    sleep: { label: 'Spánek',  ico: '🌙' },
+  };
+  return map[String(m || '').toLowerCase()] || { label: '—', ico: '🏠' };
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ UI UPDATE                                              ║
+// ╚════════════════════════════════════════════════════════╝
+function updateUI(d) {
+  if (!d) return;
+  DATA = d;
+
+  const state = d.state || {};
+  const health = d.health || {};
+  const weather = d.weather || {};
+  const energy = d.energy || {};
+
+  // ── Greeting ──
+  const greet = greetingByHour();
+  setHTML('greeting-text', `${greet}, Luděk <span>👋</span>`);
+
+  const mode = modeMap(state.rezim_doma);
+  setText('greeting-mode', mode.label);
+
+  // ── Header chips ──
+  setText('hdr-temp', (weather.temp !== undefined && weather.temp !== null) ? weather.temp.toFixed(1) + ' °C' : '—');
+  setText('hdr-wx', weather.desc || '—');
+  if (weather.icon) setText('hdr-wx-ico', weather.icon);
+
+  setText('hdr-mode-val', mode.label);
+  setText('hdr-mode-ico', mode.ico);
+
+  // ── Stat tile 1: REŽIM DOMU ──
+  setText('st-mode-ico', mode.ico);
+  setText('st-mode-val', mode.label);
+  setText('st-mode-sub', state.rezim_doma === 'home' ? 'Aktivní doma' : 'Režim ' + mode.label.toLowerCase());
+
+  // ── Stat tile 2: PŘÍTOMNOST ──
+  const isSleeping = state.spim === 'yes';
+  setText('st-pres-ico', isSleeping ? '😴' : (state.rezim_doma === 'home' ? '👥' : '🚗'));
+  setText('st-pres-val', isSleeping ? 'Spánek' : (state.rezim_doma === 'home' ? 'Doma' : 'Pryč'));
+  setText('st-pres-sub', isSleeping ? 'Ticho + no alerts' : '1 osoba');
+
+  // ── Stat tile 3: DENNÍ FÁZE ──
+  const ph = phaseMap(state.phase);
+  setText('st-phase-ico', ph.ico);
+  setText('st-phase-val', ph.label);
+  setText('st-phase-sub', ph.sub);
+
+  // ── Stat tile 4: VENKOVNÍ TEPLOTA ──
+  setText('st-temp-val', (weather.temp !== undefined && weather.temp !== null) ? weather.temp.toFixed(1) + ' °C' : '—');
+  setText('st-temp-sub', weather.desc || '—');
+
+  // ── Stat tile 5: SPOTŘEBA ──
+  const pw = health.power_total != null ? Math.round(health.power_total) : null;
+  const kwh = energy.kwh_today;
+  if (kwh != null) {
+    setText('st-power-val', kwh.toFixed(1) + ' kWh');
+    const delta = energy.delta_pct;
+    if (typeof delta === 'number') {
+      const arrow = delta < 0 ? '↓' : '↑';
+      const color = delta < 0 ? 'var(--acc-green)' : 'var(--acc-orange)';
+      const sub = $('st-power-sub');
+      if (sub) {
+        sub.textContent = `${arrow} ${Math.abs(delta)}% vs včera`;
+        sub.style.color = color;
+      }
+    } else {
+      setText('st-power-sub', pw != null ? pw + ' W live' : '—');
+    }
+  } else if (pw != null) {
+    setText('st-power-val', pw + ' W');
+    setText('st-power-sub', 'live');
+  } else {
+    setText('st-power-val', '—');
+    setText('st-power-sub', '—');
+  }
+
+  // ── Stat tile 6: SYSTÉM ──
+  const score = Number(health.score || 0);
+  const sysIco = score >= 90 ? '🛡' : score >= 70 ? '⚠️' : '🔴';
+  const sysVal = score >= 90 ? 'Vše v pořádku' : score >= 70 ? 'Drobné problémy' : 'Kritické';
+  const sysIcoEl = $('st-sys-ico');
+  if (sysIcoEl) {
+    sysIcoEl.textContent = sysIco;
+    sysIcoEl.className = 'stat-ico ' + (score >= 90 ? 'green' : score >= 70 ? 'orange' : 'red');
+  }
+  setText('st-sys-val', sysVal);
+  setText('st-sys-sub', `Health ${score}%`);
+
+  // ── Phase 48-51: Overview sections ──
+  renderLights(d.lights || []);
+  renderScenes(d.scenes || []);
+  renderCameras(d.cameras || []);
+  renderAudio(d.audio || []);
+  renderKlima(d.klima || []);
+  renderActivities(d.activities || []);
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 48 — Lights renderer                             ║
+// ╚════════════════════════════════════════════════════════╝
+function renderLights(lights) {
+  const grid = $('lights-grid');
+  if (!grid) return;
+  grid.innerHTML = lights.map(l => {
+    const pct = Math.round(l.dim * 100);
+    return `
+    <div class="light-tile ${l.on ? '' : 'off'}" data-light="${l.id}">
+      <div class="light-row">
+        <div class="light-bulb ${l.on ? 'on' : ''}">💡</div>
+        <div class="light-name">${l.name}</div>
+        <div class="light-state ${l.on ? 'on' : 'off'}">${l.on ? 'ON' : 'OFF'}</div>
+      </div>
+      <div class="light-pct">${pct}%</div>
+      <input class="slider" type="range" min="0" max="100" value="${pct}"
+             oninput="lightDim('${l.id}', this.value, this)"
+             onchange="lightDim('${l.id}', this.value, this)">
+    </div>`;
+  }).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 49 — Scenes renderer                             ║
+// ╚════════════════════════════════════════════════════════╝
+function renderScenes(scenes) {
+  const list = $('scenes-list');
+  if (!list) return;
+  list.innerHTML = scenes.map(s => `
+    <div class="scene-row" onclick="sceneRun('${s.id}')">
+      <div class="scene-ico ${s.color}">${s.ico}</div>
+      <div class="scene-name">${s.name}</div>
+      <div class="scene-play">▶</div>
+    </div>
+  `).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 49 — Cameras renderer                            ║
+// ╚════════════════════════════════════════════════════════╝
+function renderCameras(cameras) {
+  const list = $('cams-list');
+  if (!list) return;
+  list.innerHTML = cameras.map(c => `
+    <div class="cam-row" onclick="camOpen('${c.id}')">
+      <div class="cam-thumb">
+        <span class="cam-live-badge">LIVE</span>
+      </div>
+      <div class="cam-info">
+        <div class="cam-name">${c.name}</div>
+        <div class="cam-time">${c.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 50 — Audio zones renderer                        ║
+// ╚════════════════════════════════════════════════════════╝
+function renderAudio(audio) {
+  const list = $('audio-list');
+  if (!list) return;
+  list.innerHTML = audio.map(a => {
+    const playIco = a.playing ? '⏸' : '▶';
+    return `
+    <div class="audio-card">
+      <div class="audio-head">
+        <div class="audio-ico ${a.playing ? '' : 'off'}">${a.playing ? '🔊' : '🔇'}</div>
+        <div class="audio-info">
+          <div class="audio-zone-name">${a.name}</div>
+          <div class="audio-source ${a.playing ? 'playing' : ''}">${a.source || 'Idle'}</div>
+        </div>
+      </div>
+      <div class="audio-controls">
+        <div class="audio-btn" onclick="audioSkip('${a.id}', 'prev')">⏮</div>
+        <div class="audio-btn primary" onclick="audioToggle('${a.id}')">${playIco}</div>
+        <div class="audio-btn" onclick="audioSkip('${a.id}', 'next')">⏭</div>
+        <input class="audio-vol-slider" type="range" min="0" max="100" value="${a.volume}"
+               oninput="audioVol('${a.id}', this.value)">
+        <div class="audio-vol-val">${a.volume}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 50 — Klima renderer                              ║
+// ╚════════════════════════════════════════════════════════╝
+function renderKlima(klima) {
+  const list = $('klima-list');
+  if (!list) return;
+  list.innerHTML = klima.map(k => `
+    <div class="klima-card">
+      <div class="klima-head">
+        <div class="klima-room">${k.room}</div>
+        <div class="klima-target">${k.target.toFixed(1)}<span class="klima-target-unit"> °C</span></div>
+      </div>
+      <div class="klima-current">Aktuálně ${k.current.toFixed(1)} °C</div>
+      <div class="klima-ctrl">
+        <div class="klima-btn" onclick="klimaAdj('${k.id}', -0.5)">˅</div>
+        <div class="klima-btn fan" title="Ventilátor: ${k.fan}">🌀</div>
+        <div class="klima-btn" onclick="klimaAdj('${k.id}', +0.5)">˄</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 51 — Activity feed renderer                      ║
+// ╚════════════════════════════════════════════════════════╝
+function renderActivities(acts) {
+  const list = $('activity-list');
+  if (!list) return;
+  list.innerHTML = acts.map(a => `
+    <div class="activity-row">
+      <div class="activity-ico ${a.color}">${a.ico}</div>
+      <div class="activity-info">
+        <div class="activity-title">${a.title}</div>
+        <div class="activity-sub">${a.sub}</div>
+      </div>
+      <div class="activity-time">${a.time}</div>
+    </div>
+  `).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ INTERACTIONS (Phase 48-51 — demo feedback)             ║
+// ╚════════════════════════════════════════════════════════╝
+function lightDim(id, val, slider) {
+  // Find in DEMO_DATA, update (demo-only — real integration in Phase 47b)
+  const light = (DATA?.lights || []).find(l => l.id === id);
+  if (light) {
+    light.dim = val / 100;
+    light.on = val > 0;
+  }
+  // Update UI part
+  const tile = slider.closest('.light-tile');
+  if (tile) {
+    tile.classList.toggle('off', val == 0);
+    const bulb = tile.querySelector('.light-bulb');
+    const state = tile.querySelector('.light-state');
+    const pct = tile.querySelector('.light-pct');
+    if (bulb) bulb.classList.toggle('on', val > 0);
+    if (state) {
+      state.textContent = val > 0 ? 'ON' : 'OFF';
+      state.classList.toggle('on', val > 0);
+      state.classList.toggle('off', val == 0);
+    }
+    if (pct) pct.textContent = val + '%';
+  }
+  toast(`💡 ${light?.name || id}: ${val}%`);
+}
+
+function allLights(state) {
+  toast(state === 'on' ? '💡 Všechna světla ZAP' : '💡 Všechna světla VYP');
+  (DATA?.lights || []).forEach(l => {
+    l.on = state === 'on';
+    l.dim = state === 'on' ? (l.dim || 0.5) : 0;
+  });
+  renderLights(DATA.lights);
+}
+
+function sceneRun(id) {
+  const s = (DATA?.scenes || []).find(x => x.id === id);
+  toast(`🎬 Spuštěna scéna: ${s?.name || id}`);
+}
+
+function camOpen(id) { toast(`📹 Kamera: ${id}`); }
+
+function audioToggle(id) {
+  const a = (DATA?.audio || []).find(x => x.id === id);
+  if (a) { a.playing = !a.playing; renderAudio(DATA.audio); toast(`🔊 ${a.name}: ${a.playing ? 'Play' : 'Pause'}`); }
+}
+function audioSkip(id, dir) { toast(`🔊 ${dir === 'next' ? 'Další' : 'Předchozí'} skladba · ${id}`); }
+function audioVol(id, v) {
+  const a = (DATA?.audio || []).find(x => x.id === id);
+  if (a) { a.volume = Number(v); }
+  // Update inline bez re-render (plynulejší)
+  const row = document.querySelector(`.audio-card [onclick*="audioToggle('${id}')"]`)?.closest('.audio-card');
+  if (row) {
+    const val = row.querySelector('.audio-vol-val');
+    if (val) val.textContent = v + '%';
+  }
+}
+function audioStop() { toast('⏹ Audio zastaveno ve všech zónách'); (DATA?.audio || []).forEach(a => a.playing = false); renderAudio(DATA.audio); }
+function closeBlinds() { toast('🪟 Žaluzie: zavírání všech'); }
+function setMode(m) { toast(`🏠 Režim: ${m}`); }
+function klimaAdj(id, delta) {
+  const k = (DATA?.klima || []).find(x => x.id === id);
+  if (k) { k.target = Math.round((k.target + delta) * 10) / 10; renderKlima(DATA.klima); toast(`🌡 ${k.room}: ${k.target.toFixed(1)} °C`); }
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ CONFIG OVERLAY (Phase 47b)                             ║
+// ╚════════════════════════════════════════════════════════╝
+function openCfg() {
+  $('cfg-host').value = CFG.host || DEFAULT_CFG.host;
+  $('cfg-token').value = CFG.token || '';
+  $('cfg-interval').value = CFG.interval || 10;
+  $('cfg-status').textContent = '';
+  $('cfg-overlay').style.display = 'flex';
+}
+function closeCfg() { $('cfg-overlay').style.display = 'none'; }
+function clearCfg() {
+  if (!confirm('Smazat uložené API nastavení?')) return;
+  try { localStorage.removeItem('sh_v2_cfg'); } catch (e) {}
+  CFG = { ...DEFAULT_CFG };
+  $('cfg-host').value = CFG.host;
+  $('cfg-token').value = '';
+  $('cfg-status').innerHTML = '<span style="color:var(--acc-green);">✓ Smazáno · restart fallback na demo</span>';
+  setTimeout(() => { closeCfg(); refresh(); }, 1000);
+}
+async function saveCfgBtn() {
+  const host = $('cfg-host').value.trim();
+  const token = $('cfg-token').value.trim();
+  const interval = Math.max(3, Math.min(300, Number($('cfg-interval').value) || 10));
+
+  if (!host || !token) {
+    $('cfg-status').innerHTML = '<span style="color:var(--acc-red);">✗ Host a token jsou povinné</span>';
+    return;
+  }
+
+  $('cfg-status').innerHTML = '<span style="color:var(--acc-blue);">⏳ Testuji připojení…</span>';
+
+  // Test call
+  CFG = { host, token, interval };
+  try {
+    const r = await fetch(host + '/api/manager/logic/variable/', {
+      headers: { 'Authorization': 'Bearer ' + token },
+    });
+    if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+    const data = await r.json();
+    const count = Object.keys(data).length;
+    $('cfg-status').innerHTML = `<span style="color:var(--acc-green);">✓ Připojeno — ${count} proměnných načteno</span>`;
+    saveCfg();
+    varMapLoaded = false;
+    setTimeout(() => { closeCfg(); refresh(); }, 800);
+  } catch (e) {
+    $('cfg-status').innerHTML = `<span style="color:var(--acc-red);">✗ ${e.message}</span>`;
+  }
+}
+
+// Auto-open overlay při prvním loadu pokud token chybí
+if (!CFG.token) {
+  setTimeout(openCfg, 800);
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ TOAST (lightweight flash notification)                 ║
+// ╚════════════════════════════════════════════════════════╝
+let toastTimer = null;
+function toast(msg) {
+  let t = document.getElementById('v2-toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'v2-toast';
+    t.style.cssText = `
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      background: var(--bg-2); border: 1px solid var(--border-acc);
+      color: var(--tx-1); padding: 12px 20px; border-radius: 12px;
+      box-shadow: var(--shadow-lg); z-index: 1000;
+      font-size: 14px; font-weight: 500;
+      opacity: 0; transition: opacity 200ms;
+      pointer-events: none;
+    `;
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2000);
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ DATA FETCH                                             ║
+// ╚════════════════════════════════════════════════════════╝
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 47b — Homey REST API                             ║
+// ╚════════════════════════════════════════════════════════╝
+async function apiGet(path) {
+  const r = await fetch(CFG.host + path, {
+    headers: { 'Authorization': 'Bearer ' + CFG.token },
+  });
+  if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
+  return r.json();
+}
+
+async function loadVarMap() {
+  const data = await apiGet('/api/manager/logic/variable/');
+  ALL_VARS = {};
+  for (const [id, v] of Object.entries(data)) ALL_VARS[v.name] = { id, value: v.value };
+  varMapLoaded = true;
+}
+
+// ── Transform bridge raw → v2 UI shape ──────────────────
+function transformBridge(raw) {
+  const d = raw || {};
+  // state, health — 1:1
+  const state   = d.state   || {};
+  const health  = d.health  || {};
+  const rooms   = d.rooms   || {};
+  const plugs   = d.plugs   || {};
+  const blind   = d.blind_config || {};
+
+  // Weather — v1 bridge data nemá weather přímo, ale plug má d.appliances, rooms má temp…
+  // Pokud bridge poskytuje weather, fajn. Jinak fallback na rooms.jidelna.temp nebo Weather device z appliances.
+  const weather = d.weather || d.venek || {};
+  const outdoorTemp = weather.temp ?? weather.out_temp ?? null;
+
+  // Energy
+  const powerW = Number(health.power_total ?? 0);
+  const kwhSnap = d.energy_snapshot || d.finance || {};
+  const kwhToday = kwhSnap.totalKWh != null ? Number(kwhSnap.totalKWh) : null;
+
+  // ── Lights: derive from rooms (any entry with .on prop = light) ──
+  const roomLabel = {
+    jidelna:   'Jídelna + LED pásek',
+    kitchen:   'Kuchyně',
+    bedroom:   'Ložnice',
+    bathroom:  'Koupelna',
+    toilet:    'Toaleta',
+    pracovna:  'Pracovna',
+    pradelna:  'Prádelna',
+    predsin:   'Předsíň',
+  };
+  const lights = [];
+  for (const [zoneId, meta] of Object.entries(rooms)) {
+    if (!meta || typeof meta !== 'object') continue;
+    const lightKeys = Object.entries(meta).filter(([k, v]) =>
+      v && typeof v === 'object' && 'on' in v &&
+      (k.includes('light') || k.includes('strip') || k === 'lampicka' || k.includes('e14'))
+    );
+    if (lightKeys.length === 0) continue;
+    const anyOn = lightKeys.some(([, v]) => v.on);
+    const avgDim = lightKeys.reduce((sum, [, v]) => sum + (v.dim != null ? v.dim : (v.on ? 1 : 0)), 0) / lightKeys.length;
+    lights.push({
+      id: zoneId,
+      name: roomLabel[zoneId] || zoneId,
+      on: !!anyOn,
+      dim: Math.round(avgDim * 100) / 100,
+    });
+  }
+
+  // ── Audio: z rooms.<zone>.speaker_playing
+  const audio = [];
+  if (rooms.kitchen?.speaker_playing != null) {
+    audio.push({
+      id: 'kitchen', name: 'Kuchyně',
+      source: rooms.kitchen.speaker_playing ? (d.audio?.mode || 'Přehrávání') : 'Pozastaveno',
+      playing: !!rooms.kitchen.speaker_playing,
+      volume: Number(d.audio?.volume || 45),
+    });
+  }
+  if (rooms.bathroom?.speaker_playing != null) {
+    audio.push({
+      id: 'bathroom', name: 'Koupelna',
+      source: rooms.bathroom.speaker_playing ? 'Přehrávání' : 'Idle',
+      playing: !!rooms.bathroom.speaker_playing,
+      volume: Number(d.audio?.volume || 30),
+    });
+  }
+
+  // ── Klima: z heating zones (pokud jsou v d.heating, jinak z ctx není v bridge)
+  const klima = [];
+  const heatingZones = d.heating?.zones || {};
+  for (const [id, z] of Object.entries(heatingZones)) {
+    if (!z || z.enabled === false) continue;
+    klima.push({
+      id, room: (roomLabel[id] || id).replace(' + LED pásek', ''),
+      target: Number(z.target ?? z.target_temp ?? 20),
+      current: Number(z.current ?? z.current_temp ?? 20),
+      fan: z.mode || 'auto',
+    });
+  }
+
+  // ── Scenes — zatím static (bridge neexportuje scenes list)
+  const scenes = DEMO_DATA.scenes;
+
+  // ── Activities — zatím static (mohl by fetchovat EventLog přes WebApp)
+  const activities = DEMO_DATA.activities;
+
+  return {
+    state: {
+      rezim_doma: state.rezim_doma || state.presence,
+      spim: state.spim,
+      phase: state.phase || state.cast_dne || d.context?.phase,
+    },
+    health: { score: Number(health.score || 0), power_total: powerW },
+    weather: {
+      temp: outdoorTemp,
+      desc: weather.desc || d.context?.pocasiText || '—',
+      icon: weather.icon || '☁️',
+    },
+    energy: {
+      kwh_today: kwhToday,
+      delta_pct: null,  // bridge neposkytuje
+    },
+    lights: lights.length ? lights : DEMO_DATA.lights,
+    scenes,
+    cameras: DEMO_DATA.cameras,  // bridge neposkytuje camera list
+    audio: audio.length ? audio : DEMO_DATA.audio,
+    klima: klima.length ? klima : DEMO_DATA.klima,
+    activities,
+  };
+}
+
+async function fetchData() {
+  if (CONFIG.demoMode) {
+    setHeaderMode('demo');
+    return DEMO_DATA;
+  }
+  try {
+    if (!varMapLoaded) await loadVarMap();
+    const v = ALL_VARS[CONFIG.varName];
+    if (!v) throw new Error(CONFIG.varName + ' not found');
+    const fresh = await apiGet('/api/manager/logic/variable/' + v.id);
+    const raw = JSON.parse(fresh.value || '{}');
+    setHeaderMode('live');
+    return transformBridge(raw);
+  } catch (e) {
+    console.warn('[dashboard] fetch failed:', e.message);
+    setHeaderMode('error');
+    return DEMO_DATA;
+  }
+}
+
+function setHeaderMode(mode) {
+  const el = document.getElementById('v2-mode-badge');
+  if (!el) return;
+  const map = {
+    demo:  { text: 'DEMO', color: 'var(--acc-orange)', bg: 'var(--acc-orange-soft)' },
+    live:  { text: 'LIVE', color: 'var(--acc-green)',  bg: 'var(--acc-green-soft)' },
+    error: { text: 'ERR',  color: 'var(--acc-red)',    bg: 'var(--acc-red-soft)' },
+  };
+  const m = map[mode] || map.demo;
+  el.textContent = m.text;
+  el.style.color = m.color;
+  el.style.background = m.bg;
+}
+
+async function refresh() {
+  const data = await fetchData();
+  updateUI(data);
+  lastFetchTs = Date.now();
+  // Update footer "last sync"
+  const syncEl = document.querySelector('.status-footer .status-dot-green');
+  if (syncEl) {
+    const ts = new Date().toLocaleTimeString('cs-CZ');
+    syncEl.textContent = ' Poslední synchronizace: ' + ts;
+    syncEl.classList.add('status-dot-green');
+  }
+}
+
+// ── Initial fetch + interval ──
+refresh();
+setInterval(refresh, CONFIG.refreshInterval);
+
+// ── Live clock ──────────────────────────────────────────
+function tick() {
+  const now = new Date();
+  const t = now.toLocaleTimeString('cs-CZ', { hour: '2-digit', minute: '2-digit' });
+  const d = now.toLocaleDateString('cs-CZ', { day: 'numeric', month: 'long', year: 'numeric' });
+  setText('hdr-time', t);
+  setText('hdr-date', d);
+}
+tick();
+setInterval(tick, 30 * 1000);
+
+// ── Phase 46: Navigation routing ────────────────────────
+function switchPage(pageName) {
+  // Update active nav item
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === pageName);
+  });
+  // Update active page section
+  document.querySelectorAll('.page').forEach(el => {
+    el.classList.toggle('active', el.dataset.page === pageName);
+  });
+  // Update URL hash pro deeplink
+  if (location.hash.slice(1) !== pageName) {
+    history.replaceState(null, '', '#' + pageName);
+  }
+  // Scroll top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Attach click handlers
+document.querySelectorAll('.nav-item[data-page]').forEach(el => {
+  el.addEventListener('click', () => switchPage(el.dataset.page));
+});
+
+// Deeplink init — pokud URL má hash, otevři danou stránku
+window.addEventListener('load', () => {
+  const hash = location.hash.slice(1);
+  if (hash) {
+    const item = document.querySelector(`.nav-item[data-page="${hash}"]`);
+    if (item) switchPage(hash);
+  }
+});
+
+// Respond to browser back/forward
+window.addEventListener('hashchange', () => {
+  const hash = location.hash.slice(1) || 'prehled';
+  switchPage(hash);
+});
+</script>
+
+</body>
+</html>
