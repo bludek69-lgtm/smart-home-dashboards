@@ -1061,6 +1061,10 @@ body {
       <div class="nav-item" data-page="energie"><span class="nav-ico">⚡</span><span>Energie</span></div>
       <div class="nav-item" data-page="system"><span class="nav-ico">⚙️</span><span>Systém</span></div>
       <div class="nav-item" data-page="historie"><span class="nav-ico">🕐</span><span>Historie</span></div>
+      <div class="nav-item" data-page="pocasi"><span class="nav-ico">🌦</span><span>Počasí</span></div>
+      <div class="nav-item" data-page="burza"><span class="nav-ico">📈</span><span>Burza</span></div>
+      <div class="nav-item" data-page="finance"><span class="nav-ico">💰</span><span>Finance</span></div>
+      <div class="nav-item" data-page="settings"><span class="nav-ico">⚙️</span><span>Nastavení</span></div>
     </nav>
 
     <div class="health-card">
@@ -1727,7 +1731,272 @@ body {
       </div>
     </section>
 
-    <!-- Status footer (sdílený napříč stránkami) -->
+    <!-- ══════════ PAGE: POČASÍ ══════════ -->
+    <section class="page" data-page="pocasi">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>🌦 Počasí</h1>
+          <p>Aktuálně v Semilech · 3-denní předpověď · východ/západ slunce</p>
+        </div>
+      </div>
+
+      <!-- Aktuální počasí - velké tile -->
+      <div class="section-card" style="background:linear-gradient(135deg,rgba(59,130,246,.15),rgba(14,165,233,.08));">
+        <div class="section-head"><span class="section-title">AKTUÁLNĚ</span><span class="section-action" id="w-updated">—</span></div>
+        <div style="display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding:8px 0;">
+          <div id="w-icon" style="font-size:84px;line-height:1;">🌤</div>
+          <div>
+            <div style="font-size:44px;font-weight:700;line-height:1;" id="w-temp">—</div>
+            <div style="color:var(--tx-2);margin-top:4px;font-size:14px;" id="w-desc">Načítám…</div>
+            <div style="color:var(--tx-3);font-size:12px;margin-top:4px;" id="w-feel">—</div>
+          </div>
+          <div style="text-align:right;font-size:12px;color:var(--tx-3);">
+            <div>🌅 <span id="w-sunrise">—</span></div>
+            <div style="margin-top:6px;">🌇 <span id="w-sunset">—</span></div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--border-soft);">
+          <div><div style="color:var(--tx-3);font-size:11px;">💧 Vlhkost</div><div id="w-hum" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+          <div><div style="color:var(--tx-3);font-size:11px;">💨 Vítr</div><div id="w-wind" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+          <div><div style="color:var(--tx-3);font-size:11px;">🌡 Tlak</div><div id="w-pressure" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+          <div><div style="color:var(--tx-3);font-size:11px;">☔ Déšť</div><div id="w-rain" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+        </div>
+      </div>
+
+      <!-- 3-denní předpověď -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">3-DENNÍ PŘEDPOVĚĎ</span></div>
+        <div id="w-forecast" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Vazba na topení -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🔥 VLIV NA TOPENÍ</span></div>
+        <div id="w-heating-impact" style="padding:8px 0;color:var(--tx-2);font-size:13px;line-height:1.6;">
+          <!-- rendered by JS: outdoor temp → weatherAdjust delta -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: BURZA ══════════ -->
+    <section class="page" data-page="burza">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>📈 Burza</h1>
+          <p>Crypto ticker · portfolio · CZK/USD</p>
+        </div>
+      </div>
+
+      <!-- USD/CZK kurz -->
+      <div class="stat-grid" style="grid-template-columns:repeat(2,1fr);">
+        <div class="stat-tile">
+          <div class="stat-ico blue">💵</div>
+          <div class="stat-body">
+            <div class="stat-label">USD / CZK</div>
+            <div class="stat-value" id="burza-usd">—</div>
+            <div class="stat-sub" id="burza-usd-sub">Aktuální kurz</div>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-ico orange">⏱</div>
+          <div class="stat-body">
+            <div class="stat-label">Refresh</div>
+            <div class="stat-value" id="burza-refresh">— s</div>
+            <div class="stat-sub">Interval tickeru</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Crypto mince -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">KRYPTOMĚNY</span>
+          <span class="section-action" onclick="runScript('sh_crypto_fetcher_v1')">🔄 Obnovit</span>
+        </div>
+        <div id="burza-coins" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;">
+          <!-- rendered by JS from sh_cfg_crypto_coins -->
+        </div>
+        <div id="burza-status" style="color:var(--tx-3);font-size:11px;margin-top:12px;">
+          Zdroj dat: CoinGecko (přes sh_crypto_fetcher_v1) · Status: <span id="burza-fetcher-status">—</span>
+        </div>
+      </div>
+
+      <!-- Sleep — TODO portfolio (manuální) -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">💼 PORTFOLIO (info)</span></div>
+        <div style="padding:8px 0;color:var(--tx-3);font-size:13px;line-height:1.6;">
+          Portfolio tracking bude přidáno v další fázi. Proměnné již existují: <code style="color:var(--tx-2);">sh_cfg_crypto_coins</code>,
+          <code style="color:var(--tx-2);">sh_cfg_usd_czk_rate</code>. Čeká implementace <code style="color:var(--tx-2);">sh_crypto_fetcher_v1</code>.
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: FINANCE ══════════ -->
+    <section class="page" data-page="finance">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>💰 Finance</h1>
+          <p>Spotřeba elektřiny · VT/NT · měsíční náklady · TOP 10 spotřebičů</p>
+        </div>
+      </div>
+
+      <!-- 4 stat tiles -->
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-tile">
+          <div class="stat-ico yellow">💡</div>
+          <div class="stat-body">
+            <div class="stat-label">Dnes spotřeba</div>
+            <div class="stat-value" id="fin-kwh-today">— kWh</div>
+            <div class="stat-sub" id="fin-kzh-today-cost">— Kč</div>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-ico green">📅</div>
+          <div class="stat-body">
+            <div class="stat-label">Včera</div>
+            <div class="stat-value" id="fin-kwh-yesterday">— kWh</div>
+            <div class="stat-sub" id="fin-kwh-delta">—</div>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-ico purple">📈</div>
+          <div class="stat-body">
+            <div class="stat-label">Tento měsíc</div>
+            <div class="stat-value" id="fin-kwh-month">— kWh</div>
+            <div class="stat-sub" id="fin-kzh-month-cost">— Kč</div>
+          </div>
+        </div>
+        <div class="stat-tile">
+          <div class="stat-ico orange">🎯</div>
+          <div class="stat-body">
+            <div class="stat-label">Projekce měsíc</div>
+            <div class="stat-value" id="fin-kwh-projection">— kWh</div>
+            <div class="stat-sub" id="fin-kwh-projection-cost">— Kč</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tarif -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">⚡ TARIF</span>
+          <span class="section-action" id="fin-tariff-now">Aktuální: —</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+          <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;">
+            <div style="color:var(--tx-3);font-size:11px;">NT (noční)</div>
+            <div style="font-size:22px;font-weight:700;margin:4px 0;" id="fin-price-nt">—</div>
+            <div style="color:var(--tx-3);font-size:11px;" id="fin-nt-window">—</div>
+          </div>
+          <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;">
+            <div style="color:var(--tx-3);font-size:11px;">VT (denní)</div>
+            <div style="font-size:22px;font-weight:700;margin:4px 0;" id="fin-price-vt">—</div>
+            <div style="color:var(--tx-3);font-size:11px;">zbytek dne</div>
+          </div>
+          <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;">
+            <div style="color:var(--tx-3);font-size:11px;">Fixní poplatek</div>
+            <div style="font-size:22px;font-weight:700;margin:4px 0;" id="fin-fixed-fee">—</div>
+            <div style="color:var(--tx-3);font-size:11px;">měsíčně</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP 10 spotřebičů -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">🏆 TOP 10 SPOTŘEBIČŮ (DNES)</span>
+          <span class="section-action" id="fin-top-total">—</span>
+        </div>
+        <div id="fin-top10" class="activity-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- Heating cost dnes -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🔥 TOPENÍ (PROTHERM 9 KW)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+          <div><div style="color:var(--tx-3);font-size:11px;">Runtime dnes</div><div id="fin-heating-runtime" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+          <div><div style="color:var(--tx-3);font-size:11px;">kWh dnes</div><div id="fin-heating-kwh" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+          <div><div style="color:var(--tx-3);font-size:11px;">Cena dnes</div><div id="fin-heating-cost" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+          <div><div style="color:var(--tx-3);font-size:11px;">Včera</div><div id="fin-heating-yesterday" style="font-size:18px;font-weight:600;margin-top:2px;">—</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════ PAGE: NASTAVENÍ ══════════ -->
+    <section class="page" data-page="settings">
+      <div class="page-header">
+        <div class="greeting">
+          <h1>⚙️ Nastavení</h1>
+          <p>Globální config · sh_cfg_* proměnné · editor</p>
+        </div>
+      </div>
+
+      <!-- Filter -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">🔍 FILTR</span>
+          <span class="section-action" onclick="loadSettings()">🔄 Načíst</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:12px;">
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">Hledat (název)</span>
+            <input id="set-search" type="text" placeholder="např. heating, lux, audio" oninput="filterSettings()" style="padding:8px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-md);font-size:13px;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">Kategorie</span>
+            <select id="set-category" onchange="filterSettings()" style="padding:8px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-md);font-size:13px;">
+              <option value="">— všechny —</option>
+              <option value="heating">🔥 Topení</option>
+              <option value="lux">🪟 Roleta / lux</option>
+              <option value="audio">🔊 Audio</option>
+              <option value="pm25">💨 Ovzduší</option>
+              <option value="briefing">📰 Briefing / TTS</option>
+              <option value="crypto">💰 Crypto</option>
+              <option value="power">⚡ Energetika</option>
+              <option value="other">🔧 Ostatní</option>
+            </select>
+          </label>
+          <button class="section-action" onclick="loadSettings()" style="align-self:end;padding:8px 16px;background:var(--acc-blue-soft);color:var(--acc-blue);border-color:var(--acc-blue);">Aplikovat</button>
+        </div>
+      </div>
+
+      <!-- Editor list -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">📝 PROMĚNNÉ (sh_cfg_*)</span>
+          <span class="section-action" id="set-count">0 položek</span>
+        </div>
+        <div id="set-status" style="color:var(--tx-3);font-size:12px;margin-bottom:12px;">Klikni "Načíst" pro stažení všech konfiguračních proměnných z Homey</div>
+        <div id="set-list" style="display:grid;grid-template-columns:1fr;gap:8px;max-height:500px;overflow-y:auto;">
+          <!-- rendered by JS after Homey API call -->
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">⚡ RYCHLÉ AKCE</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(3,1fr);">
+          <button class="ctrl-btn" onclick="runScript('sh_system_reconcile_v1','fix')">
+            <div class="ctrl-ico orange">🔧</div>
+            <div class="ctrl-text"><div class="ctrl-title">Reconcile fix</div><div class="ctrl-sub">Sjednotit stavy</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="runScript('sh_self_healing_v4')">
+            <div class="ctrl-ico purple">🩹</div>
+            <div class="ctrl-text"><div class="ctrl-title">Self-healing</div><div class="ctrl-sub">Spustit diagnostics</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="if(confirm('Opravdu spustit hard reset? Všechny pipeline proměnné na default.')) runScript('sh_system_reconcile_v1','hard_reset')">
+            <div class="ctrl-ico red">⚠️</div>
+            <div class="ctrl-text"><div class="ctrl-title">Hard reset</div><div class="ctrl-sub">Emergency only</div></div>
+          </button>
+        </div>
+      </div>
+    </section>
+
+        <!-- Status footer (sdílený napříč stránkami) -->
     <div class="status-footer">
       <div class="status-dot-green">Poslední synchronizace: 21:41:58</div>
       <div>Homey Pro 2026 · Verze systému: 1.2.6</div>
@@ -2000,6 +2269,11 @@ function updateUI(d) {
   renderEnergieDetail(d.energy || {}, d.health || {});
   renderSystemDetail(d);
   renderHistorieDetail(d.activities || []);
+  // ── new pages (22.4. večer) ──
+  renderPocasiDetail(d.weather || {});
+  renderBurzaDetail(d);
+  renderFinanceDetail(d.energy || {}, d.heating || {});
+  // settings page loads on-demand via button
 }
 
 // ╔════════════════════════════════════════════════════════╗
@@ -2338,6 +2612,343 @@ function renderHistorieDetail(activities) {
     </div>
   `).join('');
 }
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 61+ — new pages: Počasí / Burza / Finance / Set  ║
+// ║ 22.4. večer                                            ║
+// ╚════════════════════════════════════════════════════════╝
+
+// ── POČASÍ ──────────────────────────────────────────────
+function renderPocasiDetail(w) {
+  // w = DATA.weather: { temp, humidity, desc, icon, rain, wind, pressure, feels, sunrise, sunset, forecast: [...] }
+  setText('w-temp',     w.temp != null ? Math.round(w.temp) + '°C' : '—');
+  setText('w-desc',     w.desc || '—');
+  setText('w-feel',     w.feels != null ? ('Pocitově ' + Math.round(w.feels) + '°C') : '—');
+  setText('w-hum',      w.humidity != null ? w.humidity + '%' : '—');
+  setText('w-wind',     w.wind != null ? w.wind + ' m/s' : '—');
+  setText('w-pressure', w.pressure != null ? w.pressure + ' hPa' : '—');
+  setText('w-rain',     w.rain != null ? w.rain + ' mm' : '0 mm');
+  setText('w-sunrise',  w.sunrise || '—');
+  setText('w-sunset',   w.sunset || '—');
+  setText('w-updated',  w.updated ? ('↻ ' + w.updated) : '');
+  const ico = $('w-icon');
+  if (ico && w.icon) ico.textContent = w.icon;
+
+  // 3-day forecast
+  const fc = $('w-forecast');
+  if (fc) {
+    const forecast = Array.isArray(w.forecast) ? w.forecast : [];
+    if (forecast.length === 0) {
+      fc.innerHTML = '<div style="grid-column:1/-1;color:var(--tx-3);font-size:13px;padding:8px;text-align:center;">Forecast data nejsou k dispozici (bridge v1.10+ needed)</div>';
+    } else {
+      fc.innerHTML = forecast.slice(0, 3).map(d => `
+        <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;text-align:center;">
+          <div style="color:var(--tx-3);font-size:11px;">${d.day || '—'}</div>
+          <div style="font-size:40px;margin:8px 0;">${d.icon || '☁'}</div>
+          <div style="font-size:18px;font-weight:700;">${d.tmax != null ? Math.round(d.tmax) + '°' : '—'}<span style="color:var(--tx-3);font-weight:400;font-size:13px;"> / ${d.tmin != null ? Math.round(d.tmin) + '°' : '—'}</span></div>
+          <div style="color:var(--tx-3);font-size:11px;margin-top:4px;">${d.desc || ''}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Heating impact
+  const hi = $('w-heating-impact');
+  if (hi) {
+    const t = Number(w.temp);
+    let impact, color;
+    if (!Number.isFinite(t)) {
+      impact = 'Outdoor teplota není k dispozici — weatherAdjust AI layer v topení nebude aplikován.';
+      color = 'var(--tx-3)';
+    } else if (t < -5) {
+      impact = `🥶 Venku ${Math.round(t)}°C. <b>weatherAdjust → +1°C</b> ke všem auto target_temp (hard cold override).`;
+      color = 'var(--acc-red)';
+    } else if (t > 15) {
+      impact = `☀ Venku ${Math.round(t)}°C. <b>weatherAdjust → −0.5°C</b> ke všem auto target_temp (teplo venku, šetřit).`;
+      color = 'var(--acc-green)';
+    } else {
+      impact = `Venku ${Math.round(t)}°C. weatherAdjust <b>neaktivní</b> (rozsah -5 až 15°C → 0°C delta). AI vrstva spí, schedule platí 1:1.`;
+      color = 'var(--tx-2)';
+    }
+    hi.innerHTML = `<span style="color:${color};">${impact}</span>`;
+  }
+}
+
+// ── BURZA ───────────────────────────────────────────────
+function renderBurzaDetail(d) {
+  // DATA.crypto (pokud poskytnuta bridgem) nebo fallback na config
+  const crypto = d.crypto || {};
+  const cfg = d.cfg || {};
+  setText('burza-usd', cfg.usd_czk_rate ? (Number(cfg.usd_czk_rate).toFixed(2) + ' Kč') : '—');
+  setText('burza-usd-sub', cfg.usd_czk_rate ? 'Konverzní kurz pro $' : 'sh_cfg_usd_czk_rate');
+  setText('burza-refresh', cfg.crypto_refresh_s ? (cfg.crypto_refresh_s + ' s') : '—');
+
+  const coinsWrap = $('burza-coins');
+  if (!coinsWrap) return;
+
+  const coinList = cfg.crypto_coins ? String(cfg.crypto_coins).split(',').map(s => s.trim()).filter(Boolean) : [];
+  if (coinList.length === 0) {
+    coinsWrap.innerHTML = '<div style="grid-column:1/-1;color:var(--tx-3);font-size:13px;padding:8px;text-align:center;">Žádné mince. Nastav <code>sh_cfg_crypto_coins</code> (comma-separated).</div>';
+    setText('burza-fetcher-status', 'žádné coins');
+    return;
+  }
+
+  const COIN_META = {
+    bitcoin:  { sym: 'BTC', ico: '₿',  color: 'orange' },
+    ethereum: { sym: 'ETH', ico: 'Ξ',  color: 'purple' },
+    solana:   { sym: 'SOL', ico: '◎',  color: 'cyan' },
+    cardano:  { sym: 'ADA', ico: '₳',  color: 'blue' },
+    ripple:   { sym: 'XRP', ico: '✕',  color: 'gray' },
+    dogecoin: { sym: 'DOGE', ico: 'Ð', color: 'yellow' }
+  };
+
+  coinsWrap.innerHTML = coinList.map(c => {
+    const meta = COIN_META[c.toLowerCase()] || { sym: c.toUpperCase().slice(0,4), ico: '?', color: 'gray' };
+    const row = crypto[c] || {};
+    const priceUsd = row.price_usd;
+    const priceCzk = (priceUsd != null && cfg.usd_czk_rate) ? (Number(priceUsd) * Number(cfg.usd_czk_rate)) : null;
+    const change24 = row.change_24h;
+    const changeColor = change24 == null ? 'var(--tx-3)' : (change24 >= 0 ? 'var(--acc-green)' : 'var(--acc-red)');
+    const changeSign = change24 == null ? '' : (change24 >= 0 ? '+' : '');
+    return `
+      <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="stat-ico ${meta.color}" style="width:36px;height:36px;font-size:18px;">${meta.ico}</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;">${meta.sym}</div>
+              <div style="color:var(--tx-3);font-size:11px;">${c}</div>
+            </div>
+          </div>
+          <div style="color:${changeColor};font-size:12px;font-weight:600;font-family:var(--font-mono);">
+            ${change24 != null ? (changeSign + Number(change24).toFixed(2) + '%') : '—'}
+          </div>
+        </div>
+        <div style="font-size:18px;font-weight:700;">${priceUsd != null ? ('$' + Number(priceUsd).toLocaleString('cs-CZ',{maximumFractionDigits:2})) : '—'}</div>
+        <div style="color:var(--tx-3);font-size:12px;font-family:var(--font-mono);">${priceCzk != null ? (Number(priceCzk).toLocaleString('cs-CZ',{maximumFractionDigits:0}) + ' Kč') : ''}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Fetcher status
+  const lastTs = crypto.last_fetch_ts;
+  if (lastTs) {
+    const ageS = Math.floor(Date.now()/1000 - Number(lastTs));
+    setText('burza-fetcher-status', ageS < 120 ? 'aktivní (' + ageS + 's)' : 'stale (' + Math.floor(ageS/60) + 'min)');
+  } else {
+    setText('burza-fetcher-status', 'sh_crypto_fetcher_v1 not deployed');
+  }
+}
+
+// ── FINANCE ─────────────────────────────────────────────
+function renderFinanceDetail(energy, heating) {
+  const e = energy || {};
+  const h = heating || {};
+  const cfg = (DATA && DATA.cfg) || {};
+  const priceVt = Number(cfg.price_vt) || 5.48;
+  const priceNt = Number(cfg.price_nt) || 4.76;
+  const ntStart = Number(cfg.nt_start_hour) || 22;
+  const ntEnd   = Number(cfg.nt_end_hour) || 6;
+  const fixed   = Number(cfg.fixed_fee) || 735;
+
+  // Aktuální tarif (dle času)
+  const nowHour = new Date().getHours();
+  const inNt = (ntStart > ntEnd) ? (nowHour >= ntStart || nowHour < ntEnd) : (nowHour >= ntStart && nowHour < ntEnd);
+  const avgPrice = (priceVt * 16 + priceNt * 8) / 24;  // weighted day average
+
+  // 4 tiles
+  const kwhToday = e.kwh_today;
+  const kwhYest  = e.kwh_yesterday;
+  const kwhMonth = e.kwh_month;
+  setText('fin-kwh-today', kwhToday != null ? Number(kwhToday).toFixed(1) + ' kWh' : '—');
+  setText('fin-kzh-today-cost', kwhToday != null ? (Number(kwhToday) * avgPrice).toFixed(0) + ' Kč' : '—');
+  setText('fin-kwh-yesterday', kwhYest != null ? Number(kwhYest).toFixed(1) + ' kWh' : '—');
+  setText('fin-kwh-delta', (kwhToday != null && kwhYest != null) ? (() => {
+    const delta = Number(kwhToday) - Number(kwhYest);
+    const pct = Number(kwhYest) > 0 ? (delta / Number(kwhYest) * 100).toFixed(0) : '0';
+    const sign = delta >= 0 ? '+' : '';
+    return sign + delta.toFixed(1) + ' kWh (' + sign + pct + '%)';
+  })() : '—');
+  setText('fin-kwh-month', kwhMonth != null ? Number(kwhMonth).toFixed(0) + ' kWh' : '—');
+  setText('fin-kzh-month-cost', kwhMonth != null ? (Number(kwhMonth) * avgPrice + fixed).toFixed(0) + ' Kč' : '—');
+  // Projection (linear extrapolation from kwh_month + days_in_month)
+  const day = new Date().getDate();
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+  if (kwhMonth != null && day > 0) {
+    const proj = Number(kwhMonth) / day * daysInMonth;
+    setText('fin-kwh-projection', Math.round(proj) + ' kWh');
+    setText('fin-kwh-projection-cost', Math.round(proj * avgPrice + fixed) + ' Kč');
+  } else {
+    setText('fin-kwh-projection', '—');
+    setText('fin-kwh-projection-cost', '—');
+  }
+
+  // Tarif
+  setText('fin-price-nt', priceNt.toFixed(2) + ' Kč/kWh');
+  setText('fin-price-vt', priceVt.toFixed(2) + ' Kč/kWh');
+  setText('fin-fixed-fee', fixed + ' Kč');
+  setText('fin-tariff-now', inNt ? '🌙 NT (nízký)' : '☀ VT (vysoký)');
+  setText('fin-nt-window', String(ntStart).padStart(2,'0') + ':00 – ' + String(ntEnd).padStart(2,'0') + ':00');
+
+  // TOP 10 — z energy.per_device nebo e.top10
+  const top10Wrap = $('fin-top10');
+  if (top10Wrap) {
+    const top = Array.isArray(e.top10) ? e.top10 : (Array.isArray(e.per_device) ? e.per_device : []);
+    if (top.length === 0) {
+      top10Wrap.innerHTML = '<div style="color:var(--tx-3);font-size:13px;padding:8px;text-align:center;">TOP 10 data nejsou v bridge (potřebujeme energy.top10 nebo energy.per_device)</div>';
+      setText('fin-top-total', '—');
+    } else {
+      const sorted = top.slice().sort((a,b) => Number(b.kwh||b.power_w||0) - Number(a.kwh||a.power_w||0)).slice(0, 10);
+      const total = sorted.reduce((sum, x) => sum + Number(x.kwh || 0), 0);
+      setText('fin-top-total', total > 0 ? ('Celkem ' + total.toFixed(1) + ' kWh') : '—');
+      top10Wrap.innerHTML = sorted.map((x, i) => {
+        const kwh = Number(x.kwh || 0);
+        const pct = total > 0 ? (kwh / total * 100).toFixed(0) : 0;
+        const cost = (kwh * avgPrice).toFixed(0);
+        return `
+          <div class="activity-row">
+            <div class="activity-ico ${i < 3 ? 'red' : (i < 6 ? 'orange' : 'gray')}">${i+1}</div>
+            <div class="activity-info">
+              <div class="activity-title">${x.name || x.device || '—'}</div>
+              <div class="activity-sub">${kwh.toFixed(2)} kWh · ${pct}% celku · ${cost} Kč</div>
+            </div>
+            <div class="activity-time" style="font-family:var(--font-mono);">${x.power_w != null ? Math.round(x.power_w) + ' W' : ''}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Heating cost
+  const rt = Number(h.runtime_today_s || 0);
+  const rtMin = Math.floor(rt / 60);
+  const kotelKw = Number(cfg.heating_kotel_kw) || 9;
+  const heatingKwh = (rt / 3600) * kotelKw;
+  setText('fin-heating-runtime', rtMin + ' min');
+  setText('fin-heating-kwh', heatingKwh.toFixed(1) + ' kWh');
+  setText('fin-heating-cost', (heatingKwh * avgPrice).toFixed(0) + ' Kč');
+  const rtY = Number(h.runtime_yesterday_s || 0);
+  const rtYMin = Math.floor(rtY / 60);
+  const heatingKwhY = (rtY / 3600) * kotelKw;
+  setText('fin-heating-yesterday', rtYMin + ' min (' + heatingKwhY.toFixed(1) + ' kWh)');
+}
+
+// ── NASTAVENÍ ───────────────────────────────────────────
+const SET_CATEGORY_MAP = {
+  'heating':  ['sh_cfg_heating_'],
+  'lux':      ['sh_cfg_lux_', 'sh_cfg_blind_'],
+  'audio':    ['sh_cfg_audio_', 'sh_cfg_speaker_'],
+  'pm25':     ['sh_cfg_pm25_', 'sh_cfg_air_'],
+  'briefing': ['sh_cfg_briefing', 'sh_cfg_tts_'],
+  'crypto':   ['sh_cfg_crypto_', 'sh_cfg_usd_'],
+  'power':    ['sh_cfg_price_', 'sh_cfg_nt_', 'sh_cfg_fixed_', 'sh_cfg_power_', 'sh_cfg_energy_'],
+};
+let _settingsAll = []; // cache
+
+async function loadSettings() {
+  const status = $('set-status');
+  const list = $('set-list');
+  if (status) status.textContent = '⏳ Načítám proměnné z Homey...';
+  if (list) list.innerHTML = '';
+
+  if (CONFIG.demoMode) {
+    if (status) status.textContent = '(demo mode — použij live režim pro reálný editor)';
+    return;
+  }
+  if (!CFG.host || !CFG.token) {
+    if (status) status.textContent = '⚠️ Nejdřív nastav Host + Token v ⚙ Config overlay.';
+    return;
+  }
+
+  try {
+    const url = CFG.host.replace(/\/$/, '') + '/api/manager/logic/variable';
+    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + CFG.token } });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    const vars = json.result || json;
+    // Filter only sh_cfg_*
+    _settingsAll = Object.values(vars)
+      .filter(v => (v.name || '').startsWith('sh_cfg_'))
+      .sort((a,b) => (a.name || '').localeCompare(b.name || ''));
+    if (status) status.textContent = '✓ Staženo ' + _settingsAll.length + ' proměnných';
+    filterSettings();
+  } catch (e) {
+    if (status) status.textContent = '❌ Chyba: ' + e.message;
+  }
+}
+
+function filterSettings() {
+  const search = ($('set-search')?.value || '').toLowerCase().trim();
+  const cat    = $('set-category')?.value || '';
+  const prefixes = SET_CATEGORY_MAP[cat] || null;
+
+  const filtered = _settingsAll.filter(v => {
+    const n = (v.name || '').toLowerCase();
+    if (search && !n.includes(search)) return false;
+    if (prefixes) {
+      return prefixes.some(p => n.startsWith(p.toLowerCase()));
+    } else if (cat === 'other') {
+      // "other" = nic z výše uvedených kategorií
+      const allPrefixes = Object.values(SET_CATEGORY_MAP).flat().map(s => s.toLowerCase());
+      return !allPrefixes.some(p => n.startsWith(p));
+    }
+    return true;
+  });
+
+  setText('set-count', filtered.length + ' položek');
+  const list = $('set-list');
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = '<div style="color:var(--tx-3);font-size:13px;padding:16px;text-align:center;">Žádné položky. Zkus jiný filtr.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(v => {
+    const name = v.name || '';
+    const val  = v.value == null ? '' : String(v.value);
+    const type = v.type || 'string';
+    const typeColor = type === 'number' ? 'var(--acc-blue)' : (type === 'boolean' ? 'var(--acc-green)' : 'var(--acc-purple)');
+    const inputType = type === 'number' ? 'number' : 'text';
+    return `
+      <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px 14px;display:grid;grid-template-columns:1fr 200px auto;gap:12px;align-items:center;">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:12px;font-weight:600;">${name}</div>
+          <div style="color:${typeColor};font-size:10px;margin-top:2px;text-transform:uppercase;">${type}</div>
+        </div>
+        <input
+          id="set-val-${v.id}"
+          type="${inputType}"
+          value="${val.replace(/"/g, '&quot;')}"
+          style="padding:6px 10px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:12px;">
+        <button onclick="saveSetting('${v.id}','${name}','${type}')" style="padding:6px 14px;background:var(--acc-blue-soft);color:var(--acc-blue);border:1px solid var(--acc-blue);border-radius:var(--r-sm);cursor:pointer;font-size:12px;font-weight:600;">Uložit</button>
+      </div>
+    `;
+  }).join('');
+}
+
+async function saveSetting(id, name, type) {
+  const inp = $('set-val-' + id);
+  if (!inp) return;
+  let val = inp.value;
+  if (type === 'number') val = Number(val);
+  if (type === 'boolean') val = (String(val).toLowerCase() === 'true' || val === '1');
+  try {
+    const url = CFG.host.replace(/\/$/, '') + '/api/manager/logic/variable/' + id;
+    const res = await fetch(url, {
+      method: 'PUT',
+      headers: { 'Authorization': 'Bearer ' + CFG.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ value: val })
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    toast('✓ ' + name + ' uloženo');
+    // Update cache
+    const v = _settingsAll.find(x => x.id === id);
+    if (v) v.value = val;
+  } catch (e) {
+    toast('❌ ' + e.message);
+  }
+}
+
+
 
 // ── Historie page helpers ──
 const SHEETS_WEBAPP = 'https://script.google.com/macros/s/AKfycbw9Ow2BhcjKzo_PJzzQOpa_GirCMnTcnfTAyA0cL62b6FxJigYvsAT1uapSAT_rQvY8/exec';
