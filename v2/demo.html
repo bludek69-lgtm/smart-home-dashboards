@@ -1580,110 +1580,18 @@ body {
         </div>
       </div>
 
-      <!-- ROLETA manual controls + config (v1 port, 22.4. večer) -->
-      <div class="section-card" style="margin-top:16px;">
-        <div class="section-head">
-          <span class="section-title">🪟 ROLETA JÍDELNA — MANUAL CONTROLS</span>
-          <span class="section-action" id="roleta-state-badge">—</span>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
-          <button class="ctrl-btn" onclick="roletaSet(1.0)" title="Plně vytáhnout (100%)">
-            <div class="ctrl-ico green">⬆</div>
-            <div class="ctrl-text"><div class="ctrl-title">Vytáhnout</div><div class="ctrl-sub">100%</div></div>
-          </button>
-          <button class="ctrl-btn" onclick="roletaSet(0.5)" title="Šerovací pozice (50%)">
-            <div class="ctrl-ico yellow">☀</div>
-            <div class="ctrl-text"><div class="ctrl-title">Stínění</div><div class="ctrl-sub">50%</div></div>
-          </button>
-          <button class="ctrl-btn" onclick="roletaSet(0.2)" title="Privacy mode (20%)">
-            <div class="ctrl-ico purple">👤</div>
-            <div class="ctrl-text"><div class="ctrl-title">Privacy</div><div class="ctrl-sub">20%</div></div>
-          </button>
-          <button class="ctrl-btn" onclick="roletaSet(0.0)" title="Zavřít (0%)">
-            <div class="ctrl-ico gray">⬇</div>
-            <div class="ctrl-text"><div class="ctrl-title">Zavřít</div><div class="ctrl-sub">0%</div></div>
-          </button>
-        </div>
-        <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
-          <button class="section-action" onclick="roletaTrigger('privacy_recheck')" style="padding:6px 12px;background:var(--acc-blue-soft);color:var(--acc-blue);border:1px solid var(--acc-blue);">↺ Recheck auto-režim</button>
-          <button class="section-action" onclick="roletaTrigger('lux_changed')" style="padding:6px 12px;">🔅 Force lux check</button>
-          <span id="roleta-lux-info" style="color:var(--tx-3);font-size:12px;margin-left:8px;">Lux: —</span>
+      <!-- 🪟 Roleta Jídelna přesunuta do Zone Detail (klikni na zónu Jídelna v Přehledu) -->
+      <div class="section-card" style="margin-top:16px;background:linear-gradient(135deg,rgba(14,165,233,.08),rgba(59,130,246,.04));">
+        <div style="padding:14px;display:flex;gap:14px;align-items:center;">
+          <div style="font-size:32px;">🪟</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:14px;">Roleta Jídelna — přesunuta</div>
+            <div style="color:var(--tx-3);font-size:12px;margin-top:4px;">Roleta + config + manual controls najdeš po kliknutí na <b>zónu Jídelna</b> v Přehled page (kde patří).</div>
+          </div>
+          <button onclick="openZoneDetail('jidelna')" style="padding:8px 14px;background:var(--acc-blue-soft);color:var(--acc-blue);border:1px solid var(--acc-blue);border-radius:var(--r-sm);cursor:pointer;font-size:13px;">Otevřít Jídelnu →</button>
         </div>
       </div>
-
-      <div class="section-card" style="margin-top:16px;">
-        <div class="section-head">
-          <span class="section-title">⚙ ROLETA CONFIG (klikni hodnotu pro úpravu)</span>
-          <span class="section-action" onclick="toggleHelpV2('help-roleta-cfg')">ℹ Jak to funguje</span>
-        </div>
-        <div id="help-roleta-cfg" class="help-panel" style="display:none;background:var(--bg-3);padding:14px;border-radius:var(--r-md);margin-bottom:12px;color:var(--tx-2);font-size:13px;line-height:1.6;">
-          <b>Automatika rolety (pure lux logic od v3.8):</b><br>
-          • lux &gt; <code>sh_cfg_lux_roleta_shade</code> → stínění pozice <code>sh_cfg_blind_shade_position</code><br>
-          • lux &lt; <code>sh_cfg_lux_roleta_evening_close</code> → zavřít (0.0)<br>
-          • state=shade hysterezis: drží stínění dokud lux &lt; (shade − <code>sh_cfg_lux_roleta_hysteresis</code>)<br>
-          • Guards: spím=yes / away / scene kino/romantika/relax / okno open → skip<br>
-          <b>Sanity:</b> shade rozsah 20000-50000 (nižší nefunguje — oblačnost by spustila shade).
-        </div>
-        <div class="activity-list">
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_shade',' lux','int')">
-            <div class="activity-ico yellow">☀</div>
-            <div class="activity-info">
-              <div class="activity-title">Shade threshold (stínit od)</div>
-              <div class="activity-sub">Nad touto hodnotou roleta jde do polohy stínění</div>
-            </div>
-            <div class="activity-time" id="rcfg-shade-lux">—</div>
-          </div>
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_hysteresis',' lux','int')">
-            <div class="activity-ico orange">🌗</div>
-            <div class="activity-info">
-              <div class="activity-title">Hysterezis</div>
-              <div class="activity-sub">Drž stínění dokud lux neklesne o tuto hodnotu (anti-flicker)</div>
-            </div>
-            <div class="activity-time" id="rcfg-hyst">—</div>
-          </div>
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_evening_close',' lux','int')">
-            <div class="activity-ico purple">🌙</div>
-            <div class="activity-info">
-              <div class="activity-title">Evening close</div>
-              <div class="activity-sub">Pod touto hodnotou roleta zavře (tma)</div>
-            </div>
-            <div class="activity-time" id="rcfg-evening">—</div>
-          </div>
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_blind_shade_position','','float')">
-            <div class="activity-ico blue">📐</div>
-            <div class="activity-info">
-              <div class="activity-title">Shade position</div>
-              <div class="activity-sub">Poloha při stínění (0.0-1.0, default 0.5)</div>
-            </div>
-            <div class="activity-time" id="rcfg-shade">—</div>
-          </div>
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_blind_safety_threshold','','float')">
-            <div class="activity-ico cyan">🛡</div>
-            <div class="activity-info">
-              <div class="activity-title">Safety threshold</div>
-              <div class="activity-sub">Max zavření při okně otevřeném (0-1)</div>
-            </div>
-            <div class="activity-time" id="rcfg-safety">—</div>
-          </div>
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_open',' lux','int')">
-            <div class="activity-ico green">⬆</div>
-            <div class="activity-info">
-              <div class="activity-title">Morning open</div>
-              <div class="activity-sub">Ranní lux threshold pro otevření</div>
-            </div>
-            <div class="activity-time" id="rcfg-open">—</div>
-          </div>
-          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_morning',' lux','int')">
-            <div class="activity-ico cyan">🌅</div>
-            <div class="activity-info">
-              <div class="activity-title">Morning trigger lux</div>
-              <div class="activity-sub">Lux ve fázi morning — roleta se začne hýbat</div>
-            </div>
-            <div class="activity-time" id="rcfg-morning">—</div>
-          </div>
-        </div>
-      </div>
-        </section>
+    </section>
 
     <!-- ══════════ PAGE: BEZPEČNOST ══════════ -->
     <section class="page" data-page="bezpecnost">
@@ -2033,6 +1941,96 @@ body {
         <div class="section-head"><span class="section-title">⚡ AKCE</span></div>
         <div id="zd-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
           <!-- rendered JS -->
+        </div>
+      </div>
+
+      <!-- 🔥 TOPENÍ (jen pro zóny s TRV: jidelna/loznice/koupelna/toaleta) -->
+      <div id="zd-heating-section" class="section-card" style="margin-top:16px;display:none;">
+        <div class="section-head"><span class="section-title">🔥 TOPENÍ (TRV)</span></div>
+        <div id="zd-heating-content"><!-- render JS --></div>
+      </div>
+
+      <!-- 🪟 ROLETA (jen pro Jídelnu — port z Klima page) -->
+      <div id="zd-roleta-section" class="section-card" style="margin-top:16px;display:none;">
+        <div class="section-head">
+          <span class="section-title">🪟 ROLETA — MANUAL CONTROLS</span>
+          <span class="section-action" id="roleta-state-badge">—</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+          <button class="ctrl-btn" onclick="roletaSet(1.0)" title="Plně vytáhnout (100%)">
+            <div class="ctrl-ico green">⬆</div>
+            <div class="ctrl-text"><div class="ctrl-title">Vytáhnout</div><div class="ctrl-sub">100%</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="roletaSet(0.5)" title="Šerovací pozice (50%)">
+            <div class="ctrl-ico yellow">☀</div>
+            <div class="ctrl-text"><div class="ctrl-title">Stínění</div><div class="ctrl-sub">50%</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="roletaSet(0.2)" title="Privacy mode (20%)">
+            <div class="ctrl-ico purple">👤</div>
+            <div class="ctrl-text"><div class="ctrl-title">Privacy</div><div class="ctrl-sub">20%</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="roletaSet(0.0)" title="Zavřít (0%)">
+            <div class="ctrl-ico gray">⬇</div>
+            <div class="ctrl-text"><div class="ctrl-title">Zavřít</div><div class="ctrl-sub">0%</div></div>
+          </button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+          <button class="section-action" onclick="roletaTrigger('privacy_recheck')" style="padding:6px 12px;background:var(--acc-blue-soft);color:var(--acc-blue);border:1px solid var(--acc-blue);">↺ Recheck auto-režim</button>
+          <button class="section-action" onclick="roletaTrigger('lux_changed')" style="padding:6px 12px;">🔅 Force lux check</button>
+          <span id="roleta-lux-info" style="color:var(--tx-3);font-size:12px;">Lux: —</span>
+        </div>
+      </div>
+
+      <!-- 🪟 ROLETA CONFIG (klikni hodnotu pro úpravu) -->
+      <div id="zd-roleta-cfg-section" class="section-card" style="margin-top:16px;display:none;">
+        <div class="section-head">
+          <span class="section-title">⚙ ROLETA CONFIG (klikni hodnotu pro úpravu)</span>
+          <span class="section-action" onclick="toggleHelpV2('help-roleta-cfg-zd')">ℹ Jak to funguje</span>
+        </div>
+        <div id="help-roleta-cfg-zd" style="display:none;background:var(--bg-3);padding:14px;border-radius:var(--r-md);margin-bottom:12px;color:var(--tx-2);font-size:13px;line-height:1.6;">
+          <b>Automatika rolety (pure lux logic od v3.8):</b><br>
+          • lux &gt; <code>sh_cfg_lux_roleta_shade</code> → stínění pozice <code>sh_cfg_blind_shade_position</code><br>
+          • lux &lt; <code>sh_cfg_lux_roleta_evening_close</code> → zavřít (0.0)<br>
+          • state=shade hysterezis: drží stínění dokud lux &lt; (shade − hysteresis)<br>
+          • Guards: spím=yes / away / scene kino/romantika/relax / okno open → skip<br>
+          <b>Sanity:</b> shade rozsah 20000-50000 (nižší nefunguje).
+        </div>
+        <div class="activity-list">
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_shade',' lux','int')">
+            <div class="activity-ico yellow">☀</div>
+            <div class="activity-info"><div class="activity-title">Shade threshold (stínit od)</div><div class="activity-sub">Nad touto hodnotou roleta jde do polohy stínění</div></div>
+            <div class="activity-time" id="rcfg-shade-lux">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_hysteresis',' lux','int')">
+            <div class="activity-ico orange">🌗</div>
+            <div class="activity-info"><div class="activity-title">Hysterezis</div><div class="activity-sub">Drž stínění dokud lux neklesne o tuto hodnotu (anti-flicker)</div></div>
+            <div class="activity-time" id="rcfg-hyst">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_evening_close',' lux','int')">
+            <div class="activity-ico purple">🌙</div>
+            <div class="activity-info"><div class="activity-title">Evening close</div><div class="activity-sub">Pod touto hodnotou roleta zavře (tma)</div></div>
+            <div class="activity-time" id="rcfg-evening">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_blind_shade_position','','float')">
+            <div class="activity-ico blue">📐</div>
+            <div class="activity-info"><div class="activity-title">Shade position</div><div class="activity-sub">Poloha při stínění (0.0-1.0, default 0.5)</div></div>
+            <div class="activity-time" id="rcfg-shade">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_blind_safety_threshold','','float')">
+            <div class="activity-ico cyan">🛡</div>
+            <div class="activity-info"><div class="activity-title">Safety threshold</div><div class="activity-sub">Max zavření při okně otevřeném (0-1)</div></div>
+            <div class="activity-time" id="rcfg-safety">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_open',' lux','int')">
+            <div class="activity-ico green">⬆</div>
+            <div class="activity-info"><div class="activity-title">Morning open</div><div class="activity-sub">Ranní lux threshold pro otevření</div></div>
+            <div class="activity-time" id="rcfg-open">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_morning',' lux','int')">
+            <div class="activity-ico cyan">🌅</div>
+            <div class="activity-info"><div class="activity-title">Morning trigger lux</div><div class="activity-sub">Lux ve fázi morning — roleta se začne hýbat</div></div>
+            <div class="activity-time" id="rcfg-morning">—</div>
+          </div>
         </div>
       </div>
 
@@ -4725,6 +4723,50 @@ function openZoneDetail(zoneKey) {
     }
   }
 
+  // 🔥 TOPENÍ TRV (jen pro zóny s TRV: jidelna/loznice/koupelna/toaleta)
+  const heatSection = $('zd-heating-section');
+  const heatContent = $('zd-heating-content');
+  const heatZones = (DATA && DATA.heating && DATA.heating.zones) || {};
+  if (heatSection && heatContent && heatZones[zoneKey]) {
+    heatSection.style.display = '';
+    const z = heatZones[zoneKey];
+    const enabled = z.enabled !== false;
+    const curr = Number(z.current != null ? z.current : -99);
+    const tgt = Number(z.target != null ? z.target : 20);
+    const heating = enabled && (tgt - curr) > 0.3 && curr > 0;
+    const status = !enabled ? '❌ Vypnuto (anti-freeze)' : (heating ? '🔥 Topí' : '✓ Idle');
+    const statusCol = !enabled ? 'var(--acc-red)' : (heating ? 'var(--acc-orange)' : 'var(--acc-green)');
+    heatContent.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:center;">
+        <div><div style="color:var(--tx-3);font-size:11px;">Aktuální teplota</div><div style="font-size:24px;font-weight:700;margin-top:2px;">${curr > 0 ? curr.toFixed(1) + '°C' : '—'}</div></div>
+        <div><div style="color:var(--tx-3);font-size:11px;">Cílová teplota</div><div style="font-size:24px;font-weight:700;color:var(--acc-cyan);margin-top:2px;">${tgt.toFixed(1)}°C</div></div>
+        <div><div style="color:var(--tx-3);font-size:11px;">Stav</div><div style="font-size:14px;font-weight:600;color:${statusCol};margin-top:6px;">${status}</div></div>
+        <button onclick="toggleHeatingZoneV2('${zoneKey}')" title="Přepnout zóna topení ON/OFF" style="padding:8px 14px;background:var(--bg-2);border:1px solid ${enabled ? 'var(--acc-green)' : 'var(--acc-red)'};color:${enabled ? 'var(--acc-green)' : 'var(--acc-red)'};border-radius:var(--r-sm);cursor:pointer;font-size:12px;">${enabled ? '✅ ZAP' : '❌ VYP'}</button>
+      </div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button onclick="zoneBoostV2('${zoneKey}', 30)" title="+2 °C boost na 30 min" style="padding:6px 12px;background:var(--acc-red-soft,rgba(239,68,68,.15));color:var(--acc-red);border:1px solid var(--acc-red);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔥 Boost 30 min</button>
+        <button onclick="zoneBoostV2('${zoneKey}', 60)" title="+2 °C boost na 60 min" style="padding:6px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔥 Boost 60 min</button>
+      </div>
+    `;
+  } else if (heatSection) {
+    heatSection.style.display = 'none';
+  }
+
+  // 🪟 ROLETA (jen pro Jidelnu)
+  const roletaSection = $('zd-roleta-section');
+  const roletaCfgSection = $('zd-roleta-cfg-section');
+  if (roletaSection && roletaCfgSection) {
+    if (zoneKey === 'jidelna') {
+      roletaSection.style.display = '';
+      roletaCfgSection.style.display = '';
+      setTimeout(() => { try { renderRoletaCfg(); } catch(_){} }, 100);
+    } else {
+      roletaSection.style.display = 'none';
+      roletaCfgSection.style.display = 'none';
+    }
+  }
+
+
   // Actions
   const actEl = $('zd-actions');
   if (actEl) {
@@ -4749,6 +4791,147 @@ async function zoneAction(zoneKey, action) {
     toast('✗ ' + e.message);
   }
 }
+
+// Per-zone heating boost (port z v1 pattern) — 23.4. večer
+async function zoneBoostV2(zoneKey, minutes) {
+  try {
+    const until = Math.floor(Date.now() / 1000) + minutes * 60;
+    const z = (DATA && DATA.heating && DATA.heating.zones && DATA.heating.zones[zoneKey]) || {};
+    const curTgt = Number(z.target || 20);
+    const boostDelta = Number((DATA.cfg && DATA.cfg.heating_boost_delta) || 2);
+    await writeVar('sh_heating_zone_' + zoneKey + '_manual_override_temp', curTgt + boostDelta);
+    await writeVar('sh_heating_zone_' + zoneKey + '_manual_override_until_ts0', until);
+    toast('🔥 ' + zoneKey + ' boost +' + boostDelta + '°C / ' + minutes + ' min');
+    // Re-render zone detail to show new state
+    setTimeout(() => { if (_currentZoneDetail === zoneKey) openZoneDetail(zoneKey); }, 300);
+  } catch (e) {
+    toast('✗ ' + e.message);
+  }
+}
+
+// ── ROLETA controls ─────────────────────────────────────
+async function roletaSet(targetFloat) {
+  // Target 0-1, směřuje přímo na Roleta Fyrtur1 device přes setDeviceCap (windowcoverings_set)
+  try {
+    // Find camera / find blind device via DATA.rooms.jidelna.devices?
+    const blindName = 'Roleta Fyrtur1';  // from sh_device_map BLIND_DINING
+    const devices = DATA && DATA.rooms && DATA.rooms.jidelna ? DATA.rooms.jidelna.devices : null;
+    // v2 nemá přímý device lookup, takže pošleme přes sh_jidelna_roleta_trigger var s manual_pos
+    // Nejlepší — přes runScript sh_jidelna_roleta_voice_v1 (existuje) nebo přímo writeVar
+    // V1 používal sendReq → sh_jidelna_roleta_trigger. Here simulate:
+    await writeVar('sh_jidelna_roleta_manual_pos', targetFloat);
+    await writeVar('sh_jidelna_roleta_trigger', 'manual_' + Math.round(targetFloat * 100));
+    toast('🪟 Roleta → ' + Math.round(targetFloat * 100) + '%');
+  } catch (e) {
+    toast('✗ Roleta: ' + e.message);
+  }
+}
+
+async function roletaTrigger(event) {
+  try {
+    await writeVar('sh_jidelna_roleta_trigger', event);
+    toast('🪟 Roleta: ' + event);
+  } catch (e) {
+    toast('✗ ' + e.message);
+  }
+}
+
+// ── ROLETA CONFIG — inline editor (port z v1 editRoletaCfgInline) ─────
+function renderRoletaCfg() {
+  const mapping = [
+    ['rcfg-safety',    'sh_cfg_blind_safety_threshold', '',    'float'],
+    ['rcfg-shade',     'sh_cfg_blind_shade_position',   '',    'float'],
+    ['rcfg-morning',   'sh_cfg_lux_roleta_morning',     ' lux','int'],
+    ['rcfg-open',      'sh_cfg_lux_roleta_open',        ' lux','int'],
+    ['rcfg-shade-lux', 'sh_cfg_lux_roleta_shade',       ' lux','int'],
+    ['rcfg-evening',   'sh_cfg_lux_roleta_evening_close',' lux','int'],
+    ['rcfg-hyst',      'sh_cfg_lux_roleta_hysteresis',  ' lux','int'],
+  ];
+  const cfg = (DATA && DATA.cfg) || {};
+  const fromSettings = _settingsAll && _settingsAll.length ? _settingsAll : null;
+  for (const [id, name, suffix, type] of mapping) {
+    const el = $(id);
+    if (!el) continue;
+    let val = null;
+    // 1) Try DATA.cfg (bridge v1.11)
+    const cfgKey = name.replace('sh_cfg_', '');
+    if (cfg[cfgKey] != null) val = cfg[cfgKey];
+    // 2) Fallback: _settingsAll (pokud user už loadSettings)
+    if (val == null && fromSettings) {
+      const found = fromSettings.find(v => v.name === name);
+      if (found) val = found.value;
+    }
+    el.textContent = (val != null && val !== '') ? (String(val) + suffix) : '—';
+  }
+  // Lux indicator
+  const luxEl = $('roleta-lux-info');
+  if (luxEl) {
+    const lux = (DATA && DATA.rooms && DATA.rooms.jidelna && DATA.rooms.jidelna.lux);
+    luxEl.textContent = 'Lux: ' + (lux != null ? lux : '—');
+  }
+  // State badge
+  const stEl = $('roleta-state-badge');
+  if (stEl && DATA && DATA.rooms && DATA.rooms.jidelna) {
+    const pos = DATA.rooms.jidelna.blind;
+    if (pos != null) stEl.textContent = 'Pozice: ' + Math.round(pos * 100) + '%';
+  }
+}
+
+async function editRoletaCfgV2(row, varName, suffix, type) {
+  if (!row || row.dataset.editing === '1') return;
+  const timeEl = row.querySelector('.activity-time');
+  if (!timeEl) return;
+  row.dataset.editing = '1';
+  const origText = timeEl.textContent;
+  // Extract current numeric
+  const curNum = parseFloat(String(origText).replace(suffix, '').trim()) || 0;
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.step = type === 'float' ? '0.05' : '1';
+  input.value = curNum;
+  input.style.cssText = 'width:100px;padding:4px 8px;background:var(--bg-2);border:1px solid var(--acc-cyan);border-radius:var(--r-sm);color:var(--tx-1);font-family:var(--font-mono);font-size:12px;text-align:right;outline:none;';
+  timeEl.textContent = '';
+  timeEl.appendChild(input);
+  input.focus();
+  input.select();
+
+  const cleanup = (newText) => {
+    row.dataset.editing = '0';
+    timeEl.textContent = newText;
+  };
+
+  const save = async () => {
+    const raw = input.value;
+    const num = type === 'float' ? parseFloat(raw) : parseInt(raw, 10);
+    if (isNaN(num)) { cleanup(origText); toast('✗ Neplatné číslo'); return; }
+    if (String(num) === String(curNum)) { cleanup(origText); return; }
+    try {
+      const ok = await writeVar(varName, num);
+      if (ok !== false) {
+        cleanup(String(num) + suffix);
+        timeEl.style.color = 'var(--acc-green)';
+        setTimeout(() => { timeEl.style.color = ''; }, 1500);
+        toast('✓ ' + varName + ' = ' + num);
+        // Update DATA.cfg cache
+        if (DATA && DATA.cfg) DATA.cfg[varName.replace('sh_cfg_', '')] = num;
+      } else {
+        cleanup(origText);
+        toast('✗ Nelze uložit');
+      }
+    } catch (e) {
+      cleanup(origText);
+      toast('✗ ' + e.message);
+    }
+  };
+
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') save();
+    else if (ev.key === 'Escape') cleanup(origText);
+  });
+  input.addEventListener('blur', save);
+}
+
 
 // ── ROLETA controls ─────────────────────────────────────
 async function roletaSet(targetFloat) {
