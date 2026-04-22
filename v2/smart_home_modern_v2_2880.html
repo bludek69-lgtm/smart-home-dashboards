@@ -1038,6 +1038,23 @@ body {
   </div>
 </div>
 
+<!-- ══════════ ZONE HELP MODAL (22.4. večer — port z v1 ZONE_HELP) ══════════ -->
+<div id="zone-help-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,15,28,0.85);backdrop-filter:blur(8px);z-index:999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg-2);border:1px solid var(--border-acc);border-radius:var(--r-lg);padding:var(--sp-6);max-width:680px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:var(--sp-4);">
+      <h2 id="zone-help-title" style="font-size:var(--fs-lg);color:var(--tx-1);margin:0;">Zone help</h2>
+      <button onclick="closeZoneHelp()" style="background:transparent;border:0;color:var(--tx-3);font-size:22px;cursor:pointer;line-height:1;">✕</button>
+    </div>
+    <div id="zone-help-items" style="color:var(--tx-2);font-size:14px;line-height:1.7;margin-bottom:var(--sp-4);">
+      <!-- rendered JS -->
+    </div>
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;">
+      <div style="color:var(--tx-3);font-size:11px;text-transform:uppercase;font-weight:600;margin-bottom:6px;">Flow / Automatizace</div>
+      <div id="zone-help-flow" style="color:var(--tx-2);font-size:13px;line-height:1.6;">—</div>
+    </div>
+  </div>
+</div>
+
 <div class="app">
 
   <!-- ══════════ SIDEBAR ══════════ -->
@@ -1279,6 +1296,17 @@ body {
 
     </div>
 
+    <!-- ══════════ ZONES — 9 místností (22.4. večer port z v1) ══════════ -->
+    <div class="section-card" style="margin-top:16px;">
+      <div class="section-head">
+        <span class="section-title">🏡 ZÓNY DOMU</span>
+        <span class="section-action" style="color:var(--tx-3);font-size:11px;">Klikni zónu pro info · ℹ pro detail automatizací</span>
+      </div>
+      <div id="zones-grid-v2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
+        <!-- rendered by renderZonesV2() -->
+      </div>
+    </div>
+
     </section>
 
     <!-- ══════════ PAGE: OSVĚTLENÍ ══════════ -->
@@ -1438,7 +1466,111 @@ body {
           </div>
         </div>
       </div>
-    </section>
+
+      <!-- ROLETA manual controls + config (v1 port, 22.4. večer) -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">🪟 ROLETA JÍDELNA — MANUAL CONTROLS</span>
+          <span class="section-action" id="roleta-state-badge">—</span>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;">
+          <button class="ctrl-btn" onclick="roletaSet(1.0)" title="Plně vytáhnout (100%)">
+            <div class="ctrl-ico green">⬆</div>
+            <div class="ctrl-text"><div class="ctrl-title">Vytáhnout</div><div class="ctrl-sub">100%</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="roletaSet(0.5)" title="Šerovací pozice (50%)">
+            <div class="ctrl-ico yellow">☀</div>
+            <div class="ctrl-text"><div class="ctrl-title">Stínění</div><div class="ctrl-sub">50%</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="roletaSet(0.2)" title="Privacy mode (20%)">
+            <div class="ctrl-ico purple">👤</div>
+            <div class="ctrl-text"><div class="ctrl-title">Privacy</div><div class="ctrl-sub">20%</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="roletaSet(0.0)" title="Zavřít (0%)">
+            <div class="ctrl-ico gray">⬇</div>
+            <div class="ctrl-text"><div class="ctrl-title">Zavřít</div><div class="ctrl-sub">0%</div></div>
+          </button>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center;margin-bottom:10px;">
+          <button class="section-action" onclick="roletaTrigger('privacy_recheck')" style="padding:6px 12px;background:var(--acc-blue-soft);color:var(--acc-blue);border:1px solid var(--acc-blue);">↺ Recheck auto-režim</button>
+          <button class="section-action" onclick="roletaTrigger('lux_changed')" style="padding:6px 12px;">🔅 Force lux check</button>
+          <span id="roleta-lux-info" style="color:var(--tx-3);font-size:12px;margin-left:8px;">Lux: —</span>
+        </div>
+      </div>
+
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">⚙ ROLETA CONFIG (klikni hodnotu pro úpravu)</span>
+          <span class="section-action" onclick="toggleHelpV2('help-roleta-cfg')">ℹ Jak to funguje</span>
+        </div>
+        <div id="help-roleta-cfg" class="help-panel" style="display:none;background:var(--bg-3);padding:14px;border-radius:var(--r-md);margin-bottom:12px;color:var(--tx-2);font-size:13px;line-height:1.6;">
+          <b>Automatika rolety (pure lux logic od v3.8):</b><br>
+          • lux &gt; <code>sh_cfg_lux_roleta_shade</code> → stínění pozice <code>sh_cfg_blind_shade_position</code><br>
+          • lux &lt; <code>sh_cfg_lux_roleta_evening_close</code> → zavřít (0.0)<br>
+          • state=shade hysterezis: drží stínění dokud lux &lt; (shade − <code>sh_cfg_lux_roleta_hysteresis</code>)<br>
+          • Guards: spím=yes / away / scene kino/romantika/relax / okno open → skip<br>
+          <b>Sanity:</b> shade rozsah 20000-50000 (nižší nefunguje — oblačnost by spustila shade).
+        </div>
+        <div class="activity-list">
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_shade',' lux','int')">
+            <div class="activity-ico yellow">☀</div>
+            <div class="activity-info">
+              <div class="activity-title">Shade threshold (stínit od)</div>
+              <div class="activity-sub">Nad touto hodnotou roleta jde do polohy stínění</div>
+            </div>
+            <div class="activity-time" id="rcfg-shade-lux">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_hysteresis',' lux','int')">
+            <div class="activity-ico orange">🌗</div>
+            <div class="activity-info">
+              <div class="activity-title">Hysterezis</div>
+              <div class="activity-sub">Drž stínění dokud lux neklesne o tuto hodnotu (anti-flicker)</div>
+            </div>
+            <div class="activity-time" id="rcfg-hyst">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_evening_close',' lux','int')">
+            <div class="activity-ico purple">🌙</div>
+            <div class="activity-info">
+              <div class="activity-title">Evening close</div>
+              <div class="activity-sub">Pod touto hodnotou roleta zavře (tma)</div>
+            </div>
+            <div class="activity-time" id="rcfg-evening">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_blind_shade_position','','float')">
+            <div class="activity-ico blue">📐</div>
+            <div class="activity-info">
+              <div class="activity-title">Shade position</div>
+              <div class="activity-sub">Poloha při stínění (0.0-1.0, default 0.5)</div>
+            </div>
+            <div class="activity-time" id="rcfg-shade">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_blind_safety_threshold','','float')">
+            <div class="activity-ico cyan">🛡</div>
+            <div class="activity-info">
+              <div class="activity-title">Safety threshold</div>
+              <div class="activity-sub">Max zavření při okně otevřeném (0-1)</div>
+            </div>
+            <div class="activity-time" id="rcfg-safety">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_open',' lux','int')">
+            <div class="activity-ico green">⬆</div>
+            <div class="activity-info">
+              <div class="activity-title">Morning open</div>
+              <div class="activity-sub">Ranní lux threshold pro otevření</div>
+            </div>
+            <div class="activity-time" id="rcfg-open">—</div>
+          </div>
+          <div class="activity-row" style="cursor:pointer;" onclick="editRoletaCfgV2(this,'sh_cfg_lux_roleta_morning',' lux','int')">
+            <div class="activity-ico cyan">🌅</div>
+            <div class="activity-info">
+              <div class="activity-title">Morning trigger lux</div>
+              <div class="activity-sub">Lux ve fázi morning — roleta se začne hýbat</div>
+            </div>
+            <div class="activity-time" id="rcfg-morning">—</div>
+          </div>
+        </div>
+      </div>
+        </section>
 
     <!-- ══════════ PAGE: BEZPEČNOST ══════════ -->
     <section class="page" data-page="bezpecnost">
@@ -2273,6 +2405,8 @@ function updateUI(d) {
   renderPocasiDetail(d.weather || {});
   renderBurzaDetail(d);
   renderFinanceDetail(d.energy || {}, d.heating || {});
+  renderZonesV2(d.rooms || {});
+  renderRoletaCfg();  // v Klima page
   // settings page loads on-demand via button
 }
 
@@ -2832,6 +2966,870 @@ function renderFinanceDetail(energy, heating) {
   setText('fin-heating-yesterday', rtYMin + ' min (' + heatingKwhY.toFixed(1) + ' kWh)');
 }
 
+// ── Zone cards grid — port z v1 (22.4. večer) ───────────────
+const ZONE_META_V2 = [
+  { key: 'jidelna',  icon: '🛋', name: 'Jídelna / Open Space', sub: 'Roleta · světla · lux' },
+  { key: 'kitchen',  icon: '🍳', name: 'Kuchyně',              sub: 'Radio · lednice · purifier' },
+  { key: 'bedroom',  icon: '🛏', name: 'Ložnice',              sub: 'TV · sunrise · zvlhčovač' },
+  { key: 'bathroom', icon: '🚿', name: 'Koupelna',             sub: 'Radio · TRV · Giuseppe' },
+  { key: 'pracovna', icon: '💻', name: 'Pracovna',             sub: 'PC · Pomodoro · xiaomi btn' },
+  { key: 'pradelna', icon: '🧺', name: 'Prádelna',             sub: 'Boiler · pračka · myčka' },
+  { key: 'predsin',  icon: '🚪', name: 'Předsíň',              sub: 'Dveře · kamera · vstup' },
+  { key: 'toilet',   icon: '🚽', name: 'Toaleta',              sub: 'Motion · TRV · cluster' },
+  { key: 'spolecne', icon: '🏠', name: 'Společné',             sub: 'Cube · scény · presence' },
+];
+
+function renderZonesV2(rooms) {
+  const wrap = $('zones-grid-v2');
+  if (!wrap) return;
+  wrap.innerHTML = ZONE_META_V2.map(z => {
+    const r = rooms[z.key] || {};
+    const chips = [];
+    // Motion
+    if (r.motion === true || r.motion === 'yes') chips.push('<span style="color:var(--acc-green);font-size:11px;">🚶 aktivní</span>');
+    else if (r.motion === false) chips.push('<span style="color:var(--tx-3);font-size:11px;">🚶 klid</span>');
+    // Temp
+    if (r.temp != null) chips.push('<span style="color:var(--tx-2);font-size:11px;">🌡 ' + Number(r.temp).toFixed(1) + '°</span>');
+    // Humidity
+    if (r.humidity != null) chips.push('<span style="color:var(--acc-cyan);font-size:11px;">💧 ' + Math.round(r.humidity) + '%</span>');
+    // Lux
+    if (r.lux != null) chips.push('<span style="color:var(--acc-yellow);font-size:11px;">☀ ' + r.lux + '</span>');
+    // Lights on count
+    if (r.lights_on != null) chips.push('<span style="color:' + (r.lights_on > 0 ? 'var(--acc-yellow)' : 'var(--tx-3)') + ';font-size:11px;">💡 ' + r.lights_on + '</span>');
+    // Speaker playing
+    if (r.speaker_playing === true) chips.push('<span style="color:var(--acc-purple);font-size:11px;">🔊 hraje</span>');
+
+    const chipsHtml = chips.length ? chips.join(' · ') : '<span style="color:var(--tx-3);font-size:11px;opacity:.5;">bez dat</span>';
+
+    return `
+      <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;position:relative;cursor:pointer;" onclick="openZoneHelp('${z.key}')">
+        <button onclick="event.stopPropagation();openZoneHelp('${z.key}')" title="Info o automatizacích" style="position:absolute;top:10px;right:10px;background:transparent;border:0;color:var(--tx-3);font-size:16px;cursor:pointer;padding:0;line-height:1;">ℹ</button>
+        <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;">
+          <div style="font-size:28px;line-height:1;">${z.icon}</div>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:14px;margin-top:2px;">${z.name}</div>
+            <div style="color:var(--tx-3);font-size:11px;margin-top:2px;">${z.sub}</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border-soft);">
+          ${chipsHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 53+ Detail page renderers                        ║
+// ╚════════════════════════════════════════════════════════╝
+function renderOsvetleniDetail(lights) {
+  const el = $('osvetleni-grid');
+  if (!el) return;
+  el.innerHTML = lights.map(l => {
+    const pct = Math.round(l.dim * 100);
+    return `
+    <div class="light-tile ${l.on ? '' : 'off'}" style="padding:16px;">
+      <div class="light-row">
+        <div class="light-bulb ${l.on ? 'on' : ''}">💡</div>
+        <div class="light-name">${l.name}</div>
+        <div class="light-state ${l.on ? 'on' : 'off'}">${l.on ? 'ON' : 'OFF'}</div>
+      </div>
+      <div class="light-pct">${pct}%</div>
+      <input class="slider" type="range" min="0" max="100" value="${pct}"
+             oninput="lightDim('${l.id}', this.value, this)"
+             onchange="lightDim('${l.id}', this.value, this)">
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="audio-btn" onclick="lightDim('${l.id}', 100, null)" title="Plný jas">☀</button>
+        <button class="audio-btn" onclick="lightDim('${l.id}', 50, null)" title="50%">◐</button>
+        <button class="audio-btn" onclick="lightDim('${l.id}', 20, null)" title="Dim">🌙</button>
+        <button class="audio-btn" onclick="lightDim('${l.id}', 0, null)" title="Off">⏻</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAudioDetail(audio) {
+  const el = $('audio-list-full');
+  if (!el) return;
+  el.innerHTML = audio.map(a => {
+    const playIco = a.playing ? '⏸' : '▶';
+    return `
+    <div class="audio-card">
+      <div class="audio-head">
+        <div class="audio-ico ${a.playing ? '' : 'off'}">${a.playing ? '🔊' : '🔇'}</div>
+        <div class="audio-info">
+          <div class="audio-zone-name">${a.name}</div>
+          <div class="audio-source ${a.playing ? 'playing' : ''}">${a.source || 'Idle'}</div>
+        </div>
+      </div>
+      <div class="audio-controls">
+        <div class="audio-btn" onclick="audioSkip('${a.id}', 'prev')">⏮</div>
+        <div class="audio-btn primary" onclick="audioToggle('${a.id}')">${playIco}</div>
+        <div class="audio-btn" onclick="audioSkip('${a.id}', 'next')">⏭</div>
+        <input class="audio-vol-slider" type="range" min="0" max="100" value="${a.volume}"
+               oninput="audioVol('${a.id}', this.value)">
+        <div class="audio-vol-val">${a.volume}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderKlimaDetail(klima, heating) {
+  const el = $('klima-list-full');
+  if (!el) return;
+  el.innerHTML = klima.map(k => `
+    <div class="klima-card">
+      <div class="klima-head">
+        <div class="klima-room">${k.room}</div>
+        <div class="klima-target">${k.target.toFixed(1)}<span class="klima-target-unit"> °C</span></div>
+      </div>
+      <div class="klima-current">Aktuálně ${k.current.toFixed(1)} °C · fan ${k.fan || 'auto'}</div>
+      <div class="klima-ctrl">
+        <div class="klima-btn" onclick="klimaAdj('${k.id}', -0.5)">˅</div>
+        <div class="klima-btn fan" title="Ventilátor: ${k.fan}">🌀</div>
+        <div class="klima-btn" onclick="klimaAdj('${k.id}', +0.5)">˄</div>
+      </div>
+    </div>
+  `).join('');
+  const status = $('heating-master-status');
+  if (status && heating) {
+    status.textContent = `mode: ${heating.mode || '—'} · preset: ${heating.preset || '—'} · boiler: ${heating.boiler || '—'}`;
+  }
+
+  // Týdenní schedule (jednoduchý viewer — demo/default Pro/Víkend)
+  renderHeatingSchedule(klima, heating);
+
+  // Purifier + Humidifier
+  const app = (DATA || {}).appliances || {};
+  const purifier = app.purifier || {};
+  const humid = app.humidifier || {};
+  const pState = $('klima-purifier-state');
+  if (pState) {
+    pState.textContent = purifier.on ? 'ON' : 'OFF';
+    pState.style.color = purifier.on ? 'var(--acc-green)' : 'var(--tx-3)';
+  }
+  setText('klima-purifier-sub', purifier.on
+    ? `Filtruje · ${purifier.temp != null ? purifier.temp + '°C · ' : ''}${purifier.hum != null ? purifier.hum + '% RH' : ''}`
+    : 'Vypnuto · auto dle PM2.5');
+
+  const hState = $('klima-humid-state');
+  if (hState) {
+    hState.textContent = humid.on ? 'ON' : 'OFF';
+    hState.style.color = humid.on ? 'var(--acc-cyan)' : 'var(--tx-3)';
+  }
+  setText('klima-humid-sub', humid.on
+    ? `Zvlhčuje · ${humid.power != null ? Math.round(humid.power) + ' W' : ''}`
+    : 'Vypnuto · spustí se při <35% RH');
+}
+
+function renderHeatingSchedule(klima, heating) {
+  const tbody = $('klima-schedule-body');
+  if (!tbody) return;
+
+  // Default schedule — ráno comfort, den eco, večer comfort, noc night
+  // Per-zone rozdíly
+  const defaultSchedule = {
+    jidelna:  { day: '21°', night: '18°', eco: '16°' },
+    koupelna: { day: '22°', night: '19°', eco: '16°' },
+    toaleta:  { day: '18°', night: '16°', eco: '16°' },
+    loznice:  { day: '19°', night: '17°', eco: '16°' },
+  };
+
+  // Pro každou enabled zónu
+  const zones = klima.filter(k => k.id).slice(0, 4);
+  tbody.innerHTML = zones.map(z => {
+    const ds = defaultSchedule[z.id] || { day: '20°', night: '18°', eco: '16°' };
+    const weekdays = `<td style="padding:8px;text-align:center;background:var(--acc-green-soft);color:var(--acc-green);border-right:1px solid var(--border-soft);">${ds.day}</td>`;
+    const weekend = `<td style="padding:8px;text-align:center;background:var(--acc-blue-soft);color:var(--acc-blue);border-right:1px solid var(--border-soft);">${ds.day}</td>`;
+    return `
+      <tr>
+        <td style="padding:8px;font-weight:var(--fw-semibold);color:var(--tx-1);border-right:1px solid var(--border-soft);">${z.room}</td>
+        ${weekdays}${weekdays}${weekdays}${weekdays}${weekdays}${weekend}${weekend}
+      </tr>`;
+  }).join('');
+}
+
+function renderCamsDetail(cams) {
+  const el = $('cams-grid-full');
+  if (!el) return;
+  el.innerHTML = cams.map(c => `
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;" onclick="camOpen('${c.id}')">
+      <div style="height:180px;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));display:grid;place-items:center;position:relative;">
+        <span class="cam-live-badge" style="top:8px;left:8px;font-size:10px;padding:3px 8px;">LIVE</span>
+        <span style="font-size:48px;opacity:0.3;">📹</span>
+      </div>
+      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:600;">${c.name}</div>
+          <div style="font-size:11px;color:var(--tx-3);font-family:var(--font-mono);">${c.time || ''}</div>
+        </div>
+        <span style="color:var(--tx-3);">▸</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderScenyDetail(scenes) {
+  const el = $('sceny-grid');
+  if (!el) return;
+  el.innerHTML = scenes.map(s => `
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;cursor:pointer;transition:all 180ms;" onclick="sceneRun('${s.id}')" onmouseenter="this.style.background='var(--surface-hover)'" onmouseleave="this.style.background='var(--bg-3)'">
+      <div class="scene-ico ${s.color}" style="width:48px;height:48px;font-size:22px;margin-bottom:12px;">${s.ico}</div>
+      <div style="font-weight:600;font-size:16px;margin-bottom:4px;">${s.name}</div>
+      <div style="color:var(--tx-3);font-size:12px;">Klikni pro aktivaci ▸</div>
+    </div>
+  `).join('');
+}
+
+function renderEnergieDetail(energy, health) {
+  const d = DATA || {};
+
+  // 4 stat tiles top
+  const pw = health.power_total != null ? Math.round(health.power_total) : null;
+  setText('en-now-val', pw != null ? pw + ' W' : '—');
+  // sub — Kč/hod (průměr 4.90 Kč/kWh)
+  const costPerH = pw != null ? ((pw / 1000) * 4.90).toFixed(2) : null;
+  setText('en-now-sub', costPerH != null ? costPerH + ' Kč/h' : 'Live spotřeba');
+
+  setText('en-today-val', energy.kwh_today != null ? Number(energy.kwh_today).toFixed(1) + ' kWh' : '—');
+  setText('en-yest-val', energy.kwh_yesterday != null ? Number(energy.kwh_yesterday).toFixed(1) + ' kWh' : '—');
+  const delta = energy.delta_pct;
+  const deltaEl = $('en-delta-val');
+  if (deltaEl) {
+    if (typeof delta === 'number') {
+      const arrow = delta < 0 ? '↓' : '↑';
+      deltaEl.textContent = arrow + ' ' + Math.abs(delta) + '%';
+      deltaEl.style.color = delta < 0 ? 'var(--acc-green)' : 'var(--acc-orange)';
+    } else {
+      deltaEl.textContent = '—';
+    }
+  }
+
+  // Měsíční data
+  const finance = d.finance || {};
+  setHTML('en-month-kwh', (finance.month_kwh != null ? finance.month_kwh.toFixed(1) : '—') + ' <span style="font-size:14px;color:var(--tx-3);">kWh</span>');
+  setHTML('en-month-price', (finance.month_price != null ? finance.month_price.toFixed(0) : '—') + ' <span style="font-size:14px;color:var(--tx-3);">Kč</span>');
+  setText('en-month-proj', finance.month_projection != null ? '~' + finance.month_projection.toFixed(0) + ' Kč' : '—');
+
+  // TOP 10 spotřebičů
+  const top = d.top_devices || deriveTopDevices(d);
+  const el = $('en-top-list');
+  if (el) {
+    el.innerHTML = top.slice(0, 10).map((t, i) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      return `
+      <div class="activity-row">
+        <div class="activity-ico ${t.color || 'blue'}">${t.ico || '⚡'}</div>
+        <div class="activity-info">
+          <div class="activity-title">${medal} ${t.name}</div>
+          <div class="activity-sub">${t.power != null ? Math.round(t.power) + ' W' : '—'}</div>
+        </div>
+        <div class="activity-time">${t.power != null ? ((t.power / 1000) * 4.90 * 24).toFixed(0) + ' Kč/den' : ''}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// Derive top devices from live plugs + appliances data
+function deriveTopDevices(d) {
+  const out = [];
+  const plugMeta = {
+    oven:     { name: 'Trouba',        ico: '🍞', color: 'orange' },
+    micro:    { name: 'Mikrovlnka',    ico: '📡', color: 'yellow' },
+    fridge:   { name: 'Lednice',       ico: '🧊', color: 'blue' },
+    coffee:   { name: 'Kávovar',       ico: '☕', color: 'orange' },
+    tv:       { name: 'TV',            ico: '📺', color: 'purple' },
+    humidifier:{ name: 'Zvlhčovač',    ico: '💧', color: 'cyan' },
+    boiler:   { name: 'Boiler',        ico: '🔥', color: 'red' },
+    washer:   { name: 'Pračka',        ico: '🫧', color: 'cyan' },
+    office:   { name: 'Pracovna PC',   ico: '💻', color: 'blue' },
+  };
+  for (const [k, v] of Object.entries(d.plugs || {})) {
+    if (!v || typeof v.power !== 'number') continue;
+    const meta = plugMeta[k] || { name: k, ico: '⚡', color: 'blue' };
+    out.push({ name: meta.name, power: v.power, ico: meta.ico, color: meta.color });
+  }
+  out.sort((a, b) => (b.power || 0) - (a.power || 0));
+  return out;
+}
+
+function renderSystemDetail(d) {
+  const health = d.health || {};
+  const ai = d.ai || {};
+  const overrides = d.overrides || {};
+
+  // Top stats
+  const score = Number(health.score || 0);
+  setText('sys-health-val', score + '%');
+  const ico = $('sys-health-ico');
+  if (ico) {
+    ico.textContent = score >= 90 ? '🛡' : score >= 70 ? '⚠️' : '🔴';
+    ico.className = 'stat-ico ' + (score >= 90 ? 'green' : score >= 70 ? 'orange' : 'red');
+  }
+  setText('sys-errors-val', health.errors_30m != null ? health.errors_30m : 0);
+  setText('sys-power-val', health.power_total != null ? Math.round(health.power_total) + ' W' : '—');
+  setText('sys-offline-val', (d.offline || []).length);
+
+  // AI moduly last action (truncated)
+  const trunc = (s, n) => String(s || '—').substring(0, n);
+  setText('sys-meta-sub', trunc(ai.meta_last || ai.last_decision, 26));
+  setText('sys-predict-sub', trunc(ai.predict_last, 26));
+  setText('sys-coord-sub', trunc(ai.coord_last, 26));
+
+  // Overrides states (ON/OFF pills)
+  const pill = (val) => {
+    const on = String(val || '').toLowerCase() === 'yes' || val === true;
+    return `<span style="padding:2px 8px;border-radius:var(--r-full);font-size:10px;font-weight:600;background:${on ? 'var(--acc-green-soft)' : 'var(--bg-2)'};color:${on ? 'var(--acc-green)' : 'var(--tx-3)'};">${on ? 'ON' : 'OFF'}</span>`;
+  };
+  setHTML('ov-light', pill(overrides.manual_override_light));
+  setHTML('ov-privacy', pill(overrides.privacy_guard));
+  setHTML('ov-sim', pill(overrides.simulation_mode));
+  setHTML('ov-predict', pill(overrides.predict_enabled));
+  setHTML('ov-skip-morning', pill(overrides.skip_morning));
+  setHTML('ov-heating-ai', pill((d.heating || {}).ai_enabled));
+}
+
+// ── Systém page helpers ──
+async function wakeUpV2() {
+  await writeVar('sh_morning_event', 'motion_detected');
+  await writeVar('sh_morning_audit_trigger', 'dashboard_v2');
+}
+
+async function openLogV2(varName, title) {
+  // Simple modal — fetch var value + display v preformatted block
+  let content = 'Načítám ...';
+  if (CONFIG.demoMode) {
+    content = '(demo mode — hodnota proměnné ' + varName + ' by se zobrazila v live režimu)';
+  } else {
+    try {
+      if (!varMapLoaded) await loadVarMap();
+      const v = ALL_VARS[varName];
+      if (!v) {
+        content = 'Proměnná ' + varName + ' neexistuje';
+      } else {
+        const fresh = await apiGet('/api/manager/logic/variable/' + v.id);
+        let raw = String(fresh.value || '');
+        // Try pretty-print JSON
+        try { raw = JSON.stringify(JSON.parse(raw), null, 2); } catch(e) {}
+        content = raw || '(prázdné)';
+      }
+    } catch (e) {
+      content = 'Chyba: ' + e.message;
+    }
+  }
+
+  let m = document.getElementById('v2-log-modal');
+  if (!m) {
+    m = document.createElement('div');
+    m.id = 'v2-log-modal';
+    m.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(10,15,28,0.85);backdrop-filter:blur(8px);z-index:1000;align-items:center;justify-content:center;padding:20px;';
+    m.innerHTML = `
+      <div style="background:var(--bg-2);border:1px solid var(--border-acc);border-radius:var(--r-lg);padding:var(--sp-5);max-width:800px;width:100%;max-height:85vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-4);">
+          <h2 id="lm-title" style="font-size:var(--fs-md);color:var(--tx-1);"></h2>
+          <button onclick="this.closest('#v2-log-modal').remove()" style="background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);padding:var(--sp-2) var(--sp-4);border-radius:var(--r-md);cursor:pointer;">✕</button>
+        </div>
+        <pre id="lm-body" style="background:var(--bg-0);padding:var(--sp-4);border-radius:var(--r-md);overflow:auto;font-size:12px;font-family:var(--font-mono);color:var(--tx-2);flex:1;white-space:pre-wrap;word-break:break-word;margin:0;"></pre>
+        <div id="lm-var" style="margin-top:var(--sp-3);font-size:11px;color:var(--tx-3);font-family:var(--font-mono);"></div>
+      </div>`;
+    document.body.appendChild(m);
+  } else {
+    m.style.display = 'flex';
+  }
+  m.querySelector('#lm-title').textContent = title;
+  m.querySelector('#lm-body').textContent = content;
+  m.querySelector('#lm-var').textContent = 'Proměnná: ' + varName;
+}
+
+function renderHistorieDetail(activities) {
+  const el = $('historie-list');
+  if (!el) return;
+  el.innerHTML = activities.map(a => `
+    <div class="activity-row">
+      <div class="activity-ico ${a.color}">${a.ico}</div>
+      <div class="activity-info">
+        <div class="activity-title">${a.title}</div>
+        <div class="activity-sub">${a.sub}</div>
+      </div>
+      <div class="activity-time">${a.time}</div>
+    </div>
+  `).join('');
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 61+ — new pages: Počasí / Burza / Finance / Set  ║
+// ║ 22.4. večer                                            ║
+// ╚════════════════════════════════════════════════════════╝
+
+// ── POČASÍ ──────────────────────────────────────────────
+function renderPocasiDetail(w) {
+  w = w || {};
+  // w = DATA.weather: { temp, humidity, desc, icon, rain, wind, pressure, feels, sunrise, sunset, forecast: [...] }
+  const hasAny = w.temp != null || w.humidity != null || w.desc;
+  setText('w-temp',     w.temp != null ? Math.round(w.temp) + '°C' : '—');
+  setText('w-desc',     w.desc || (hasAny ? '—' : 'Čekám na bridge v1.11 data...'));
+  setText('w-feel',     w.feels != null && w.feels !== w.temp ? ('Pocitově ' + Math.round(w.feels) + '°C') : (w.temp != null ? '' : ''));
+  setText('w-hum',      w.humidity != null ? Math.round(w.humidity) + '%' : '—');
+  setText('w-wind',     w.wind != null ? Number(w.wind).toFixed(1) + ' m/s' : '—');
+  setText('w-pressure', w.pressure != null ? Math.round(w.pressure) + ' hPa' : '—');
+  setText('w-rain',     w.rain != null ? Number(w.rain).toFixed(1) + ' mm' : '0 mm');
+  setText('w-sunrise',  w.sunrise || '—');
+  setText('w-sunset',   w.sunset || '—');
+  setText('w-updated',  w.updated ? ('↻ ' + w.updated) : '');
+  const ico = $('w-icon');
+  if (ico) ico.textContent = w.icon || '🌤';
+
+  // 3-day forecast
+  const fc = $('w-forecast');
+  if (fc) {
+    const forecast = Array.isArray(w.forecast) ? w.forecast : [];
+    if (forecast.length === 0) {
+      fc.innerHTML = '<div style="grid-column:1/-1;color:var(--tx-3);font-size:13px;padding:8px;text-align:center;">Forecast data nejsou k dispozici (bridge v1.10+ needed)</div>';
+    } else {
+      fc.innerHTML = forecast.slice(0, 3).map(d => `
+        <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;text-align:center;">
+          <div style="color:var(--tx-3);font-size:11px;">${d.day || '—'}</div>
+          <div style="font-size:40px;margin:8px 0;">${d.icon || '☁'}</div>
+          <div style="font-size:18px;font-weight:700;">${d.tmax != null ? Math.round(d.tmax) + '°' : '—'}<span style="color:var(--tx-3);font-weight:400;font-size:13px;"> / ${d.tmin != null ? Math.round(d.tmin) + '°' : '—'}</span></div>
+          <div style="color:var(--tx-3);font-size:11px;margin-top:4px;">${d.desc || ''}</div>
+        </div>
+      `).join('');
+    }
+  }
+
+  // Heating impact
+  const hi = $('w-heating-impact');
+  if (hi) {
+    const t = Number(w.temp);
+    let impact, color;
+    if (!Number.isFinite(t)) {
+      impact = 'Outdoor teplota není k dispozici — weatherAdjust AI layer v topení nebude aplikován.';
+      color = 'var(--tx-3)';
+    } else if (t < -5) {
+      impact = `🥶 Venku ${Math.round(t)}°C. <b>weatherAdjust → +1°C</b> ke všem auto target_temp (hard cold override).`;
+      color = 'var(--acc-red)';
+    } else if (t > 15) {
+      impact = `☀ Venku ${Math.round(t)}°C. <b>weatherAdjust → −0.5°C</b> ke všem auto target_temp (teplo venku, šetřit).`;
+      color = 'var(--acc-green)';
+    } else {
+      impact = `Venku ${Math.round(t)}°C. weatherAdjust <b>neaktivní</b> (rozsah -5 až 15°C → 0°C delta). AI vrstva spí, schedule platí 1:1.`;
+      color = 'var(--tx-2)';
+    }
+    hi.innerHTML = `<span style="color:${color};">${impact}</span>`;
+  }
+}
+
+// ── BURZA ───────────────────────────────────────────────
+function renderBurzaDetail(d) {
+  // DATA.crypto (pokud poskytnuta bridgem) nebo fallback na config
+  const crypto = d.crypto || {};
+  const cfg = d.cfg || {};
+  setText('burza-usd', cfg.usd_czk_rate ? (Number(cfg.usd_czk_rate).toFixed(2) + ' Kč') : '—');
+  setText('burza-usd-sub', cfg.usd_czk_rate ? 'Konverzní kurz pro $' : 'sh_cfg_usd_czk_rate');
+  setText('burza-refresh', cfg.crypto_refresh_s ? (cfg.crypto_refresh_s + ' s') : '—');
+
+  const coinsWrap = $('burza-coins');
+  if (!coinsWrap) return;
+
+  const coinList = cfg.crypto_coins ? String(cfg.crypto_coins).split(',').map(s => s.trim()).filter(Boolean) : [];
+  if (coinList.length === 0) {
+    coinsWrap.innerHTML = '<div style="grid-column:1/-1;color:var(--tx-3);font-size:13px;padding:8px;text-align:center;">Žádné mince. Nastav <code>sh_cfg_crypto_coins</code> (comma-separated).</div>';
+    setText('burza-fetcher-status', 'žádné coins');
+    return;
+  }
+
+  const COIN_META = {
+    bitcoin:  { sym: 'BTC', ico: '₿',  color: 'orange' },
+    ethereum: { sym: 'ETH', ico: 'Ξ',  color: 'purple' },
+    solana:   { sym: 'SOL', ico: '◎',  color: 'cyan' },
+    cardano:  { sym: 'ADA', ico: '₳',  color: 'blue' },
+    ripple:   { sym: 'XRP', ico: '✕',  color: 'gray' },
+    dogecoin: { sym: 'DOGE', ico: 'Ð', color: 'yellow' }
+  };
+
+  coinsWrap.innerHTML = coinList.map(c => {
+    const meta = COIN_META[c.toLowerCase()] || { sym: c.toUpperCase().slice(0,4), ico: '?', color: 'gray' };
+    const row = crypto[c] || {};
+    const priceUsd = row.price_usd;
+    const priceCzk = (priceUsd != null && cfg.usd_czk_rate) ? (Number(priceUsd) * Number(cfg.usd_czk_rate)) : null;
+    const change24 = row.change_24h;
+    const changeColor = change24 == null ? 'var(--tx-3)' : (change24 >= 0 ? 'var(--acc-green)' : 'var(--acc-red)');
+    const changeSign = change24 == null ? '' : (change24 >= 0 ? '+' : '');
+    return `
+      <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <div class="stat-ico ${meta.color}" style="width:36px;height:36px;font-size:18px;">${meta.ico}</div>
+            <div>
+              <div style="font-weight:700;font-size:14px;">${meta.sym}</div>
+              <div style="color:var(--tx-3);font-size:11px;">${c}</div>
+            </div>
+          </div>
+          <div style="color:${changeColor};font-size:12px;font-weight:600;font-family:var(--font-mono);">
+            ${change24 != null ? (changeSign + Number(change24).toFixed(2) + '%') : '—'}
+          </div>
+        </div>
+        <div style="font-size:18px;font-weight:700;">${priceUsd != null ? ('$' + Number(priceUsd).toLocaleString('cs-CZ',{maximumFractionDigits:2})) : '—'}</div>
+        <div style="color:var(--tx-3);font-size:12px;font-family:var(--font-mono);">${priceCzk != null ? (Number(priceCzk).toLocaleString('cs-CZ',{maximumFractionDigits:0}) + ' Kč') : ''}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Fetcher status
+  const lastTs = crypto.last_fetch_ts;
+  if (lastTs) {
+    const ageS = Math.floor(Date.now()/1000 - Number(lastTs));
+    setText('burza-fetcher-status', ageS < 120 ? 'aktivní (' + ageS + 's)' : 'stale (' + Math.floor(ageS/60) + 'min)');
+  } else {
+    setText('burza-fetcher-status', 'sh_crypto_fetcher_v1 not deployed');
+  }
+}
+
+// ── FINANCE ─────────────────────────────────────────────
+function renderFinanceDetail(energy, heating) {
+  const e = energy || {};
+  const h = heating || {};
+  const cfg = (DATA && DATA.cfg) || {};
+  const priceVt = Number(cfg.price_vt) || 5.48;
+  const priceNt = Number(cfg.price_nt) || 4.76;
+  const ntStart = Number(cfg.nt_start_hour) || 22;
+  const ntEnd   = Number(cfg.nt_end_hour) || 6;
+  const fixed   = Number(cfg.fixed_fee) || 735;
+
+  // Aktuální tarif (dle času)
+  const nowHour = new Date().getHours();
+  const inNt = (ntStart > ntEnd) ? (nowHour >= ntStart || nowHour < ntEnd) : (nowHour >= ntStart && nowHour < ntEnd);
+  const avgPrice = (priceVt * 16 + priceNt * 8) / 24;  // weighted day average
+
+  // 4 tiles
+  const kwhToday = e.kwh_today;
+  const kwhYest  = e.kwh_yesterday;
+  const kwhMonth = e.kwh_month;
+  setText('fin-kwh-today', kwhToday != null ? Number(kwhToday).toFixed(1) + ' kWh' : '—');
+  setText('fin-kzh-today-cost', kwhToday != null ? (Number(kwhToday) * avgPrice).toFixed(0) + ' Kč' : '—');
+  setText('fin-kwh-yesterday', kwhYest != null ? Number(kwhYest).toFixed(1) + ' kWh' : '—');
+  setText('fin-kwh-delta', (kwhToday != null && kwhYest != null) ? (() => {
+    const delta = Number(kwhToday) - Number(kwhYest);
+    const pct = Number(kwhYest) > 0 ? (delta / Number(kwhYest) * 100).toFixed(0) : '0';
+    const sign = delta >= 0 ? '+' : '';
+    return sign + delta.toFixed(1) + ' kWh (' + sign + pct + '%)';
+  })() : '—');
+  setText('fin-kwh-month', kwhMonth != null ? Number(kwhMonth).toFixed(0) + ' kWh' : '—');
+  setText('fin-kzh-month-cost', kwhMonth != null ? (Number(kwhMonth) * avgPrice + fixed).toFixed(0) + ' Kč' : '—');
+  // Projection (linear extrapolation from kwh_month + days_in_month)
+  const day = new Date().getDate();
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+  if (kwhMonth != null && day > 0) {
+    const proj = Number(kwhMonth) / day * daysInMonth;
+    setText('fin-kwh-projection', Math.round(proj) + ' kWh');
+    setText('fin-kwh-projection-cost', Math.round(proj * avgPrice + fixed) + ' Kč');
+  } else {
+    setText('fin-kwh-projection', '—');
+    setText('fin-kwh-projection-cost', '—');
+  }
+
+  // Tarif
+  setText('fin-price-nt', priceNt.toFixed(2) + ' Kč/kWh');
+  setText('fin-price-vt', priceVt.toFixed(2) + ' Kč/kWh');
+  setText('fin-fixed-fee', fixed + ' Kč');
+  setText('fin-tariff-now', inNt ? '🌙 NT (nízký)' : '☀ VT (vysoký)');
+  setText('fin-nt-window', String(ntStart).padStart(2,'0') + ':00 – ' + String(ntEnd).padStart(2,'0') + ':00');
+
+  // TOP 10 — z energy.per_device nebo e.top10
+  const top10Wrap = $('fin-top10');
+  if (top10Wrap) {
+    const top = Array.isArray(e.top10) ? e.top10 : (Array.isArray(e.per_device) ? e.per_device : []);
+    if (top.length === 0) {
+      top10Wrap.innerHTML = '<div style="color:var(--tx-3);font-size:13px;padding:8px;text-align:center;">TOP 10 data nejsou v bridge (potřebujeme energy.top10 nebo energy.per_device)</div>';
+      setText('fin-top-total', '—');
+    } else {
+      const sorted = top.slice().sort((a,b) => Number(b.kwh||b.power_w||0) - Number(a.kwh||a.power_w||0)).slice(0, 10);
+      const total = sorted.reduce((sum, x) => sum + Number(x.kwh || 0), 0);
+      setText('fin-top-total', total > 0 ? ('Celkem ' + total.toFixed(1) + ' kWh') : '—');
+      top10Wrap.innerHTML = sorted.map((x, i) => {
+        const kwh = Number(x.kwh || 0);
+        const pct = total > 0 ? (kwh / total * 100).toFixed(0) : 0;
+        const cost = (kwh * avgPrice).toFixed(0);
+        return `
+          <div class="activity-row">
+            <div class="activity-ico ${i < 3 ? 'red' : (i < 6 ? 'orange' : 'gray')}">${i+1}</div>
+            <div class="activity-info">
+              <div class="activity-title">${x.name || x.device || '—'}</div>
+              <div class="activity-sub">${kwh.toFixed(2)} kWh · ${pct}% celku · ${cost} Kč</div>
+            </div>
+            <div class="activity-time" style="font-family:var(--font-mono);">${x.power_w != null ? Math.round(x.power_w) + ' W' : ''}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  }
+
+  // Heating cost
+  const rt = Number(h.runtime_today_s || 0);
+  const rtMin = Math.floor(rt / 60);
+  const kotelKw = Number(cfg.heating_kotel_kw) || 9;
+  const heatingKwh = (rt / 3600) * kotelKw;
+  setText('fin-heating-runtime', rtMin + ' min');
+  setText('fin-heating-kwh', heatingKwh.toFixed(1) + ' kWh');
+  setText('fin-heating-cost', (heatingKwh * avgPrice).toFixed(0) + ' Kč');
+  const rtY = Number(h.runtime_yesterday_s || 0);
+  const rtYMin = Math.floor(rtY / 60);
+  const heatingKwhY = (rtY / 3600) * kotelKw;
+  setText('fin-heating-yesterday', rtYMin + ' min (' + heatingKwhY.toFixed(1) + ' kWh)');
+}
+
+// ── ZONE HELP — port z v1 ZONE_HELP array (22.4. večer) ─────────────────
+const ZONE_HELP_V2 = {
+  jidelna: {
+    title: '🛋 Jídelna — automatizace a zařízení',
+    items: [
+      '<b>Sektorka1 + Stul Jidelna1</b> — svítí automaticky při pohybu (open space SNZB-06P)',
+      '<b>Roleta Fyrtur1</b> — mění polohu dle lux (sh_jidelna_roleta_router_v2 v3.10)',
+      '<b>Door/Window Sensor</b> — pokud OPEN, roleta max 20 % (safety)',
+      '<b>Light Sensor Okno Jidelna1</b> — lux senzor pro roletu i open space'
+    ],
+    flow: 'Motion → open_space_router → světla. Lux change → jidelna_roleta → poloha. Detail v Klimatizace → 🪟 Roleta Config.'
+  },
+  kitchen: {
+    title: '🍳 Kuchyně — automatizace a zařízení',
+    items: [
+      '<b>Kuchyňská světla</b> (Sektorka + 1/2/3 žárovka) — auto-ON při pohybu',
+      '<b>Reproduktor Kuchyn</b> (Nest Mini) — TTS + ranní rádio (Classic Hits RADIO Italia)',
+      '<b>PIR + SNZB-06P presence</b> — sh_kitchen_ai_v1',
+      '<b>Zasuvka Kaffe</b> — ráno immediate ON při wake_confirmed (morning_vstal v2.4)',
+      '<b>🧊 Lednice</b> — live power (W) + sparkline',
+      '<b>🌬 Air Purifier 4 Lite</b> — auto dle PM2.5, guard toggle'
+    ],
+    flow: 'Kitchen Motion → Kitchen AI → světla + rádio. Ranní: motion ložnice → kitchen_ai → radio_kitchen → briefing → kaffe immediate.'
+  },
+  bedroom: {
+    title: '🛏 Ložnice — automatizace a zařízení',
+    items: [
+      '<b>Zarovka Loznice</b> — hlavní světlo + sunrise simulace (před v3.4, teď direct ON)',
+      '<b>Led pasek postel</b> — noční orientační LED (WC cesta)',
+      '<b>1/2 žárovka lidl E14</b> — scény kino / romantika',
+      '<b>nest max Ložnice 2</b> — briefing TTS (opt-in)',
+      '<b>Motion senzor ložnice</b> — detekce probuzení + WC cesta',
+      '<b>Teploměr-vlhkoměr</b> — anomaly detector',
+      '<b>📺 TV remote</b> — Power, Vol, Play, Channel, D-pad (native key_* caps)',
+      '<b>💧 Zvlhčovač1</b> — auto v rozmezí sh_cfg_humidity_low/high'
+    ],
+    flow: 'Motion < 3:00 → LED pásek. Motion 3:00+ → 2× do 3 min = wake confirmed. Alarm 3:15 PO-PÁ / 5:15 SO-NE → direct bedroom ON 100%.'
+  },
+  bathroom: {
+    title: '🚿 Koupelna — automatizace a zařízení',
+    items: [
+      '<b>svetlo Koupelna</b> — auto ON při motion (phase-aware dim)',
+      '<b>Speaker koupelna</b> — ranní + večerní rádio (Italia 80)',
+      '<b>2× PIR</b> — zdvojené motion pro spolehlivost',
+      '<b>Teploměr-vlhkoměr</b> — pro digestor',
+      '<b>🤖 Giuseppe</b> — vysavač (start/stop + battery)',
+      '<b>🔥 Fibaro Heat Controller</b> — TRV radiátor (target 16 comfort, +2°C morning preWakeBoost)'
+    ],
+    flow: 'Motion ON → bathroom_router → světlo. Morning → radio_bathroom. Cluster s toaletou/prádelnou (bathroom_cluster_timeout). Heating: koupelna +2°C v 5-30 min pre-alarm.'
+  },
+  pracovna: {
+    title: '💻 Pracovna — automatizace a zařízení',
+    items: [
+      '<b>Zasuvka pracovna</b> — PC + monitor (KRITICKÉ — drží ON)',
+      '<b>Světlo pracovna</b> — manuální ovládání',
+      '<b>sh_critical_devices_v1</b> — pokud off → auto-zapne (work protection)',
+      '<b>🎮 Xiaomi button</b> (Pc Setup) — 6 gest: 1× světlo · 2× PC · 3× kávovar · 4× WORK · long = konec',
+      '<b>🍅 Pomodoro</b> — 25/5 min cykly, TTS do kuchyně'
+    ],
+    flow: 'Kritická ochrana — zásuvka nesmí být off když jsi doma. Critical Devices flow every 5 min check.'
+  },
+  pradelna: {
+    title: '🧺 Prádelna — automatizace a zařízení',
+    items: [
+      '<b>Pradelna zarovka</b> — auto ON při motion',
+      '<b>Boiler zasuvka</b> — measure_power (anomaly detector)',
+      '<b>Lavastoviglie</b> (myčka) — energy tracking',
+      '<b>Zasuvka pracka pradelna</b> 🫧 — PLUG_WASHER v1.9 (finance top 10)',
+      '<b>PIR senzor prádelna</b> — cluster s koupelnou'
+    ],
+    flow: 'Motion ON → laundry_router → světlo. Cluster check — pokud koupelna/toaleta off ale prádelna motion = stále v clusteru, neshazovat světla.'
+  },
+  predsin: {
+    title: '🚪 Předsíň — automatizace a zařízení',
+    items: [
+      '<b>Predsin světlo</b> — auto ON při open door / motion',
+      '<b>Door/Window Sensor (SNZB-04)1</b> — hlavní vstupní dveře',
+      '<b>Kamera</b> (Foscam) — security při away',
+      '<b>Zasuvka kamera</b> — auto-ON při away, OFF při home (camera_router v1.4)'
+    ],
+    flow: 'Entry motion → entry_router → světlo 2 min. Away + motion = bezpečnostní alert. Presence change (Homey geofence) → camera on/off přes dispatcher.'
+  },
+  toilet: {
+    title: '🚽 Toaleta — automatizace a zařízení',
+    items: [
+      '<b>Toaleta světlo</b> — PIR auto ON/OFF',
+      '<b>PIR senzor toaleta</b> — motion → cluster',
+      '<b>🔥 Fibaro Heat Controller</b> — TRV radiátor (target 16, +1°C morning preWakeBoost v 5-15 min okně)'
+    ],
+    flow: 'Motion ON → toilet_router → světlo. Motion OFF → bathroom_cluster_timeout. Heating: toaleta +1°C pre-alarm.'
+  },
+  spolecne: {
+    title: '🏠 Společné — systémové ovládání',
+    items: [
+      '<b>Aqara Cubo</b> — otočit = scéna, hodit = TV on/off',
+      '<b>Aqara Remote</b> — 1x/2x/3x/long klik = scény (Left + Right)',
+      '<b>Fibaro Button</b> (předsíň) — přítomnost (home/away)',
+      '<b>OpenAI Speech / Gemini</b> — hlasové příkazy'
+    ],
+    flow: 'Physical trigger → scene_engine → ovládá všechny zóny. Ranní rutina: motion ložnice → kitchen_ai dispatch.'
+  }
+};
+
+function openZoneHelp(zoneKey) {
+  const data = ZONE_HELP_V2[zoneKey];
+  if (!data) return;
+  const titleEl = $('zone-help-title');
+  const itemsEl = $('zone-help-items');
+  const flowEl = $('zone-help-flow');
+  if (titleEl) titleEl.textContent = data.title;
+  if (itemsEl) itemsEl.innerHTML = '<ul style="padding-left:20px;margin:0;">' + data.items.map(i => '<li style="margin-bottom:6px;">' + i + '</li>').join('') + '</ul>';
+  if (flowEl) flowEl.textContent = data.flow;
+  const ov = $('zone-help-overlay');
+  if (ov) ov.style.display = 'flex';
+}
+
+function closeZoneHelp() {
+  const ov = $('zone-help-overlay');
+  if (ov) ov.style.display = 'none';
+}
+
+// ── ROLETA controls ─────────────────────────────────────
+async function roletaSet(targetFloat) {
+  // Target 0-1, směřuje přímo na Roleta Fyrtur1 device přes setDeviceCap (windowcoverings_set)
+  try {
+    // Find camera / find blind device via DATA.rooms.jidelna.devices?
+    const blindName = 'Roleta Fyrtur1';  // from sh_device_map BLIND_DINING
+    const devices = DATA && DATA.rooms && DATA.rooms.jidelna ? DATA.rooms.jidelna.devices : null;
+    // v2 nemá přímý device lookup, takže pošleme přes sh_jidelna_roleta_trigger var s manual_pos
+    // Nejlepší — přes runScript sh_jidelna_roleta_voice_v1 (existuje) nebo přímo writeVar
+    // V1 používal sendReq → sh_jidelna_roleta_trigger. Here simulate:
+    await writeVar('sh_jidelna_roleta_manual_pos', targetFloat);
+    await writeVar('sh_jidelna_roleta_trigger', 'manual_' + Math.round(targetFloat * 100));
+    toast('🪟 Roleta → ' + Math.round(targetFloat * 100) + '%');
+  } catch (e) {
+    toast('✗ Roleta: ' + e.message);
+  }
+}
+
+async function roletaTrigger(event) {
+  try {
+    await writeVar('sh_jidelna_roleta_trigger', event);
+    toast('🪟 Roleta: ' + event);
+  } catch (e) {
+    toast('✗ ' + e.message);
+  }
+}
+
+// ── ROLETA CONFIG — inline editor (port z v1 editRoletaCfgInline) ─────
+function renderRoletaCfg() {
+  const mapping = [
+    ['rcfg-safety',    'sh_cfg_blind_safety_threshold', '',    'float'],
+    ['rcfg-shade',     'sh_cfg_blind_shade_position',   '',    'float'],
+    ['rcfg-morning',   'sh_cfg_lux_roleta_morning',     ' lux','int'],
+    ['rcfg-open',      'sh_cfg_lux_roleta_open',        ' lux','int'],
+    ['rcfg-shade-lux', 'sh_cfg_lux_roleta_shade',       ' lux','int'],
+    ['rcfg-evening',   'sh_cfg_lux_roleta_evening_close',' lux','int'],
+    ['rcfg-hyst',      'sh_cfg_lux_roleta_hysteresis',  ' lux','int'],
+  ];
+  const cfg = (DATA && DATA.cfg) || {};
+  const fromSettings = _settingsAll && _settingsAll.length ? _settingsAll : null;
+  for (const [id, name, suffix, type] of mapping) {
+    const el = $(id);
+    if (!el) continue;
+    let val = null;
+    // 1) Try DATA.cfg (bridge v1.11)
+    const cfgKey = name.replace('sh_cfg_', '');
+    if (cfg[cfgKey] != null) val = cfg[cfgKey];
+    // 2) Fallback: _settingsAll (pokud user už loadSettings)
+    if (val == null && fromSettings) {
+      const found = fromSettings.find(v => v.name === name);
+      if (found) val = found.value;
+    }
+    el.textContent = (val != null && val !== '') ? (String(val) + suffix) : '—';
+  }
+  // Lux indicator
+  const luxEl = $('roleta-lux-info');
+  if (luxEl) {
+    const lux = (DATA && DATA.rooms && DATA.rooms.jidelna && DATA.rooms.jidelna.lux);
+    luxEl.textContent = 'Lux: ' + (lux != null ? lux : '—');
+  }
+  // State badge
+  const stEl = $('roleta-state-badge');
+  if (stEl && DATA && DATA.rooms && DATA.rooms.jidelna) {
+    const pos = DATA.rooms.jidelna.blind;
+    if (pos != null) stEl.textContent = 'Pozice: ' + Math.round(pos * 100) + '%';
+  }
+}
+
+async function editRoletaCfgV2(row, varName, suffix, type) {
+  if (!row || row.dataset.editing === '1') return;
+  const timeEl = row.querySelector('.activity-time');
+  if (!timeEl) return;
+  row.dataset.editing = '1';
+  const origText = timeEl.textContent;
+  // Extract current numeric
+  const curNum = parseFloat(String(origText).replace(suffix, '').trim()) || 0;
+
+  const input = document.createElement('input');
+  input.type = 'number';
+  input.step = type === 'float' ? '0.05' : '1';
+  input.value = curNum;
+  input.style.cssText = 'width:100px;padding:4px 8px;background:var(--bg-2);border:1px solid var(--acc-cyan);border-radius:var(--r-sm);color:var(--tx-1);font-family:var(--font-mono);font-size:12px;text-align:right;outline:none;';
+  timeEl.textContent = '';
+  timeEl.appendChild(input);
+  input.focus();
+  input.select();
+
+  const cleanup = (newText) => {
+    row.dataset.editing = '0';
+    timeEl.textContent = newText;
+  };
+
+  const save = async () => {
+    const raw = input.value;
+    const num = type === 'float' ? parseFloat(raw) : parseInt(raw, 10);
+    if (isNaN(num)) { cleanup(origText); toast('✗ Neplatné číslo'); return; }
+    if (String(num) === String(curNum)) { cleanup(origText); return; }
+    try {
+      const ok = await writeVar(varName, num);
+      if (ok !== false) {
+        cleanup(String(num) + suffix);
+        timeEl.style.color = 'var(--acc-green)';
+        setTimeout(() => { timeEl.style.color = ''; }, 1500);
+        toast('✓ ' + varName + ' = ' + num);
+        // Update DATA.cfg cache
+        if (DATA && DATA.cfg) DATA.cfg[varName.replace('sh_cfg_', '')] = num;
+      } else {
+        cleanup(origText);
+        toast('✗ Nelze uložit');
+      }
+    } catch (e) {
+      cleanup(origText);
+      toast('✗ ' + e.message);
+    }
+  };
+
+  input.addEventListener('keydown', (ev) => {
+    if (ev.key === 'Enter') save();
+    else if (ev.key === 'Escape') cleanup(origText);
+  });
+  input.addEventListener('blur', save);
+}
+
+// ── Help toggle (universal helper pro jakýkoli help panel) ──────────
+function toggleHelpV2(id) {
+  const panel = $(id);
+  if (!panel) return;
+  panel.style.display = (panel.style.display === 'none' || !panel.style.display) ? 'block' : 'none';
+}
+
+
 // ── NASTAVENÍ ───────────────────────────────────────────
 const SET_CATEGORY_MAP = {
   'heating':  ['sh_cfg_heating_'],
@@ -2851,28 +3849,69 @@ async function loadSettings() {
   if (list) list.innerHTML = '';
 
   if (CONFIG.demoMode) {
-    if (status) status.textContent = '(demo mode — použij live režim pro reálný editor)';
+    if (status) {
+      status.innerHTML = '🎭 Demo režim — editor je aktivní jen v <b>live</b> režimu.<br>' +
+        'Přepni přes ⚙ Config (ikonka vlevo dole) — zadej Host + Bearer token.';
+    }
     return;
   }
   if (!CFG.host || !CFG.token) {
-    if (status) status.textContent = '⚠️ Nejdřív nastav Host + Token v ⚙ Config overlay.';
+    if (status) {
+      status.innerHTML = '⚠️ Nejdřív <b>Config</b>: klik na ⚙ ikonu vlevo dole → ' +
+        '<b>Host</b> (např. <code>http://192.168.1.142</code>) + <b>Bearer Token</b><br>' +
+        '<span style="color:var(--tx-3);font-size:11px;">Token získáš v Homey Web → Settings → Personal access tokens → Create new token (scope: homey.logic)</span>';
+    }
     return;
   }
 
   try {
     const url = CFG.host.replace(/\/$/, '') + '/api/manager/logic/variable';
-    const res = await fetch(url, { headers: { 'Authorization': 'Bearer ' + CFG.token } });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const res = await fetch(url, {
+      headers: { 'Authorization': 'Bearer ' + CFG.token, 'Accept': 'application/json' },
+      mode: 'cors'
+    });
+    if (!res.ok) {
+      let detail = '';
+      try { detail = await res.text(); detail = detail.substring(0, 200); } catch (_) {}
+      if (res.status === 401) throw new Error('HTTP 401 — token neplatný nebo nemá scope homey.logic');
+      if (res.status === 403) throw new Error('HTTP 403 — token bez oprávnění. V Homey Web vytvoř nový s scope "logic"');
+      if (res.status === 404) throw new Error('HTTP 404 — endpoint neexistuje. Zkontroluj Host URL (má být http://IP bez /api)');
+      throw new Error('HTTP ' + res.status + (detail ? ' · ' + detail : ''));
+    }
     const json = await res.json();
-    const vars = json.result || json;
-    // Filter only sh_cfg_*
-    _settingsAll = Object.values(vars)
-      .filter(v => (v.name || '').startsWith('sh_cfg_'))
+    // Homey API response: může být { result: {...} } NEBO přímo {...}
+    let vars = json.result || json;
+    if (Array.isArray(vars)) {
+      // Už pole
+    } else if (typeof vars === 'object' && vars !== null) {
+      vars = Object.values(vars);
+    } else {
+      throw new Error('Neočekávaný formát response: ' + typeof vars);
+    }
+    _settingsAll = vars
+      .filter(v => v && typeof v.name === 'string' && v.name.startsWith('sh_cfg_'))
       .sort((a,b) => (a.name || '').localeCompare(b.name || ''));
-    if (status) status.textContent = '✓ Staženo ' + _settingsAll.length + ' proměnných';
+    if (status) {
+      status.innerHTML = '✓ Staženo <b>' + _settingsAll.length + '</b> sh_cfg_* proměnných · ' +
+        '<span style="color:var(--tx-3);">Použij filtr pro kategorie</span>';
+    }
     filterSettings();
+    // Refresh roleta config s novými daty
+    try { renderRoletaCfg(); } catch (_) {}
   } catch (e) {
-    if (status) status.textContent = '❌ Chyba: ' + e.message;
+    const em = String(e && e.message || e);
+    if (status) {
+      if (em.toLowerCase().includes('failed to fetch') || em.toLowerCase().includes('networkerror')) {
+        status.innerHTML = '❌ <b>CORS nebo network fail</b>: ' + em + '<br>' +
+          '<span style="color:var(--tx-3);font-size:11px;">' +
+          '• Jsi na stejné LAN jako Homey? (' + (CFG.host || '?') + ')<br>' +
+          '• Když otevíráš dashboard z GitHub Pages (https), Homey (http) blokuje fetch — musíš použít LAN file:// nebo https reverse proxy.<br>' +
+          '• Zkontroluj že Homey odpovídá: otevři ' + (CFG.host || 'http://192.168.1.142') + ' v browser tabu.' +
+          '</span>';
+      } else {
+        status.innerHTML = '❌ ' + em;
+      }
+    }
   }
 }
 
@@ -3690,6 +4729,19 @@ function switchPage(pageName) {
   }
   // Scroll top
   window.scrollTo({ top: 0, behavior: 'smooth' });
+
+  // ── 22.4. večer — per-page on-enter hooks ──
+  try {
+    if (pageName === 'settings') {
+      if (!CONFIG.demoMode && CFG.host && CFG.token && _settingsAll.length === 0) {
+        loadSettings();
+      }
+    } else if (pageName === 'klima') {
+      renderRoletaCfg();
+    } else if (pageName === 'pocasi') {
+      if (DATA && DATA.weather) renderPocasiDetail(DATA.weather);
+    }
+  } catch (_) {}
 }
 
 // Attach click handlers
