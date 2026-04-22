@@ -1025,6 +1025,20 @@ body {
   </div>
 </div>
 
+<!-- ══════════ SHEET PREVIEW MODAL (23.4. — port z v1 popup) ══════════ -->
+<div id="sheet-preview-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,15,28,0.85);backdrop-filter:blur(8px);z-index:998;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg-2);border:1px solid var(--border-acc);border-radius:var(--r-lg);padding:var(--sp-5);max-width:1100px;width:100%;max-height:85vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow-lg);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-4);">
+      <h2 id="sheet-preview-title" style="font-size:var(--fs-lg);color:var(--tx-1);margin:0;">📊 Sheet preview</h2>
+      <div style="display:flex;gap:10px;">
+        <button onclick="window.open(SHEETS_WEBAPP+'?mode=latest&sheet='+encodeURIComponent($('sheet-preview-title').textContent.replace('📊 ','').replace(' ', '+'))+'&count=100', '_blank')" title="Otevřít více řádků v novém tabu" style="background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-2);padding:6px 12px;border-radius:var(--r-sm);font-size:12px;cursor:pointer;">↗ Web</button>
+        <button onclick="closeSheetPreview()" style="background:transparent;border:0;color:var(--tx-3);font-size:22px;cursor:pointer;line-height:1;padding:0 8px;">✕</button>
+      </div>
+    </div>
+    <div id="sheet-preview-body" style="overflow:auto;"><!-- rendered by openSheet() --></div>
+  </div>
+</div>
+
 <!-- ══════════ ZONE HELP MODAL (22.4. večer — port z v1 ZONE_HELP) ══════════ -->
 <div id="zone-help-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,15,28,0.85);backdrop-filter:blur(8px);z-index:999;align-items:center;justify-content:center;padding:20px;">
   <div style="background:var(--bg-2);border:1px solid var(--border-acc);border-radius:var(--r-lg);padding:var(--sp-6);max-width:680px;width:100%;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg);">
@@ -1849,6 +1863,73 @@ body {
       </div>
     </section>
 
+    <!-- ══════════ PAGE: ZONE DETAIL (dynamic — port z v1 zone page) ══════════ -->
+    <section class="page" data-page="zone-detail">
+      <div class="page-header">
+        <div class="greeting">
+          <h1 id="zd-title">🏠 Zóna</h1>
+          <p id="zd-subtitle">Detail místnosti · senzory · zařízení · akce</p>
+        </div>
+        <button onclick="switchPage('prehled')" style="padding:8px 16px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-md);cursor:pointer;font-size:13px;">← Zpět</button>
+      </div>
+
+      <!-- Info row -->
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">📋 POPIS</span>
+          <span class="section-action" onclick="toggleHelpV2('zd-help')">ℹ Jak tato zóna funguje</span>
+        </div>
+        <div id="zd-help" style="display:none;background:var(--bg-3);padding:14px;border-radius:var(--r-md);margin-bottom:12px;color:var(--tx-2);font-size:13px;line-height:1.6;">
+          <!-- rendered by renderZoneDetail() -->
+        </div>
+        <div id="zd-desc" style="color:var(--tx-2);font-size:13px;">—</div>
+      </div>
+
+      <!-- Senzory -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">📡 SENZORY</span></div>
+        <div id="zd-sensors" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <!-- rendered JS -->
+        </div>
+      </div>
+
+      <!-- Světla -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">💡 SVĚTLA</span></div>
+        <div id="zd-lights" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <!-- rendered JS -->
+        </div>
+      </div>
+
+      <!-- Spotřebiče -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🔌 SPOTŘEBIČE</span></div>
+        <div id="zd-appliances" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;">
+          <!-- rendered JS -->
+        </div>
+      </div>
+
+      <!-- Reproduktor -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🔊 REPRODUKTOR</span></div>
+        <div id="zd-speaker" style="padding:8px 0;color:var(--tx-3);font-size:13px;">Bez reproduktoru v této zóně</div>
+      </div>
+
+      <!-- Akce -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">⚡ AKCE</span></div>
+        <div id="zd-actions" style="display:flex;gap:10px;flex-wrap:wrap;">
+          <!-- rendered JS -->
+        </div>
+      </div>
+
+      <!-- AI poznámky -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🤖 AI POZNÁMKY</span></div>
+        <div id="zd-ai-notes" style="padding:8px 0;color:var(--tx-3);font-size:13px;">Žádné poznámky pro tuto zónu</div>
+      </div>
+    </section>
+
     <!-- ══════════ PAGE: POČASÍ ══════════ -->
     <section class="page" data-page="pocasi">
       <div class="page-header">
@@ -2387,9 +2468,14 @@ function updateUI(d) {
   renderEnergieDetail(d.energy || {}, d.health || {});
   renderSystemDetail(d);
   renderHistorieDetail(d.activities || []);
-  // ── new pages (22.4. večer) ──
-  renderPocasiDetail(d.weather || {});
-  renderBurzaDetail(d);
+  // ── new pages (22.4. + 23.4. večer) ──
+  // 🩹 23.4. FIX: NEVOLAT renderPocasiDetail/renderBurzaDetail z updateUI,
+  //    protože refresh loop je volá s prázdnými bridge daty (cfg undefined)
+  //    a přemaže autoritativní client-side fetch data (Počasí + Burza blikají).
+  //    Místo toho: switchPage() hook volá refreshBurzaPage/refreshPocasiPage
+  //    podle potřeby — client-fetch je autoritativní.
+  // renderPocasiDetail(d.weather || {});   // disabled — client fetch autoritativní
+  // renderBurzaDetail(d);                  // disabled — client fetch autoritativní
   renderFinanceDetail(d.energy || {}, d.heating || {});
   renderZonesV2(d.rooms || {});
   renderRoletaCfg();  // v Klima page
@@ -2429,25 +2515,20 @@ function renderZonesV2(rooms) {
   wrap.innerHTML = ZONE_META_V2.map(z => {
     const r = rooms[z.key] || {};
     const chips = [];
-    // Motion
-    if (r.motion === true || r.motion === 'yes') chips.push('<span style="color:var(--acc-green);font-size:11px;">🚶 aktivní</span>');
-    else if (r.motion === false) chips.push('<span style="color:var(--tx-3);font-size:11px;">🚶 klid</span>');
-    // Temp
-    if (r.temp != null) chips.push('<span style="color:var(--tx-2);font-size:11px;">🌡 ' + Number(r.temp).toFixed(1) + '°</span>');
-    // Humidity
-    if (r.humidity != null) chips.push('<span style="color:var(--acc-cyan);font-size:11px;">💧 ' + Math.round(r.humidity) + '%</span>');
-    // Lux
-    if (r.lux != null) chips.push('<span style="color:var(--acc-yellow);font-size:11px;">☀ ' + r.lux + '</span>');
-    // Lights on count
-    if (r.lights_on != null) chips.push('<span style="color:' + (r.lights_on > 0 ? 'var(--acc-yellow)' : 'var(--tx-3)') + ';font-size:11px;">💡 ' + r.lights_on + '</span>');
-    // Speaker playing
-    if (r.speaker_playing === true) chips.push('<span style="color:var(--acc-purple);font-size:11px;">🔊 hraje</span>');
+    // 🆕 23.4. tooltips na každý chip (hover ukáže co to je)
+    if (r.motion === true || r.motion === 'yes') chips.push('<span title="Detekován pohyb (PIR/mmWave senzor)" style="color:var(--acc-green);font-size:11px;">🚶 aktivní</span>');
+    else if (r.motion === false) chips.push('<span title="Žádný pohyb detekován" style="color:var(--tx-3);font-size:11px;">🚶 klid</span>');
+    if (r.temp != null) chips.push('<span title="Aktuální teplota v zóně (°C)" style="color:var(--tx-2);font-size:11px;">🌡 ' + Number(r.temp).toFixed(1) + '°</span>');
+    if (r.humidity != null) chips.push('<span title="Relativní vlhkost vzduchu (%)" style="color:var(--acc-cyan);font-size:11px;">💧 ' + Math.round(r.humidity) + '%</span>');
+    if (r.lux != null) chips.push('<span title="Aktuální osvětlení (lux) — nízké=tma, vysoké=slunce" style="color:var(--acc-yellow);font-size:11px;">☀ ' + r.lux + '</span>');
+    if (r.lights_on != null) chips.push('<span title="Počet rozsvícených světel v zóně" style="color:' + (r.lights_on > 0 ? 'var(--acc-yellow)' : 'var(--tx-3)') + ';font-size:11px;">💡 ' + r.lights_on + '</span>');
+    if (r.speaker_playing === true) chips.push('<span title="Reproduktor hraje" style="color:var(--acc-purple);font-size:11px;">🔊 hraje</span>');
 
     const chipsHtml = chips.length ? chips.join(' · ') : '<span style="color:var(--tx-3);font-size:11px;opacity:.5;">bez dat</span>';
 
     return `
-      <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;position:relative;cursor:pointer;" onclick="openZoneHelp('${z.key}')">
-        <button onclick="event.stopPropagation();openZoneHelp('${z.key}')" title="Info o automatizacích" style="position:absolute;top:10px;right:10px;background:transparent;border:0;color:var(--tx-3);font-size:16px;cursor:pointer;padding:0;line-height:1;">ℹ</button>
+      <div title="Klikni pro otevření detailu zóny (senzory / zařízení / akce)" style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:14px;position:relative;cursor:pointer;transition:all 180ms;" onclick="openZoneDetail('${z.key}')" onmouseenter="this.style.borderColor='var(--acc-cyan)'" onmouseleave="this.style.borderColor='var(--border-soft)'">
+        <button onclick="event.stopPropagation();openZoneHelp('${z.key}')" title="Detail automatizací a zařízení v této zóně" style="position:absolute;top:10px;right:10px;background:transparent;border:0;color:var(--tx-3);font-size:16px;cursor:pointer;padding:0;line-height:1;">ℹ</button>
         <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:8px;">
           <div style="font-size:28px;line-height:1;">${z.icon}</div>
           <div style="flex:1;">
@@ -3422,6 +3503,119 @@ function closeZoneHelp() {
   if (ov) ov.style.display = 'none';
 }
 
+// ── Zone DETAIL (port z v1 zone page — 23.4. večer) ───────
+let _currentZoneDetail = null;
+
+function openZoneDetail(zoneKey) {
+  _currentZoneDetail = zoneKey;
+  const rooms = (DATA && DATA.rooms) || {};
+  const room = rooms[zoneKey] || {};
+  const meta = ZONE_META_V2.find(z => z.key === zoneKey) || { icon: '🏠', name: zoneKey, sub: '' };
+  const help = ZONE_HELP_V2[zoneKey] || { items: [], flow: '' };
+
+  setText('zd-title', meta.icon + ' ' + meta.name);
+  setText('zd-subtitle', meta.sub);
+  setText('zd-desc', meta.sub);
+
+  // Help content
+  const helpEl = $('zd-help');
+  if (helpEl) {
+    helpEl.innerHTML =
+      '<ul style="padding-left:18px;margin:0 0 10px 0;">' + help.items.map(i => '<li style="margin-bottom:4px;">' + i + '</li>').join('') + '</ul>' +
+      '<div style="padding:10px;background:var(--bg-2);border-radius:var(--r-sm);color:var(--tx-2);font-size:12px;"><b>Flow:</b> ' + help.flow + '</div>';
+  }
+
+  // Sensors (pohyb, teplota, vlhkost, lux) s tooltips
+  const sensorsEl = $('zd-sensors');
+  if (sensorsEl) {
+    const sensors = [];
+    if (room.temp != null) sensors.push({ ico: '🌡', label: 'Teplota', val: Number(room.temp).toFixed(1) + ' °C', tip: 'Aktuální teplota v zóně (měřená senzorem)' });
+    if (room.humidity != null) sensors.push({ ico: '💧', label: 'Vlhkost', val: Math.round(room.humidity) + ' %', tip: 'Relativní vlhkost vzduchu' });
+    if (room.lux != null) sensors.push({ ico: '☀', label: 'Lux', val: room.lux + ' lux', tip: 'Aktuální osvětlení — nízké = tma, vysoké = slunce' });
+    if (room.motion != null) sensors.push({ ico: '🚶', label: 'Pohyb', val: (room.motion === true || room.motion === 'yes') ? 'ANO' : 'NE', tip: 'Detekce pohybu PIR/mmWave senzorem' });
+    if (room.pm25 != null) sensors.push({ ico: '💨', label: 'PM2.5', val: room.pm25 + ' μg/m³', tip: 'Jemné prachové částice (< 2.5 μm) — kvalita ovzduší' });
+    if (room.power_w != null) sensors.push({ ico: '⚡', label: 'Spotřeba', val: Math.round(room.power_w) + ' W', tip: 'Aktuální elektrický příkon zóny' });
+    sensorsEl.innerHTML = sensors.length === 0
+      ? '<div style="grid-column:1/-1;color:var(--tx-3);font-size:12px;padding:8px;">Žádné senzory v této zóně</div>'
+      : sensors.map(s => '<div title="' + s.tip + '" style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);padding:12px;text-align:center;cursor:help;">' +
+          '<div style="font-size:22px;">' + s.ico + '</div>' +
+          '<div style="color:var(--tx-3);font-size:10px;margin-top:2px;">' + s.label + '</div>' +
+          '<div style="font-size:14px;font-weight:600;margin-top:2px;">' + s.val + '</div></div>').join('');
+  }
+
+  // Lights (z DATA.lights filtered by zone)
+  const lightsEl = $('zd-lights');
+  if (lightsEl) {
+    const allLights = (DATA && DATA.lights) || [];
+    const mine = allLights.filter(l => (l.zone || '').toLowerCase() === zoneKey.toLowerCase() || (l.room || '').toLowerCase() === zoneKey.toLowerCase());
+    lightsEl.innerHTML = mine.length === 0
+      ? '<div style="grid-column:1/-1;color:var(--tx-3);font-size:12px;padding:8px;">Žádná světla</div>'
+      : mine.map(l => {
+          const isOn = l.on === true || l.onoff === true;
+          return '<div title="Klik pro přepnutí ' + (l.name || '') + '" onclick="setDeviceCap(\'' + (l.id || '') + '\',\'onoff\',' + (!isOn) + ')" style="background:var(--bg-3);border:1px solid ' + (isOn ? 'var(--acc-yellow)' : 'var(--border-soft)') + ';border-radius:var(--r-md);padding:14px;text-align:center;cursor:pointer;transition:all 180ms;">' +
+            '<div style="font-size:28px;">' + (isOn ? '💡' : '🔦') + '</div>' +
+            '<div style="font-size:12px;font-weight:600;margin-top:4px;">' + (l.name || '?') + '</div>' +
+            '<div style="color:' + (isOn ? 'var(--acc-yellow)' : 'var(--tx-3)') + ';font-size:11px;margin-top:2px;">' + (isOn ? 'ON' + (l.dim != null ? ' · ' + Math.round(l.dim * 100) + '%' : '') : 'OFF') + '</div></div>';
+        }).join('');
+  }
+
+  // Appliances (z DATA.plugs nebo DATA.appliances filtered by zone)
+  const applEl = $('zd-appliances');
+  if (applEl) {
+    const all = ((DATA && DATA.plugs) || []).concat((DATA && DATA.appliances) || []);
+    const mine = all.filter(a => (a.zone || '').toLowerCase() === zoneKey.toLowerCase() || (a.room || '').toLowerCase() === zoneKey.toLowerCase());
+    applEl.innerHTML = mine.length === 0
+      ? '<div style="grid-column:1/-1;color:var(--tx-3);font-size:12px;padding:8px;">Žádné spotřebiče</div>'
+      : mine.map(a => {
+          const isOn = a.on === true || a.onoff === true;
+          const pw = a.power_w != null ? a.power_w : (a.power != null ? a.power : null);
+          return '<div title="' + (a.name || '') + (pw != null ? ' — ' + Math.round(pw) + ' W' : '') + '" style="background:var(--bg-3);border:1px solid ' + (isOn ? 'var(--acc-cyan)' : 'var(--border-soft)') + ';border-radius:var(--r-md);padding:14px;text-align:center;cursor:help;">' +
+            '<div style="font-size:24px;">' + (a.ico || '🔌') + '</div>' +
+            '<div style="font-size:12px;font-weight:600;margin-top:4px;">' + (a.name || '?') + '</div>' +
+            '<div style="color:' + (isOn ? 'var(--acc-cyan)' : 'var(--tx-3)') + ';font-size:11px;margin-top:2px;">' + (isOn ? (pw != null ? Math.round(pw) + ' W' : 'ON') : 'OFF') + '</div></div>';
+        }).join('');
+  }
+
+  // Speaker
+  const spEl = $('zd-speaker');
+  if (spEl) {
+    const audio = (DATA && DATA.audio) || [];
+    const mine = audio.filter(s => (s.zone || '').toLowerCase() === zoneKey.toLowerCase() || (s.room || '').toLowerCase() === zoneKey.toLowerCase());
+    if (mine.length === 0) {
+      spEl.textContent = 'Bez reproduktoru v této zóně';
+    } else {
+      spEl.innerHTML = mine.map(s => '<div title="' + (s.playing ? 'Hraje: ' + (s.track || '') : 'Ticho') + '" style="display:inline-flex;gap:10px;align-items:center;padding:10px 14px;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);margin-right:8px;">' +
+        '<span style="font-size:20px;">' + (s.playing ? '🔊' : '🔇') + '</span>' +
+        '<div><div style="font-weight:600;font-size:13px;">' + (s.name || 'Speaker') + '</div>' +
+        '<div style="color:var(--tx-3);font-size:11px;">' + (s.playing ? 'Hraje' : 'Ticho') + (s.volume != null ? ' · ' + Math.round(s.volume * 100) + '%' : '') + '</div></div></div>').join('');
+    }
+  }
+
+  // Actions
+  const actEl = $('zd-actions');
+  if (actEl) {
+    actEl.innerHTML = [
+      { ico: '💡', label: 'Full ON', action: "zoneAction('" + zoneKey + "','on')", tip: 'Zapne všechna světla v zóně na 100 %' },
+      { ico: '◐', label: 'Partial', action: "zoneAction('" + zoneKey + "','partial')", tip: 'Tlumené osvětlení (scéna comfort)' },
+      { ico: '○', label: 'OFF', action: "zoneAction('" + zoneKey + "','off')", tip: 'Zhasne všechna světla v zóně' },
+      { ico: '📻', label: 'Radio', action: "zoneAction('" + zoneKey + "','radio')", tip: 'Spustí rádio na speakeru zóny' },
+      { ico: '🔇', label: 'Audio stop', action: "audioStop()", tip: 'Zastaví audio ve všech zónách' }
+    ].map(b => '<button class="ctrl-btn" title="' + b.tip + '" onclick="' + b.action + '" style="min-width:120px;">' +
+      '<div class="ctrl-ico gray">' + b.ico + '</div><div class="ctrl-text"><div class="ctrl-title">' + b.label + '</div></div></button>').join('');
+  }
+
+  switchPage('zone-detail');
+}
+
+async function zoneAction(zoneKey, action) {
+  try {
+    await writeVar('sh_light_request', zoneKey + '_' + action);
+    toast('💡 ' + zoneKey + ' → ' + action);
+  } catch (e) {
+    toast('✗ ' + e.message);
+  }
+}
+
 // ── ROLETA controls ─────────────────────────────────────
 async function roletaSet(targetFloat) {
   // Target 0-1, směřuje přímo na Roleta Fyrtur1 device přes setDeviceCap (windowcoverings_set)
@@ -3712,9 +3906,56 @@ async function saveSetting(id, name, type) {
 // ── Historie page helpers ──
 const SHEETS_WEBAPP = 'https://script.google.com/macros/s/AKfycbw9Ow2BhcjKzo_PJzzQOpa_GirCMnTcnfTAyA0cL62b6FxJigYvsAT1uapSAT_rQvY8/exec';
 
-function openSheet(sheetName) {
-  const url = SHEETS_WEBAPP + '?mode=latest&sheet=' + encodeURIComponent(sheetName) + '&count=50';
-  window.open(url, '_blank');
+// 🆕 23.4. — Sheet preview modal místo open v novém tabu (port z v1 pattern)
+async function openSheet(sheetName) {
+  const mov = $('sheet-preview-overlay');
+  if (!mov) {
+    // Fallback: pokud modal nenainjektován, otevři v tabu
+    const url = SHEETS_WEBAPP + '?mode=latest&sheet=' + encodeURIComponent(sheetName) + '&count=50';
+    window.open(url, '_blank');
+    return;
+  }
+  setText('sheet-preview-title', '📊 ' + sheetName.replace('+', ' '));
+  const body = $('sheet-preview-body');
+  if (body) body.innerHTML = '<div style="color:var(--tx-3);font-size:13px;text-align:center;padding:40px 0;">⏳ Načítám data...</div>';
+  mov.style.display = 'flex';
+
+  try {
+    const url = SHEETS_WEBAPP + '?mode=latest&sheet=' + encodeURIComponent(sheetName) + '&count=50';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const rows = data.rows || data;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      body.innerHTML = '<div style="color:var(--tx-3);font-size:13px;text-align:center;padding:40px 0;">⚠ Žádná data</div>';
+      return;
+    }
+    // Render jako tabulku (první řádek jsou headers pokud jsou objects)
+    const keys = typeof rows[0] === 'object' ? Object.keys(rows[0]).slice(0, 8) : [];
+    let html = '<div style="max-height:60vh;overflow:auto;"><table style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono);">';
+    if (keys.length) {
+      html += '<thead style="position:sticky;top:0;background:var(--bg-2);"><tr>' +
+        keys.map(k => '<th style="text-align:left;padding:8px 10px;color:var(--tx-3);font-size:10px;text-transform:uppercase;border-bottom:1px solid var(--border-soft);">' + k + '</th>').join('') +
+        '</tr></thead><tbody>';
+      for (const row of rows) {
+        html += '<tr style="border-bottom:1px solid var(--border-soft);">' +
+          keys.map(k => '<td style="padding:6px 10px;color:var(--tx-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="' + String(row[k] || '').replace(/"/g, '&quot;') + '">' + (row[k] != null ? String(row[k]) : '') + '</td>').join('') +
+          '</tr>';
+      }
+      html += '</tbody>';
+    } else {
+      html += '<tbody>' + rows.map(r => '<tr><td style="padding:8px;">' + String(r) + '</td></tr>').join('') + '</tbody>';
+    }
+    html += '</table></div>';
+    body.innerHTML = html;
+  } catch (e) {
+    body.innerHTML = '<div style="color:var(--acc-red);font-size:13px;text-align:center;padding:40px 0;">❌ Chyba: ' + e.message + '</div>';
+  }
+}
+
+function closeSheetPreview() {
+  const mov = $('sheet-preview-overlay');
+  if (mov) mov.style.display = 'none';
 }
 
 async function loadEventLogV2() {
@@ -4433,6 +4674,16 @@ refresh();
 const REFRESH_MS = Math.max(3000, Number(CFG.interval || 10) * 1000);
 setInterval(refresh, REFRESH_MS);
 console.log('[v2] refresh interval: ' + REFRESH_MS + ' ms');
+
+// 🆕 23.4. večer — init client-side fetch pro Počasí + Burza (port z v1 pattern)
+// Nezávislé na bridge refresh. Data budou v cache, ready když user přepne page.
+setTimeout(() => {
+  try { if (typeof refreshPocasiPage === 'function') refreshPocasiPage(); } catch (_) {}
+  try { if (typeof refreshBurzaPage === 'function') refreshBurzaPage(); } catch (_) {}
+}, 1500);
+// Refresh client-fetch data every 10 min (weather) / every 2 min (crypto)
+setInterval(() => { try { if (typeof refreshPocasiPage === 'function') refreshPocasiPage(); } catch (_) {} }, 10 * 60 * 1000);
+setInterval(() => { try { if (typeof refreshBurzaPage === 'function') refreshBurzaPage(); } catch (_) {} }, 2 * 60 * 1000);
 
 // ── Live clock ──────────────────────────────────────────
 function tick() {
