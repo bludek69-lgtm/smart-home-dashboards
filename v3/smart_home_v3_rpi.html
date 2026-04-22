@@ -1016,6 +1016,178 @@ input:focus, select:focus, textarea:focus {
 }
 /* ═══════════════════════════════════════════════════════════════ */
 
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🎨 v3 ICON OVERLAY — pěkné colored circles + glow (port z v2)   */
+/* 23.4. večer — user feedback: "ikony jsou hrozný, v2 hezčí"       */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* 🏠 Home stat tile icons (.tile-icon) — 40px big emoji → colored glow circle */
+.tile-icon {
+  font-size: 44px !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+  padding: 12px !important;
+  background: linear-gradient(135deg, var(--cyand), var(--blued)) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 32px rgba(34,211,238,0.28), inset 0 1px 2px rgba(255,255,255,0.08) !important;
+  margin-bottom: 8px !important;
+  min-width: 68px !important;
+  min-height: 68px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+/* 🎨 Tile with t-icon (typical card) — make it pretty circle with glow */
+.t-icon {
+  width: 44px !important;
+  height: 44px !important;
+  font-size: 22px !important;
+  background: linear-gradient(135deg, var(--cyand), rgba(74,158,255,0.08)) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 20px rgba(34,211,238,0.18), inset 0 1px 2px rgba(255,255,255,0.08) !important;
+  border: 1px solid rgba(34,211,238,0.15);
+  flex-shrink: 0 !important;
+}
+
+/* 💡 Card-icon (small inline icon) — upgrade do moderního circle */
+.card-icon {
+  font-size: 18px !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(34,211,238,0.12), rgba(74,158,255,0.06)) !important;
+  box-shadow: 0 0 12px rgba(34,211,238,0.15) !important;
+  text-align: center !important;
+  flex-shrink: 0 !important;
+}
+
+/* 🎬 Scene tile icon (.ht-icon) — BIG gradient circle (Relax/Work/Kino/atd.) */
+.ht-icon {
+  font-size: 30px !important;
+  width: 60px !important;
+  height: 60px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, rgba(168,85,247,0.22), rgba(74,158,255,0.12)) !important;
+  box-shadow: 0 0 28px rgba(168,85,247,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important;
+  margin-bottom: 8px !important;
+  border: 1px solid rgba(168,85,247,0.18);
+  transition: transform var(--tr-med), box-shadow var(--tr-med);
+}
+.tile.scene:hover .ht-icon {
+  transform: scale(1.08);
+  box-shadow: 0 0 36px rgba(168,85,247,0.4) !important;
+}
+
+/* Scene tile specific variants (barevné glow per scéna — vyšší specificita přes id) */
+#scn-relax .ht-icon       { background: linear-gradient(135deg, rgba(168,85,247,0.3), rgba(139,92,246,0.15)) !important; box-shadow: 0 0 28px rgba(168,85,247,0.35) !important; }
+#scn-work .ht-icon        { background: linear-gradient(135deg, rgba(74,158,255,0.3), rgba(59,130,246,0.15)) !important; box-shadow: 0 0 28px rgba(74,158,255,0.35) !important; }
+#scn-audio .ht-icon       { background: linear-gradient(135deg, rgba(34,211,238,0.3), rgba(14,165,233,0.15)) !important; box-shadow: 0 0 28px rgba(34,211,238,0.35) !important; }
+#scn-vareni .ht-icon      { background: linear-gradient(135deg, rgba(255,159,64,0.3), rgba(249,115,22,0.15)) !important; box-shadow: 0 0 28px rgba(255,159,64,0.35) !important; }
+#scn-kino .ht-icon        { background: linear-gradient(135deg, rgba(239,68,68,0.3), rgba(220,38,38,0.15)) !important; box-shadow: 0 0 28px rgba(239,68,68,0.35) !important; }
+#scn-romantika .ht-icon   { background: linear-gradient(135deg, rgba(251,191,36,0.3), rgba(245,158,11,0.15)) !important; box-shadow: 0 0 28px rgba(251,191,36,0.35) !important; }
+
+/* 🚶 🌡 💧 Room indicator chips (.ri) — moderní pills s colored bg per typ */
+.room-inds .ri, .zc-inds .ri {
+  font-size: 13px !important;
+  padding: 6px 11px !important;
+  border-radius: 999px !important;
+  background: var(--bg3) !important;
+  border: 1px solid var(--bd) !important;
+  gap: 5px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: all var(--tr-fast);
+}
+.room-inds .ri:hover, .zc-inds .ri:hover {
+  transform: translateY(-1px);
+  border-color: var(--bda) !important;
+}
+.ri.on {
+  background: linear-gradient(135deg, var(--greend), rgba(59,201,125,0.05)) !important;
+  border-color: rgba(59,201,125,0.35) !important;
+  box-shadow: 0 0 12px rgba(59,201,125,0.25), 0 1px 4px rgba(0,0,0,0.2) !important;
+}
+.ri.warn {
+  background: linear-gradient(135deg, var(--oranged), rgba(255,159,64,0.04)) !important;
+  border-color: rgba(255,159,64,0.4) !important;
+  box-shadow: 0 0 10px rgba(255,159,64,0.2), 0 1px 4px rgba(0,0,0,0.2) !important;
+}
+.ri.aud {
+  background: linear-gradient(135deg, var(--cyand), rgba(34,211,238,0.04)) !important;
+  border-color: rgba(34,211,238,0.35) !important;
+  box-shadow: 0 0 12px rgba(34,211,238,0.25), 0 1px 4px rgba(0,0,0,0.2) !important;
+}
+.ri.err {
+  background: linear-gradient(135deg, var(--redd), rgba(239,68,68,0.06)) !important;
+  border-color: rgba(239,68,68,0.4) !important;
+  box-shadow: 0 0 14px rgba(239,68,68,0.25), 0 1px 4px rgba(0,0,0,0.2) !important;
+  color: var(--red) !important;
+  font-weight: 600;
+}
+.ri.off {
+  opacity: 0.45 !important;
+}
+.ri .ri-txt {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  font-weight: 600;
+}
+
+/* 🔖 Tab icons (.ti) — trochu větší + animate */
+.ti {
+  font-size: 18px !important;
+  margin-right: 4px;
+  transition: transform var(--tr-fast);
+}
+.tab:hover .ti {
+  transform: scale(1.15);
+}
+.tab.active .ti {
+  filter: drop-shadow(0 0 8px var(--cyan));
+}
+
+/* 🏠 hg-rooms tiles (zone cards na home) */
+.hg-rooms .room-inds {
+  gap: 4px !important;
+  flex-wrap: wrap;
+}
+
+/* 📊 Kamera/camera related icons */
+.cam-title {
+  font-weight: 600 !important;
+}
+.cam-live {
+  background: var(--red) !important;
+  color: white !important;
+  padding: 3px 10px !important;
+  border-radius: 999px !important;
+  font-weight: 700 !important;
+  font-size: 10px !important;
+  box-shadow: 0 0 16px rgba(239,68,68,0.4);
+  animation: v3-pulse 2s ease-in-out infinite;
+}
+@keyframes v3-pulse {
+  0%, 100% { box-shadow: 0 0 16px rgba(239,68,68,0.4); }
+  50% { box-shadow: 0 0 24px rgba(239,68,68,0.7); }
+}
+
+/* Zone card tiles — more distinct look */
+.zc-card, .hg-rooms .card {
+  transition: all var(--tr-med) !important;
+}
+.zc-card:hover, .hg-rooms .card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg), var(--glow-cyan) !important;
+  border-color: var(--bda) !important;
+}
+/* ═══════════════════════════════════════════════════════════════ */
+
 </style>
 </head>
 <body>
