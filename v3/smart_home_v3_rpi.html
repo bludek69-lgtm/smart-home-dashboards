@@ -1137,52 +1137,151 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
 }
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 🏠 HOME COMPACT — zóny menší, víc se vejde bez scrolu            */
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🏗 v3 HOME REDESIGN — 23.4. večer (user: "přeházej jak chceš")   */
 /* ═══════════════════════════════════════════════════════════════ */
 
-/* Skryj detail chipy na Home */
-#page-home .hg-rooms .room-inds {
-  display: none !important;
+/* NEW grid: 5 rows, kamera spans 3 middle rows (right column) */
+#page-home .home-grid {
+  grid-template-columns: 3fr 2fr !important;
+  grid-template-rows: auto auto 160px auto 1fr !important;
+  gap: 8px !important;
 }
 
-/* Hlavní emoji — COMPACT */
-#page-home .hg-rooms .rm-icon {
-  font-size: clamp(22px, 2.2vw, 30px) !important;
-  line-height: 1 !important;
-  margin-bottom: 2px !important;
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3));
-  transition: transform var(--tr-fast);
-}
-#page-home .hg-rooms .room:hover .rm-icon {
-  transform: scale(1.08);
+/* Row 1 — top stats (5 tiles) */
+#page-home .hg-status {
+  grid-column: 1 / -1 !important;
+  grid-row: 1 !important;
 }
 
-/* Název — menší ale čitelný */
-#page-home .hg-rooms .room-name {
-  font-size: clamp(10px, 1.05vw, 13px) !important;
-  font-weight: 600 !important;
-  color: var(--tx1) !important;
-  line-height: 1.2;
+/* Row 2 — sys tiles (4 tiles) */
+#page-home .hg-sys {
+  grid-column: 1 / -1 !important;
+  grid-row: 2 !important;
 }
 
-/* Room tile — kompaktní */
-#page-home .hg-rooms .room {
+/* Row 3 — zones (LEFT) */
+#page-home .hg-rooms {
+  grid-column: 1 !important;
+  grid-row: 3 !important;
+}
+
+/* Row 4 — scenes horizontal strip (LEFT) */
+#page-home .hg-scenes {
+  grid-column: 1 !important;
+  grid-row: 4 !important;
+  overflow: visible !important;
+  min-height: 80px;
+}
+
+/* Row 5 — apps/appliances (LEFT, scrollable rest) */
+#page-home .hg-apps {
+  grid-column: 1 !important;
+  grid-row: 5 !important;
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Camera SPANS rows 3-5 on right (velká live) */
+#page-home .hg-cam {
+  grid-column: 2 !important;
+  grid-row: 3 / 6 !important;
+  overflow: hidden;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═══ SCENES HORIZONTAL STRIP ═══════════════════════════════════ */
+/* v1 defaultně 2×3 grid, v3 teď 7 boxů v řadě (horizontal) */
+#page-home .hg-scenes .scene-grid {
+  grid-template-columns: repeat(7, 1fr) !important;
+  grid-template-rows: 1fr !important;
+  gap: 4px !important;
+  height: 100% !important;
+}
+
+#page-home .hg-scenes .tile.scene {
+  min-height: 70px !important;
   padding: 6px 4px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+#page-home .hg-scenes .tile.scene .ht-icon {
+  font-size: 24px !important;
+  margin-bottom: 4px !important;
+}
+
+#page-home .hg-scenes .tile.scene .ht-name {
+  font-size: clamp(10px, 0.95vw, 12px) !important;
+  font-weight: 600;
+}
+
+/* Reset tile (poslední) s dashed border */
+#page-home .hg-scenes .tile.scene.reset-t {
+  border: 1px dashed rgba(239,68,68,0.4) !important;
+  background: linear-gradient(135deg, rgba(239,68,68,0.05), rgba(26,34,54,0.5)) !important;
+}
+
+/* ═══ ZONE ROOMS COMPACT ═══════════════════════════════════════ */
+#page-home .hg-rooms .floor-grid {
+  grid-template-columns: repeat(4, 1fr) !important;
+  grid-template-rows: 1fr 1fr !important;
+  height: 100%;
+  gap: 4px !important;
+}
+
+#page-home .hg-rooms .room {
+  padding: 4px 3px !important;
   gap: 0 !important;
   background: linear-gradient(135deg, rgba(26,34,54,0.6), rgba(35,44,68,0.4)) !important;
   border: 1px solid var(--bd) !important;
   border-radius: var(--r) !important;
-  box-shadow: var(--shadow-sm);
   transition: all var(--tr-med) !important;
   position: relative;
   min-height: 0 !important;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-/* Aktivní zóna */
+#page-home .hg-rooms .rm-icon {
+  font-size: clamp(22px, 2.2vw, 30px) !important;
+  margin-bottom: 2px !important;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3));
+  transition: transform var(--tr-fast);
+}
+
+#page-home .hg-rooms .room:hover .rm-icon {
+  transform: scale(1.1);
+}
+
+#page-home .hg-rooms .room-name {
+  font-size: clamp(10px, 1vw, 13px) !important;
+  font-weight: 600 !important;
+  color: var(--tx1) !important;
+  line-height: 1.15;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Skryj chipy na Home (v Zone Detail je uvidí) */
+#page-home .hg-rooms .room-inds {
+  display: none !important;
+}
+
+/* Aktivní zóna — zelený glow + pulsing dot */
 #page-home .hg-rooms .room.lit {
   background: linear-gradient(135deg, rgba(59,201,125,0.15), rgba(26,34,54,0.5)) !important;
   border-color: rgba(59,201,125,0.4) !important;
-  box-shadow: 0 0 12px rgba(59,201,125,0.2), var(--shadow-sm) !important;
+  box-shadow: 0 0 12px rgba(59,201,125,0.2);
 }
 #page-home .hg-rooms .room.lit::after {
   content: '';
@@ -1201,31 +1300,14 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
   50% { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* Hover */
 #page-home .hg-rooms .room:hover {
   transform: translateY(-1px);
   border-color: var(--bda) !important;
-  box-shadow: 0 0 14px rgba(34,211,238,0.22), var(--shadow-md) !important;
+  box-shadow: 0 0 14px rgba(34,211,238,0.22);
   background: linear-gradient(135deg, rgba(26,34,54,0.85), rgba(35,44,68,0.65)) !important;
 }
 
-/* Grid — 4 columns default, 2 rows = 8 zón */
-#page-home .hg-rooms .floor-grid {
-  gap: 4px !important;
-  grid-template-columns: repeat(4, 1fr) !important;
-}
-
-/* Na menších obrazovkách (RPi) 3 per row */
-@media (max-width: 1024px) {
-  #page-home .hg-rooms .floor-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-  #page-home .hg-rooms .rm-icon {
-    font-size: clamp(20px, 2vw, 26px) !important;
-  }
-}
-
-/* Hover tooltip s chipy — subtle */
+/* Hover tooltip s chipy (pod tilem) — zachováno */
 #page-home .hg-rooms .room:hover .room-inds {
   display: flex !important;
   position: absolute;
@@ -1248,49 +1330,75 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
   from { opacity: 0; transform: translateX(-50%) translateY(-2px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
-/* ═══════════════════════════════════════════════════════════════ */
 
-
-/* ═══════════════════════════════════════════════════════════════ */
-/* 🏠 v3 HOME GRID FIX — user: "čtverce jsou pořad velké"           */
-/* Root cause: .home-grid{grid-template-rows:auto auto 1fr 1fr}     */
-/* zone row = 1fr = polovina viewport → tiles obrovské.             */
-/* Fix: fixed compact height pro zone row, víc pro scénes/apps.     */
-/* ═══════════════════════════════════════════════════════════════ */
-
-#page-home .home-grid {
-  grid-template-rows: auto auto 160px 1fr !important;
-  gap: 6px !important;
+/* ═══ KAMERA BIG FEED ═══════════════════════════════════════════ */
+#page-home .hg-cam .cam-card {
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+  margin: 0 !important;
 }
 
-/* Responsive — menší obrazovky */
+#page-home .hg-cam .cam-body {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: var(--r);
+}
+
+#page-home .hg-cam .cam-body img,
+#page-home .hg-cam #camImg {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+}
+
+/* ═══ APPLIANCES — scrollable list ═══════════════════════════════ */
+#page-home .hg-apps .card {
+  height: 100%;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
+
+#page-home .hg-apps .card-row {
+  padding: 4px 0 !important;
+  font-size: 12px;
+}
+
+/* ═══ Top stats + sys — compact ═══════════════════════════════════ */
+#page-home .hg-status .tile {
+  padding: 8px 6px !important;
+}
+
+#page-home .hg-sys .tile {
+  padding: 8px 6px !important;
+}
+
+#page-home .hg-status .tile-icon,
+#page-home .hg-sys .tile-icon {
+  font-size: clamp(24px, 2.2vw, 32px) !important;
+}
+
+/* ═══ Responsive breakpoints ═══════════════════════════════════ */
 @media (max-width: 1366px) {
   #page-home .home-grid {
-    grid-template-rows: auto auto 140px 1fr !important;
+    grid-template-rows: auto auto 140px auto 1fr !important;
+  }
+  #page-home .hg-scenes .scene-grid {
+    grid-template-columns: repeat(7, 1fr) !important;
   }
 }
 
 @media (max-width: 1024px) {
   #page-home .home-grid {
-    grid-template-rows: auto auto 120px 1fr !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto auto auto auto !important;
   }
-}
-
-/* Zone tiles — při pevné výšce jsou nyní pěkně kompaktní */
-#page-home .hg-rooms .room {
-  padding: 4px 3px !important;
-  gap: 0 !important;
-}
-
-/* Emoji ještě jemně zmenšit — aby bylo poměrově OK v 80px tile */
-#page-home .hg-rooms .rm-icon {
-  font-size: clamp(20px, 2vw, 28px) !important;
-  margin-bottom: 2px !important;
-}
-
-#page-home .hg-rooms .room-name {
-  font-size: clamp(10px, 0.95vw, 12px) !important;
-  line-height: 1.15;
+  #page-home .hg-rooms  { grid-column: 1 !important; grid-row: 3 !important; }
+  #page-home .hg-cam    { grid-column: 1 !important; grid-row: 4 !important; }
+  #page-home .hg-scenes { grid-column: 1 !important; grid-row: 5 !important; }
+  #page-home .hg-apps   { grid-column: 1 !important; grid-row: 6 !important; }
 }
 /* ═══════════════════════════════════════════════════════════════ */
 </style>
