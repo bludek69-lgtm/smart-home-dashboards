@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Smart Home · MacBook Pro 2880</title>
+<title>Smart Home . MacBook Pro 2880</title>
 <!-- ═══════════════════════════════════════════════════════════════
      Smart Home Dashboard v2 — Modern Redesign
      Phase 45 (2026-04-22) — Design tokens + CSS theme skeleton
@@ -985,8 +985,7 @@ body {
   .greeting h1 { font-size: var(--fs-xl); }
 }
 
-/* RESOLUTION VARIANT: 2880x1800 */
-/* 2880x1800 high-DPI variant: bigger content */
+/* 2880x1800 high-DPI variant */
 :root {
   --sidebar-w: 280px !important;
   --content-max: 2200px !important;
@@ -998,7 +997,6 @@ body {
 }
 .stat-tile { padding: 24px !important; }
 .stat-ico { width: 64px !important; height: 64px !important; font-size: 24px !important; }
-
 </style>
 </head>
 <body>
@@ -1283,15 +1281,40 @@ body {
     <section class="page" data-page="osvetleni">
       <div class="page-header">
         <div class="greeting">
-          <h1>💡 Osvětlení</h1>
-          <p>Ovládání světel ve všech místnostech · dimmer, teplota barvy, scény</p>
+          <h1>💡 Osvětlení — všechny místnosti</h1>
+          <p>Dimmer, on/off, scény</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">💡</div>
-        <div class="placeholder-title">Osvětlení — detail</div>
-        <div class="placeholder-sub">6 místností s dimmer slider + přepínač on/off.<br>Per-room controls (barva, teplota, efekty).</div>
-        <div class="placeholder-phase">⏳ Phase 48</div>
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">RYCHLÉ AKCE</span>
+        </div>
+        <div class="ctrl-grid" style="grid-template-columns: repeat(4, 1fr);">
+          <button class="ctrl-btn" onclick="allLights('on')">
+            <div class="ctrl-ico yellow">💡</div>
+            <div class="ctrl-text"><div class="ctrl-title">Vše ON</div><div class="ctrl-sub">Plný jas</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="allLights('off')">
+            <div class="ctrl-ico gray">💡</div>
+            <div class="ctrl-text"><div class="ctrl-title">Vše OFF</div><div class="ctrl-sub">Zhasnout</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="sceneRun('comfort')">
+            <div class="ctrl-ico orange">☀</div>
+            <div class="ctrl-text"><div class="ctrl-title">Comfort</div><div class="ctrl-sub">Denní scéna</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="sceneRun('relax')">
+            <div class="ctrl-ico purple">🌙</div>
+            <div class="ctrl-text"><div class="ctrl-title">Relax</div><div class="ctrl-sub">Tlumené</div></div>
+          </button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">MÍSTNOSTI</span>
+        </div>
+        <div class="lights-grid" id="osvetleni-grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr));">
+          <!-- rendered by JS -->
+        </div>
       </div>
     </section>
 
@@ -1300,14 +1323,31 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>🔊 Audio</h1>
-          <p>Multi-room audio · Kuchyň (Spotify) · Ložnice · Koupelna · TTS pipeline</p>
+          <p>Multi-room audio · play/pause · volume · TTS pipeline</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">🔊</div>
-        <div class="placeholder-title">Audio — multi-room</div>
-        <div class="placeholder-sub">Kontrola každé zóny zvlášť · play/pause/volume · queue · TTS priority</div>
-        <div class="placeholder-phase">⏳ Phase 50</div>
+      <div class="section-card">
+        <div class="section-head"><span class="section-title">ZÓNY</span></div>
+        <div class="audio-list" id="audio-list-full">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">RYCHLÉ AKCE</span></div>
+        <div class="ctrl-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <button class="ctrl-btn" onclick="audioStop()">
+            <div class="ctrl-ico red">⏹</div>
+            <div class="ctrl-text"><div class="ctrl-title">Stop všude</div><div class="ctrl-sub">Všechny zóny</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="toast('📻 Radio kuchyň')">
+            <div class="ctrl-ico orange">📻</div>
+            <div class="ctrl-text"><div class="ctrl-title">Radio kuchyň</div><div class="ctrl-sub">Classic Hits</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="toast('🗣 TTS test')">
+            <div class="ctrl-ico blue">🗣</div>
+            <div class="ctrl-text"><div class="ctrl-title">TTS test</div><div class="ctrl-sub">Hlas pipeline</div></div>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -1316,14 +1356,26 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>🌡 Klimatizace</h1>
-          <p>Topení (Protherm 9kW + 3× TRV) · Čistička · Zvlhčovač · Ventilátor</p>
+          <p>Heating (Protherm 9 kW + TRV) · Čistička · Zvlhčovač</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">🌡</div>
-        <div class="placeholder-title">Heating + klima</div>
-        <div class="placeholder-sub">Per-zone target · boost · AI vrstvy toggle · týdenní plán · kWh graf</div>
-        <div class="placeholder-phase">⏳ Phase 50</div>
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">TOPENÍ — ZÓNY</span>
+          <span class="section-action" id="heating-master-status">mode: — · boiler: —</span>
+        </div>
+        <div id="klima-list-full" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">PRESETY</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(4,1fr);">
+          <button class="ctrl-btn" onclick="toast('🏠 Preset: Doma')"><div class="ctrl-ico green">🏠</div><div class="ctrl-text"><div class="ctrl-title">Doma</div><div class="ctrl-sub">Standardní</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🚗 Preset: Pryč')"><div class="ctrl-ico orange">🚗</div><div class="ctrl-text"><div class="ctrl-title">Pryč</div><div class="ctrl-sub">16 °C</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🔥 Preset: Boost')"><div class="ctrl-ico red">🔥</div><div class="ctrl-text"><div class="ctrl-title">Boost</div><div class="ctrl-sub">+2 °C / 30 min</div></div></button>
+          <button class="ctrl-btn" onclick="toast('⏸ Heating OFF')"><div class="ctrl-ico gray">⏸</div><div class="ctrl-text"><div class="ctrl-title">Vše OFF</div><div class="ctrl-sub">Anti-freeze</div></div></button>
+        </div>
       </div>
     </section>
 
@@ -1332,14 +1384,25 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>🛡 Bezpečnost</h1>
-          <p>Door/window sensors · Presence · Privacy guard · Režim pryč</p>
+          <p>Senzory · Presence · Privacy guard · Režim pryč</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">🛡</div>
-        <div class="placeholder-title">Security dashboard</div>
-        <div class="placeholder-sub">Sensor status · history events · auto-lock rules</div>
-        <div class="placeholder-phase">⏳ budoucí</div>
+      <div class="section-card">
+        <div class="section-head"><span class="section-title">SENZORY</span></div>
+        <div class="activity-list">
+          <div class="activity-row"><div class="activity-ico green">🚪</div><div class="activity-info"><div class="activity-title">Vchodové dveře</div><div class="activity-sub">Zavřeno</div></div><div class="activity-time">OK</div></div>
+          <div class="activity-row"><div class="activity-ico green">🪟</div><div class="activity-info"><div class="activity-title">Okno jídelna</div><div class="activity-sub">Zavřeno</div></div><div class="activity-time">OK</div></div>
+          <div class="activity-row"><div class="activity-ico blue">👤</div><div class="activity-info"><div class="activity-title">Presence</div><div class="activity-sub" id="sec-presence-sub">Doma</div></div><div class="activity-time" id="sec-presence-time">aktivní</div></div>
+          <div class="activity-row"><div class="activity-ico purple">🔒</div><div class="activity-info"><div class="activity-title">Privacy guard</div><div class="activity-sub">Roleta nahoře → open space OFF</div></div><div class="activity-time">ON</div></div>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">REŽIM</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(3,1fr);">
+          <button class="ctrl-btn" onclick="setMode('home')"><div class="ctrl-ico green">🏠</div><div class="ctrl-text"><div class="ctrl-title">Doma</div><div class="ctrl-sub">Aktivovat</div></div></button>
+          <button class="ctrl-btn" onclick="setMode('away')"><div class="ctrl-ico orange">🚗</div><div class="ctrl-text"><div class="ctrl-title">Pryč</div><div class="ctrl-sub">Vše off + alerty</div></div></button>
+          <button class="ctrl-btn" onclick="setMode('sleep')"><div class="ctrl-ico purple">🌙</div><div class="ctrl-text"><div class="ctrl-title">Spánek</div><div class="ctrl-sub">Tichý režim</div></div></button>
+        </div>
       </div>
     </section>
 
@@ -1348,14 +1411,14 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>📹 Kamery</h1>
-          <p>Vchod · Zahrada · Garáž · Kuchyně · Ložnice indoor</p>
+          <p>Živý náhled · motion snapshots</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">📹</div>
-        <div class="placeholder-title">Camera grid</div>
-        <div class="placeholder-sub">Live náhled všech kamer · motion snapshots archiv · timeline</div>
-        <div class="placeholder-phase">⏳ Phase 49</div>
+      <div class="section-card">
+        <div class="section-head"><span class="section-title">ŽIVÉ KAMERY</span></div>
+        <div id="cams-grid-full" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;">
+          <!-- rendered by JS (velké tiles) -->
+        </div>
       </div>
     </section>
 
@@ -1364,14 +1427,17 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>🎬 Scény</h1>
-          <p>Večerní pohoda · Film · Dobré ráno · Noc · Odchod z domu · Vaření</p>
+          <p>Rychlé aktivování atmosfér · světla, audio, klima v jednom kliku</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">🎬</div>
-        <div class="placeholder-title">Scény editor</div>
-        <div class="placeholder-sub">Quick-play všechny scény · create/edit/duplicate · schedule</div>
-        <div class="placeholder-phase">⏳ Phase 49</div>
+      <div class="section-card">
+        <div class="section-head">
+          <span class="section-title">VŠECHNY SCÉNY</span>
+          <span class="section-action" id="scene-active-lbl">Aktivní: —</span>
+        </div>
+        <div id="sceny-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
+          <!-- rendered by JS -->
+        </div>
       </div>
     </section>
 
@@ -1380,14 +1446,28 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>⚡ Energie</h1>
-          <p>Spotřeba dnes · měsíc · TOP 10 spotřebičů · VT/NT · Kč/kWh</p>
+          <p>Spotřeba · kWh · VT/NT · heating odhad</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">⚡</div>
-        <div class="placeholder-title">Energy dashboard</div>
-        <div class="placeholder-sub">Graf spotřeby 24h · TOP 10 · VT/NT breakdown · měsíční projekce Kč</div>
-        <div class="placeholder-phase">⏳ budoucí</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-tile"><div class="stat-label">AKTUÁLNĚ W</div><div class="stat-ico purple">⚡</div><div class="stat-value" id="en-now-val">—</div><div class="stat-sub">Live spotřeba</div></div>
+        <div class="stat-tile"><div class="stat-label">DNES kWh</div><div class="stat-ico blue">📅</div><div class="stat-value" id="en-today-val">—</div><div class="stat-sub">Heating odhad</div></div>
+        <div class="stat-tile"><div class="stat-label">VČERA kWh</div><div class="stat-ico orange">📆</div><div class="stat-value" id="en-yest-val">—</div><div class="stat-sub">Heating odhad</div></div>
+        <div class="stat-tile"><div class="stat-label">DELTA vs VČERA</div><div class="stat-ico green">📊</div><div class="stat-value" id="en-delta-val">—</div><div class="stat-sub">Meziroční změna</div></div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">TARIF</span></div>
+        <div class="activity-list">
+          <div class="activity-row"><div class="activity-ico yellow">☀</div><div class="activity-info"><div class="activity-title">VT (vysoký tarif)</div><div class="activity-sub">5.48 Kč/kWh</div></div><div class="activity-time">D57d</div></div>
+          <div class="activity-row"><div class="activity-ico blue">🌙</div><div class="activity-info"><div class="activity-title">NT (nízký tarif)</div><div class="activity-sub">4.76 Kč/kWh</div></div><div class="activity-time">D57d</div></div>
+          <div class="activity-row"><div class="activity-ico purple">📋</div><div class="activity-info"><div class="activity-title">Fixní poplatek</div><div class="activity-sub">735 Kč/měsíc · 3×25A</div></div><div class="activity-time">—</div></div>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">GRAF 24H</span></div>
+        <div style="min-height:160px;display:grid;place-items:center;color:var(--tx-3);font-size:13px;border:1px dashed var(--border-med);border-radius:var(--r-md);padding:20px;">
+          📊 Graf power_snapshot history — coming soon (Phase 60+)
+        </div>
       </div>
     </section>
 
@@ -1396,14 +1476,27 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>⚙️ Systém</h1>
-          <p>Health · AI vrstvy · Diagnostika · Logy · Config · Advanced</p>
+          <p>Health · AI vrstvy · Diagnostika · Odkaz na v1 pro detailní akce</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">⚙️</div>
-        <div class="placeholder-title">System & AI</div>
-        <div class="placeholder-sub">AI control center · diagnostické akce · manuální akce · log snapshots</div>
-        <div class="placeholder-phase">⏳ budoucí (převzít z v1)</div>
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat-tile"><div class="stat-label">HEALTH SCORE</div><div class="stat-ico green">🛡</div><div class="stat-value" id="sys-health-val">—</div><div class="stat-sub">System zdraví</div></div>
+        <div class="stat-tile"><div class="stat-label">DEMAND ZÓNY</div><div class="stat-ico orange">🔥</div><div class="stat-value" id="sys-demand-val">—</div><div class="stat-sub">Heating</div></div>
+        <div class="stat-tile"><div class="stat-label">OFFLINE DEVICES</div><div class="stat-ico blue">📡</div><div class="stat-value" id="sys-offline-val">—</div><div class="stat-sub">Nedostupné</div></div>
+        <div class="stat-tile"><div class="stat-label">CELKEM DEVICES</div><div class="stat-ico purple">🔢</div><div class="stat-value" id="sys-total-val">—</div><div class="stat-sub">V Homey</div></div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">RYCHLÉ AKCE</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(3,1fr);">
+          <button class="ctrl-btn" onclick="toast('🏥 Health check triggered')"><div class="ctrl-ico green">🏥</div><div class="ctrl-text"><div class="ctrl-title">Health check</div><div class="ctrl-sub">sh_system_health_v1</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🔄 Self-heal triggered')"><div class="ctrl-ico blue">🔄</div><div class="ctrl-text"><div class="ctrl-title">Self-heal</div><div class="ctrl-sub">Fix orphans</div></div></button>
+          <button class="ctrl-btn" onclick="toast('🧠 Meta Brain triggered')"><div class="ctrl-ico purple">🧠</div><div class="ctrl-text"><div class="ctrl-title">Meta Brain</div><div class="ctrl-sub">Full scan</div></div></button>
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">DETAILNÍ OVLÁDÁNÍ</span></div>
+        <p style="color:var(--tx-3);font-size:13px;margin-bottom:12px;">Pro plnou AI kontrolu (PŘEPISY, DIAGNOSTICKÉ AKCE, MANUÁLNÍ AKCE, LOG SNAPSHOTS, GEMINI DIAGNOSTIKA) použij v1 dashboard:</p>
+        <a href="../smart_home_1920x1080.html" class="cam-btn-all" style="text-decoration:none;">→ Otevřít v1 AI page</a>
       </div>
     </section>
 
@@ -1412,14 +1505,23 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>🕐 Historie</h1>
-          <p>Event log · Morning routine history · Daily reports · AI rozhodnutí</p>
+          <p>Poslední události · zdroje dat</p>
         </div>
       </div>
-      <div class="page-placeholder">
-        <div class="placeholder-ico">🕐</div>
-        <div class="placeholder-title">Activity history</div>
-        <div class="placeholder-sub">Filterable event log · timeline · export · search</div>
-        <div class="placeholder-phase">⏳ budoucí</div>
+      <div class="section-card">
+        <div class="section-head"><span class="section-title">POSLEDNÍ UDÁLOSTI</span></div>
+        <div class="activity-list" id="historie-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">ZDROJE DAT</span></div>
+        <div class="activity-list">
+          <div class="activity-row"><div class="activity-ico green">📊</div><div class="activity-info"><div class="activity-title">Google Sheets EventLog</div><div class="activity-sub">10k řádků · filter by script/event/hours</div></div><div class="activity-time">web</div></div>
+          <div class="activity-row"><div class="activity-ico blue">🌅</div><div class="activity-info"><div class="activity-title">Ranní rutina</div><div class="activity-sub">Morning timeline · 3:15 / 5:15 alarm</div></div><div class="activity-time">daily</div></div>
+          <div class="activity-row"><div class="activity-ico orange">🔋</div><div class="activity-info"><div class="activity-title">Battery History</div><div class="activity-sub">30-denní trend per zařízení</div></div><div class="activity-time">daily</div></div>
+          <div class="activity-row"><div class="activity-ico purple">🧠</div><div class="activity-info"><div class="activity-title">Daily Report</div><div class="activity-sub">Gemini AI souhrn dne</div></div><div class="activity-time">22:00</div></div>
+        </div>
       </div>
     </section>
 
@@ -1664,6 +1766,168 @@ function updateUI(d) {
   renderAudio(d.audio || []);
   renderKlima(d.klima || []);
   renderActivities(d.activities || []);
+
+  // ── Phase 53+: Detail pages ──
+  renderOsvetleniDetail(d.lights || []);
+  renderAudioDetail(d.audio || []);
+  renderKlimaDetail(d.klima || [], d.heating);
+  renderCamsDetail(d.cameras || []);
+  renderScenyDetail(d.scenes || []);
+  renderEnergieDetail(d.energy || {}, d.health || {});
+  renderSystemDetail(d);
+  renderHistorieDetail(d.activities || []);
+}
+
+// ╔════════════════════════════════════════════════════════╗
+// ║ Phase 53+ Detail page renderers                        ║
+// ╚════════════════════════════════════════════════════════╝
+function renderOsvetleniDetail(lights) {
+  const el = $('osvetleni-grid');
+  if (!el) return;
+  el.innerHTML = lights.map(l => {
+    const pct = Math.round(l.dim * 100);
+    return `
+    <div class="light-tile ${l.on ? '' : 'off'}" style="padding:16px;">
+      <div class="light-row">
+        <div class="light-bulb ${l.on ? 'on' : ''}">💡</div>
+        <div class="light-name">${l.name}</div>
+        <div class="light-state ${l.on ? 'on' : 'off'}">${l.on ? 'ON' : 'OFF'}</div>
+      </div>
+      <div class="light-pct">${pct}%</div>
+      <input class="slider" type="range" min="0" max="100" value="${pct}"
+             oninput="lightDim('${l.id}', this.value, this)"
+             onchange="lightDim('${l.id}', this.value, this)">
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button class="audio-btn" onclick="lightDim('${l.id}', 100, null)" title="Plný jas">☀</button>
+        <button class="audio-btn" onclick="lightDim('${l.id}', 50, null)" title="50%">◐</button>
+        <button class="audio-btn" onclick="lightDim('${l.id}', 20, null)" title="Dim">🌙</button>
+        <button class="audio-btn" onclick="lightDim('${l.id}', 0, null)" title="Off">⏻</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderAudioDetail(audio) {
+  const el = $('audio-list-full');
+  if (!el) return;
+  el.innerHTML = audio.map(a => {
+    const playIco = a.playing ? '⏸' : '▶';
+    return `
+    <div class="audio-card">
+      <div class="audio-head">
+        <div class="audio-ico ${a.playing ? '' : 'off'}">${a.playing ? '🔊' : '🔇'}</div>
+        <div class="audio-info">
+          <div class="audio-zone-name">${a.name}</div>
+          <div class="audio-source ${a.playing ? 'playing' : ''}">${a.source || 'Idle'}</div>
+        </div>
+      </div>
+      <div class="audio-controls">
+        <div class="audio-btn" onclick="audioSkip('${a.id}', 'prev')">⏮</div>
+        <div class="audio-btn primary" onclick="audioToggle('${a.id}')">${playIco}</div>
+        <div class="audio-btn" onclick="audioSkip('${a.id}', 'next')">⏭</div>
+        <input class="audio-vol-slider" type="range" min="0" max="100" value="${a.volume}"
+               oninput="audioVol('${a.id}', this.value)">
+        <div class="audio-vol-val">${a.volume}%</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderKlimaDetail(klima, heating) {
+  const el = $('klima-list-full');
+  if (!el) return;
+  el.innerHTML = klima.map(k => `
+    <div class="klima-card">
+      <div class="klima-head">
+        <div class="klima-room">${k.room}</div>
+        <div class="klima-target">${k.target.toFixed(1)}<span class="klima-target-unit"> °C</span></div>
+      </div>
+      <div class="klima-current">Aktuálně ${k.current.toFixed(1)} °C · fan ${k.fan || 'auto'}</div>
+      <div class="klima-ctrl">
+        <div class="klima-btn" onclick="klimaAdj('${k.id}', -0.5)">˅</div>
+        <div class="klima-btn fan" title="Ventilátor: ${k.fan}">🌀</div>
+        <div class="klima-btn" onclick="klimaAdj('${k.id}', +0.5)">˄</div>
+      </div>
+    </div>
+  `).join('');
+  const status = $('heating-master-status');
+  if (status && heating) {
+    status.textContent = `mode: ${heating.mode || '—'} · preset: ${heating.preset || '—'} · boiler: ${heating.boiler || '—'}`;
+  }
+}
+
+function renderCamsDetail(cams) {
+  const el = $('cams-grid-full');
+  if (!el) return;
+  el.innerHTML = cams.map(c => `
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;" onclick="camOpen('${c.id}')">
+      <div style="height:180px;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));display:grid;place-items:center;position:relative;">
+        <span class="cam-live-badge" style="top:8px;left:8px;font-size:10px;padding:3px 8px;">LIVE</span>
+        <span style="font-size:48px;opacity:0.3;">📹</span>
+      </div>
+      <div style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:600;">${c.name}</div>
+          <div style="font-size:11px;color:var(--tx-3);font-family:var(--font-mono);">${c.time || ''}</div>
+        </div>
+        <span style="color:var(--tx-3);">▸</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderScenyDetail(scenes) {
+  const el = $('sceny-grid');
+  if (!el) return;
+  el.innerHTML = scenes.map(s => `
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;cursor:pointer;transition:all 180ms;" onclick="sceneRun('${s.id}')" onmouseenter="this.style.background='var(--surface-hover)'" onmouseleave="this.style.background='var(--bg-3)'">
+      <div class="scene-ico ${s.color}" style="width:48px;height:48px;font-size:22px;margin-bottom:12px;">${s.ico}</div>
+      <div style="font-weight:600;font-size:16px;margin-bottom:4px;">${s.name}</div>
+      <div style="color:var(--tx-3);font-size:12px;">Klikni pro aktivaci ▸</div>
+    </div>
+  `).join('');
+}
+
+function renderEnergieDetail(energy, health) {
+  const pw = health.power_total != null ? Math.round(health.power_total) : null;
+  setText('en-now-val', pw != null ? pw + ' W' : '—');
+  setText('en-today-val', energy.kwh_today != null ? Number(energy.kwh_today).toFixed(1) + ' kWh' : '—');
+  setText('en-yest-val', energy.kwh_yesterday != null ? Number(energy.kwh_yesterday).toFixed(1) + ' kWh' : '—');
+  const delta = energy.delta_pct;
+  const deltaEl = $('en-delta-val');
+  if (deltaEl) {
+    if (typeof delta === 'number') {
+      const arrow = delta < 0 ? '↓' : '↑';
+      deltaEl.textContent = arrow + ' ' + Math.abs(delta) + '%';
+      deltaEl.style.color = delta < 0 ? 'var(--acc-green)' : 'var(--acc-orange)';
+    } else {
+      deltaEl.textContent = '—';
+    }
+  }
+}
+
+function renderSystemDetail(d) {
+  const health = d.health || {};
+  const heating = d.heating || {};
+  setText('sys-health-val', (health.score || 0) + '%');
+  setText('sys-demand-val', (heating.demand_count || 0) + '/4');
+  setText('sys-offline-val', (d.offline || []).length);
+  setText('sys-total-val', d.device_count || '—');
+}
+
+function renderHistorieDetail(activities) {
+  const el = $('historie-list');
+  if (!el) return;
+  el.innerHTML = activities.map(a => `
+    <div class="activity-row">
+      <div class="activity-ico ${a.color}">${a.ico}</div>
+      <div class="activity-info">
+        <div class="activity-title">${a.title}</div>
+        <div class="activity-sub">${a.sub}</div>
+      </div>
+      <div class="activity-time">${a.time}</div>
+    </div>
+  `).join('');
 }
 
 // ╔════════════════════════════════════════════════════════╗
