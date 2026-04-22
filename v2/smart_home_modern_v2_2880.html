@@ -1405,22 +1405,131 @@ body {
           <p>Heating (Protherm 9 kW + TRV) · Čistička · Zvlhčovač</p>
         </div>
       </div>
+      <!-- 🔥 TOPENÍ Master card (port z v1 23.4. večer) -->
       <div class="section-card">
         <div class="section-head">
-          <span class="section-title">TOPENÍ — ZÓNY</span>
-          <span class="section-action" id="heating-master-status">mode: — · boiler: —</span>
+          <span class="section-title">🔥 TOPENÍ — PROTHERM RAY 9 KE</span>
+          <span class="section-action" onclick="toggleHelpV2('help-heating-v2')">ℹ Jak to funguje</span>
+        </div>
+        <div id="help-heating-v2" style="display:none;background:var(--bg-3);padding:14px;border-radius:var(--r-md);margin-bottom:12px;color:var(--tx-2);font-size:13px;line-height:1.6;">
+          <b>🤖 Auto</b> — scheduler + AI vrstvy (preWakeBoost, weatherAdjust, occupancyBonus)<br>
+          <b>📅 Manual</b> — striktně dle týdenního programu, bez AI<br>
+          <b>⏸ Off</b> — vše vypnuto, anti-freeze 7 °C stále aktivní<br><br>
+          <b>Preset:</b> 🏠 Doma (standardní) · 🚗 Odjíždím (16 °C vše) · 🔥 Boost (+2 °C / 30 min)<br>
+          <b>kWh dnes</b> = runtime × 9 kW (odhad, Protherm moduluje interně)
+        </div>
+
+        <!-- Režim buttons -->
+        <div style="display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-soft);">
+          <span style="color:var(--tx-2);font-weight:600;min-width:80px;">🎛 Režim:</span>
+          <button class="heat-mode-btn-v2" data-mode="auto" onclick="setHeatingModeV2('auto')" title="Auto režim — scheduler + AI vrstvy" style="padding:6px 14px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🤖 Auto</button>
+          <button class="heat-mode-btn-v2" data-mode="manual" onclick="setHeatingModeV2('manual')" title="Manuální — jen schedule bez AI" style="padding:6px 14px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">📅 Manual</button>
+          <button class="heat-mode-btn-v2" data-mode="off" onclick="setHeatingModeV2('off')" title="Vypnout — target všech zón 7 °C" style="padding:6px 14px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">⏸ Off</button>
+        </div>
+
+        <!-- Preset + Demand + Kotel + Runtime (2 řádky) -->
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:10px 0;font-family:var(--font-mono);font-size:13px;color:var(--tx-2);border-bottom:1px solid var(--border-soft);">
+          <div title="Aktuální preset topení">Preset: <strong id="heat-preset-v2">—</strong></div>
+          <div title="Kolik zón aktuálně požaduje teplo (současně = boiler ON)">Demand: <strong id="heat-demand-v2">0/4</strong> zón</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:10px 0;font-family:var(--font-mono);font-size:12px;color:var(--tx-2);">
+          <div title="Fyzický stav kotle (FGS-214 relé)">Kotel: <strong id="heat-boiler-v2">—</strong></div>
+          <div title="Doba kdy kotel dnes topil">Runtime dnes: <strong id="heat-runtime-v2">— min</strong></div>
+          <div title="Odhadovaná spotřeba dnes (runtime × 9 kW)">≈ <strong id="heat-kwh-v2">— kWh</strong></div>
+          <div style="color:var(--tx-3);">Včera: <strong id="heat-yest-v2" style="color:var(--tx-2);">— / —</strong></div>
+        </div>
+      </div>
+
+      <!-- Zone tiles s enable toggle + progress bar (port z v1) -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🏡 ZÓNY TOPENÍ</span></div>
+        <div id="heat-zones-grid-v2" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
+          <!-- rendered by renderHeatingV2() -->
+        </div>
+      </div>
+
+      <!-- Rychlé akce 6 buttons (port z v1) -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">⚡ RYCHLÉ AKCE</span></div>
+        <div class="ctrl-grid" style="grid-template-columns:repeat(6,1fr);">
+          <button class="ctrl-btn" onclick="setHeatingPresetV2('home')" title="Preset Doma — standardní schedule (comfort)">
+            <div class="ctrl-ico green">🏠</div><div class="ctrl-text"><div class="ctrl-title">Doma</div><div class="ctrl-sub">Standardní</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="setHeatingPresetV2('away')" title="Preset Pryč — všechny zóny 16 °C">
+            <div class="ctrl-ico orange">🚗</div><div class="ctrl-text"><div class="ctrl-title">Odcházím</div><div class="ctrl-sub">16 °C vše</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="setHeatingBoostV2(30)" title="+2 °C na 30 min, všechny zóny">
+            <div class="ctrl-ico red">🔥</div><div class="ctrl-text"><div class="ctrl-title">Boost</div><div class="ctrl-sub">+2 °C / 30 min</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="setHeatingNightV2()" title="Nastaví noční teploty do rána (dle schedule)">
+            <div class="ctrl-ico purple">🌙</div><div class="ctrl-text"><div class="ctrl-title">Noc</div><div class="ctrl-sub">Noční temp</div></div>
+          </button>
+          <button class="ctrl-btn" onclick="setHeatingModeV2('off')" title="Vypnout — target 7 °C (anti-freeze)" style="border-color:var(--acc-red);">
+            <div class="ctrl-ico red">⏸</div><div class="ctrl-text"><div class="ctrl-title">Vše OFF</div><div class="ctrl-sub">Anti-freeze</div></div>
+          </button>
+          <button class="ctrl-btn" id="heat-ai-btn-v2" onclick="toggleHeatingAiV2()" title="Fáze C AI vrstvy (preWakeBoost + weatherAdjust + occupancyBonus)">
+            <div class="ctrl-ico cyan">🧠</div><div class="ctrl-text"><div class="ctrl-title">AI</div><div class="ctrl-sub" id="heat-ai-sub-v2">—</div></div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Konfigurace expandable (port z v1 PHASE28) -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">⚙️ KONFIGURACE TOPENÍ</span>
+          <span class="section-action" onclick="toggleHelpV2('heat-cfg-panel')">▸ klikni pro rozbalení</span>
+        </div>
+        <div id="heat-cfg-panel" style="display:none;padding-top:8px;">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;font-size:12px;">
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Cílová teplota koupelny při ranní rutině">
+              <span style="color:var(--tx-3);">🚿 Koupelna ráno °C</span>
+              <input type="number" step="0.5" min="18" max="28" id="cfg-h-bath-temp-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_morning_bath_boost_temp',this.value,23)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Jak dlouho koupelna drží ranní boost (minuty)">
+              <span style="color:var(--tx-3);">🚿 Koupelna boost min</span>
+              <input type="number" step="5" min="10" max="180" id="cfg-h-bath-min-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_morning_bath_boost_min',this.value,60)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Čas alarmu PO-PÁ v minutách od půlnoci (195 = 3:15)">
+              <span style="color:var(--tx-3);">⏰ Alarm PO-PÁ (min)</span>
+              <input type="number" step="15" min="0" max="1439" id="cfg-h-wake-wd-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_wake_weekday_min',this.value,195)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Čas alarmu SO-NE (315 = 5:15)">
+              <span style="color:var(--tx-3);">⏰ Alarm SO-NE (min)</span>
+              <input type="number" step="15" min="0" max="1439" id="cfg-h-wake-we-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_wake_weekend_min',this.value,315)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Pre-heat okno před alarmem (minuty)">
+              <span style="color:var(--tx-3);">🧠 Pre-heat okno min</span>
+              <input type="number" step="5" min="5" max="60" id="cfg-h-prewake-win-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_prewake_window_min',this.value,30)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Pre-heat koupelna delta °C (AI přidá k target)">
+              <span style="color:var(--tx-3);">🧠 Koupelna pre-heat +°C</span>
+              <input type="number" step="0.5" min="0" max="5" id="cfg-h-prewake-bath-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_prewake_bath_delta',this.value,2)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Pre-heat toaleta delta °C">
+              <span style="color:var(--tx-3);">🧠 Toaleta pre-heat +°C</span>
+              <input type="number" step="0.5" min="0" max="5" id="cfg-h-prewake-toi-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_prewake_toilet_delta',this.value,1)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Max stáří motion eventu pro occupancy bonus (sekundy)">
+              <span style="color:var(--tx-3);">🧠 Motion max age s</span>
+              <input type="number" step="60" min="60" max="3600" id="cfg-h-occ-age-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_occupancy_age_max_s',this.value,600)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+            <label style="display:flex;flex-direction:column;gap:4px;" title="Occupancy bonus delta °C">
+              <span style="color:var(--tx-3);">🧠 Occupancy +°C</span>
+              <input type="number" step="0.1" min="0" max="2" id="cfg-h-occ-bonus-v2" onchange="saveHeatingCfgV2('sh_cfg_heating_occupancy_bonus',this.value,0.5)" style="padding:6px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+            </label>
+          </div>
+          <div style="color:var(--tx-3);font-size:10px;margin-top:8px;">Config se aktivuje po zapnutí 🧠 AI (Rychlé akce). Bez AI se používají jen morning boost cfg.</div>
+        </div>
+      </div>
+
+
+      <!-- Staré klima-list-full (purifier/humidifier zone cards) — zachovat -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">OSTATNÍ ZÓNY (živé teploty)</span>
         </div>
         <div id="klima-list-full" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
           <!-- rendered by JS -->
-        </div>
-      </div>
-      <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">PRESETY</span></div>
-        <div class="ctrl-grid" style="grid-template-columns:repeat(4,1fr);">
-          <button class="ctrl-btn" onclick="toast('🏠 Preset: Doma')"><div class="ctrl-ico green">🏠</div><div class="ctrl-text"><div class="ctrl-title">Doma</div><div class="ctrl-sub">Standardní</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🚗 Preset: Pryč')"><div class="ctrl-ico orange">🚗</div><div class="ctrl-text"><div class="ctrl-title">Pryč</div><div class="ctrl-sub">16 °C</div></div></button>
-          <button class="ctrl-btn" onclick="toast('🔥 Preset: Boost')"><div class="ctrl-ico red">🔥</div><div class="ctrl-text"><div class="ctrl-title">Boost</div><div class="ctrl-sub">+2 °C / 30 min</div></div></button>
-          <button class="ctrl-btn" onclick="toast('⏸ Heating OFF')"><div class="ctrl-ico gray">⏸</div><div class="ctrl-text"><div class="ctrl-title">Vše OFF</div><div class="ctrl-sub">Anti-freeze</div></div></button>
         </div>
       </div>
 
@@ -2036,15 +2145,49 @@ body {
         </div>
       </div>
 
-      <!-- Sleep — TODO portfolio (manuální) -->
+      <!-- 💼 PORTFOLIO (privátní, localStorage — port z v1) -->
       <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">💼 PORTFOLIO (info)</span></div>
-        <div style="padding:8px 0;color:var(--tx-3);font-size:13px;line-height:1.6;">
-          Portfolio tracking bude přidáno v další fázi. Proměnné již existují: <code style="color:var(--tx-2);">sh_cfg_crypto_coins</code>,
-          <code style="color:var(--tx-2);">sh_cfg_usd_czk_rate</code>. Čeká implementace <code style="color:var(--tx-2);">sh_crypto_fetcher_v1</code>.
+        <div class="section-head">
+          <span class="section-title">💼 PORTFOLIO (privátní, localStorage)</span>
+          <span class="section-action" onclick="toggleHelpV2('help-portfolio-v2')">ℹ Jak to funguje</span>
+        </div>
+        <div id="help-portfolio-v2" style="display:none;background:var(--bg-3);padding:14px;border-radius:var(--r-md);margin-bottom:12px;color:var(--tx-2);font-size:13px;line-height:1.6;">
+          <b>Privátní:</b> množství se ukládá jen do <code>localStorage</code> tohoto prohlížeče. Nikdy se nenahrává do Homey ani na cloud.<br>
+          Smazáním prohlížečových dat (cache) se množství ztratí.<br>
+          Vyprázdni pole / 0 pokud daný coin nedržíš.<br>
+          <b>24h change</b> je vážený průměr podle hodnoty každého coinu v portfoliu.
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:12px;">
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">🟠 BTC množství</span>
+            <input type="number" step="0.00000001" id="portBtcV2" placeholder="0.00000000" onchange="renderPortfolioV2()" style="padding:8px 10px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:13px;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">🔷 ETH množství</span>
+            <input type="number" step="0.00000001" id="portEthV2" placeholder="0.00000000" onchange="renderPortfolioV2()" style="padding:8px 10px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);font-size:13px;">
+          </label>
+        </div>
+        <div id="port-summary-v2" style="padding-top:12px;border-top:1px solid var(--border-soft);">
+          <div style="color:var(--tx-3);text-align:center;padding:16px 0;font-size:13px;">Zadej množství pro výpočet hodnoty</div>
         </div>
       </div>
-    </section>
+
+      <!-- 🔔 ALERT (TTS + notifikace) — port z v1 -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">🔔 ALERT (TTS + notifikace)</span></div>
+        <div style="display:flex;gap:20px;align-items:center;flex-wrap:wrap;">
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">Práh 24h dropu (%)</span>
+            <input type="number" step="0.5" min="1" max="50" id="burzaAlertThresholdV2" onchange="_burzaSaveThresholdV2(this.value)" style="width:100px;padding:6px 10px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-sm);font-family:var(--font-mono);">
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+            <input type="checkbox" id="burzaAlertTtsV2" onchange="_burzaSaveTtsV2(this.checked)" style="width:18px;height:18px;cursor:pointer;">
+            <span style="color:var(--tx-2);font-size:13px;">TTS alert přes kuchyň speaker</span>
+          </label>
+          <div style="color:var(--tx-3);font-size:11px;flex:1;min-width:200px;">Při poklesu 24h o více než práh se spustí TTS alert. Alert se nevrátí dokud cena nevyleze nad práh zpět.</div>
+        </div>
+      </div>
+
 
     <!-- ══════════ PAGE: FINANCE ══════════ -->
     <section class="page" data-page="finance">
@@ -2493,6 +2636,7 @@ function updateUI(d) {
   renderFinanceDetail(d.energy || {}, d.heating || {});
   renderZonesV2(d.rooms || {});
   renderRoletaCfg();  // v Klima page
+  renderHeatingV2();  // 🆕 23.4. — full heating master+zones+actions
   // settings page loads on-demand via button
 }
 
@@ -4078,6 +4222,337 @@ function closeZoneHelp() {
   if (ov) ov.style.display = 'none';
 }
 
+// ═══════════════════════════════════════════════════════════════
+// ── BURZA portfolio + alert (port z v1 — 23.4. večer) ─────────
+// ═══════════════════════════════════════════════════════════════
+
+function _burzaLoadPortfolioInputsV2() {
+  const btc = $('portBtcV2'); const eth = $('portEthV2');
+  if (btc && !btc.value) btc.value = localStorage.getItem('sh_portfolio_btc') || '';
+  if (eth && !eth.value) eth.value = localStorage.getItem('sh_portfolio_eth') || '';
+  // Alert settings
+  const thr = $('burzaAlertThresholdV2');
+  const tts = $('burzaAlertTtsV2');
+  if (thr && !thr.value) thr.value = localStorage.getItem('sh_burza_alert_threshold') || '10';
+  if (tts) tts.checked = localStorage.getItem('sh_burza_alert_tts') === 'true';
+}
+
+function _burzaSaveThresholdV2(v) {
+  const n = parseFloat(v);
+  if (Number.isFinite(n) && n >= 1 && n <= 50) {
+    localStorage.setItem('sh_burza_alert_threshold', String(n));
+    toast('✓ Alert práh: ' + n + ' %');
+  }
+}
+
+function _burzaSaveTtsV2(checked) {
+  localStorage.setItem('sh_burza_alert_tts', checked ? 'true' : 'false');
+  toast(checked ? '🔊 TTS alert ZAPNUT' : '🔕 TTS alert VYPNUT');
+}
+
+function _fmtUsdV2(n) {
+  if (n == null || !Number.isFinite(n)) return '—';
+  const dec = n < 10 ? 4 : n < 1000 ? 2 : 0;
+  return '$' + Number(n).toLocaleString('cs-CZ', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+}
+
+function _fmtCzkV2(n) {
+  if (n == null || !Number.isFinite(n)) return '—';
+  const dec = n < 10 ? 2 : 0;
+  return Number(n).toLocaleString('cs-CZ', { minimumFractionDigits: dec, maximumFractionDigits: dec }) + ' Kč';
+}
+
+function renderPortfolioV2() {
+  const btcInp = $('portBtcV2');
+  const ethInp = $('portEthV2');
+  if (!btcInp || !ethInp) return;
+
+  const btcAmt = parseFloat(btcInp.value) || 0;
+  const ethAmt = parseFloat(ethInp.value) || 0;
+  localStorage.setItem('sh_portfolio_btc', String(btcAmt));
+  localStorage.setItem('sh_portfolio_eth', String(ethAmt));
+
+  const el = $('port-summary-v2');
+  if (!el) return;
+
+  if (btcAmt === 0 && ethAmt === 0) {
+    el.innerHTML = '<div style="color:var(--tx-3);text-align:center;padding:16px 0;font-size:13px;">Zadej množství pro výpočet hodnoty</div>';
+    return;
+  }
+
+  const coins = _dashCache.crypto;
+  if (!coins || !Array.isArray(coins)) {
+    el.innerHTML = '<div style="color:var(--tx-3);text-align:center;padding:16px 0;font-size:13px;">⏳ Načítám ceny... (klikni 🔄 Obnovit)</div>';
+    return;
+  }
+
+  const btc = coins.find(c => c.id === 'bitcoin');
+  const eth = coins.find(c => c.id === 'ethereum');
+  const rate = _dashCache.usdCzkRate || 22.5;
+
+  const btcPrice = Number(btc && btc.current_price) || 0;
+  const ethPrice = Number(eth && eth.current_price) || 0;
+  const btcVal = btcAmt * btcPrice;
+  const ethVal = ethAmt * ethPrice;
+  const totalUsd = btcVal + ethVal;
+  const totalCzk = totalUsd * rate;
+
+  // 24h weighted change
+  const btcCh = btcVal * (Number(btc && btc.price_change_percentage_24h || 0) / 100);
+  const ethCh = ethVal * (Number(eth && eth.price_change_percentage_24h || 0) / 100);
+  const usdChange = btcCh + ethCh;
+  const czkChange = usdChange * rate;
+  const pctChange = totalUsd > 0 ? (usdChange / (totalUsd - usdChange)) * 100 : 0;
+  const chColor = usdChange >= 0 ? 'var(--acc-green)' : 'var(--acc-red)';
+  const chArrow = usdChange >= 0 ? '▲' : '▼';
+  const sign = usdChange >= 0 ? '+' : '';
+
+  let html = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">';
+  if (btcAmt > 0) {
+    html += '<div style="padding:12px;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);">';
+    html += '<div style="font-size:11px;color:var(--tx-3);">🟠 BTC × ' + btcAmt + '</div>';
+    html += '<div style="font-size:16px;font-weight:700;margin-top:4px;">' + _fmtUsdV2(btcVal) + '</div>';
+    html += '<div style="font-size:13px;color:var(--acc-cyan);">' + _fmtCzkV2(btcVal * rate) + '</div></div>';
+  }
+  if (ethAmt > 0) {
+    html += '<div style="padding:12px;background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-md);">';
+    html += '<div style="font-size:11px;color:var(--tx-3);">🔷 ETH × ' + ethAmt + '</div>';
+    html += '<div style="font-size:16px;font-weight:700;margin-top:4px;">' + _fmtUsdV2(ethVal) + '</div>';
+    html += '<div style="font-size:13px;color:var(--acc-cyan);">' + _fmtCzkV2(ethVal * rate) + '</div></div>';
+  }
+  html += '</div>';
+
+  // CELKEM
+  html += '<div style="margin-top:14px;padding:14px;background:linear-gradient(135deg,rgba(100,244,216,.10),rgba(14,165,233,.05));border:1px solid rgba(100,244,216,.3);border-radius:var(--r-md);">';
+  html += '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:14px;flex-wrap:wrap;">';
+  html += '<div><div style="font-size:11px;color:var(--tx-3);text-transform:uppercase;">💼 Celkem</div>';
+  html += '<div style="font-size:26px;font-weight:800;margin-top:2px;">' + _fmtUsdV2(totalUsd) + '</div>';
+  html += '<div style="font-size:16px;color:var(--acc-cyan);">' + _fmtCzkV2(totalCzk) + '</div></div>';
+  html += '<div style="text-align:right;">';
+  html += '<div style="font-size:11px;color:var(--tx-3);">24h change</div>';
+  html += '<div style="color:' + chColor + ';font-weight:700;font-size:18px;margin-top:2px;">' + chArrow + ' ' + pctChange.toFixed(2) + ' %</div>';
+  html += '<div style="font-size:12px;color:' + chColor + ';margin-top:2px;">' + sign + _fmtUsdV2(usdChange) + ' (' + sign + _fmtCzkV2(czkChange) + ')</div></div></div></div>';
+
+  el.innerHTML = html;
+
+  // TTS alert check
+  const thrStr = localStorage.getItem('sh_burza_alert_threshold') || '10';
+  const ttsEnabled = localStorage.getItem('sh_burza_alert_tts') === 'true';
+  const thr = parseFloat(thrStr);
+  if (ttsEnabled && Number.isFinite(thr) && pctChange <= -thr) {
+    const lastAlert = Number(localStorage.getItem('sh_burza_alert_last_ts') || 0);
+    const nowS = Math.floor(Date.now() / 1000);
+    if (nowS - lastAlert > 3600) {  // Max 1× za hodinu
+      localStorage.setItem('sh_burza_alert_last_ts', String(nowS));
+      try {
+        writeVar('sh_tts_speaker', 'kuchyn');
+        writeVar('sh_tts_text', 'Luďku, portfolio kleslo o ' + Math.abs(pctChange).toFixed(1) + ' procent za 24 hodin.');
+        toast('🔊 TTS alert: -' + Math.abs(pctChange).toFixed(1) + '%');
+      } catch (_) {}
+    }
+  }
+}
+
+// Wire up portfolio init při switch na Burza page
+const _origRefreshBurzaPage = (typeof refreshBurzaPage === 'function') ? refreshBurzaPage : null;
+async function refreshBurzaPageV2() {
+  if (_origRefreshBurzaPage) await _origRefreshBurzaPage();
+  _burzaLoadPortfolioInputsV2();
+  renderPortfolioV2();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ── HEATING master + zones + actions (port z v1 — 23.4. večer) ─
+// ═══════════════════════════════════════════════════════════════
+
+const HEAT_ZONES_V2 = [
+  { id: 'jidelna',  icon: '🍽', label: 'Jídelna'  },
+  { id: 'loznice',  icon: '🛏', label: 'Ložnice'  },
+  { id: 'koupelna', icon: '🚿', label: 'Koupelna' },
+  { id: 'toaleta',  icon: '🚽', label: 'Toaleta'  }
+];
+
+function renderHeatingV2() {
+  if (!DATA) return;
+  const h = DATA.heating || {};
+
+  const mode = String(h.mode || 'manual').toLowerCase();
+  const preset = String(h.preset || 'home').toLowerCase();
+  const boilerState = String(h.boiler || 'off').toLowerCase();
+  const demand = Number(h.demand_count || 0);
+  const rtSec = Number(h.runtime_today_s || 0);
+  const rtYestSec = Number(h.runtime_yesterday_s || 0);
+  const kotelKw = Number((DATA.cfg && DATA.cfg.heating_kotel_kw) || 9);
+  const kwh = Math.round((rtSec / 3600) * kotelKw * 10) / 10;
+  const kwhYest = Math.round((rtYestSec / 3600) * kotelKw * 10) / 10;
+
+  // Mode buttons — active state
+  document.querySelectorAll('.heat-mode-btn-v2').forEach(b => {
+    const isActive = b.dataset.mode === mode;
+    b.style.background = isActive ? 'var(--acc-cyan-soft)' : 'var(--bg-3)';
+    b.style.borderColor = isActive ? 'var(--acc-cyan)' : 'var(--border-soft)';
+    b.style.color = isActive ? 'var(--acc-cyan)' : 'var(--tx-2)';
+    b.style.fontWeight = isActive ? '700' : '400';
+  });
+
+  const presetLbl = { home: '🏠 Doma', away: '🚗 Pryč', boost: '🔥 Boost', override: '✋ Override' }[preset] || preset;
+  setText('heat-preset-v2', presetLbl);
+  setText('heat-demand-v2', demand + '/' + HEAT_ZONES_V2.length);
+  const boilerEl = $('heat-boiler-v2');
+  if (boilerEl) boilerEl.innerHTML = boilerState === 'on'
+    ? '<span style="color:var(--acc-red);">🔴 ON</span>'
+    : '<span style="color:var(--tx-3);">⚫ OFF</span>';
+
+  const h1 = Math.floor(rtSec / 3600);
+  const m1 = Math.floor((rtSec % 3600) / 60);
+  setText('heat-runtime-v2', (h1 > 0 ? h1 + ' h ' : '') + m1 + ' min');
+  setText('heat-kwh-v2', kwh + ' kWh');
+  const hy = Math.floor(rtYestSec / 3600);
+  const my = Math.floor((rtYestSec % 3600) / 60);
+  setText('heat-yest-v2', rtYestSec > 0 ? ((hy > 0 ? hy + ' h ' : '') + my + ' min / ' + kwhYest + ' kWh') : '— / —');
+
+  // AI button
+  const aiEnabled = String((DATA.cfg && DATA.cfg.heating_ai_enabled) || 'no').toLowerCase() === 'yes';
+  setText('heat-ai-sub-v2', aiEnabled ? 'ON' : 'OFF');
+  const aiBtn = $('heat-ai-btn-v2');
+  if (aiBtn) aiBtn.style.borderColor = aiEnabled ? 'var(--acc-green)' : 'var(--border-soft)';
+
+  // Zone tiles
+  const grid = $('heat-zones-grid-v2');
+  if (grid) {
+    const zones = h.zones || {};
+    grid.innerHTML = HEAT_ZONES_V2.map(z => {
+      const zData = zones[z.id] || {};
+      const enabled = zData.enabled !== false;
+      const curr = Number(zData.current != null ? zData.current : -99);
+      const tgt = Number(zData.target != null ? zData.target : 20);
+      const currTxt = curr > 0 ? curr.toFixed(1) + ' °C' : '— °C';
+      const tgtTxt = tgt.toFixed(1) + ' °C';
+      const pct = curr > 0 ? Math.max(0, Math.min(100, ((curr - 10) / (28 - 10)) * 100)) : 0;
+      const heating = enabled && (tgt - curr) > 0.3 && curr > 0;
+      const borderCol = !enabled ? 'var(--acc-red)' : (heating ? 'var(--acc-orange)' : 'var(--border-soft)');
+      const opacity = !enabled ? 0.55 : 1;
+      const statusBadge = !enabled
+        ? '<span style="color:var(--acc-red);font-size:10px;">❌ VYPNUTO</span>'
+        : (heating ? '<span style="color:var(--acc-orange);font-size:10px;">🔥 topí</span>' : '<span style="color:var(--tx-3);font-size:10px;">idle</span>');
+      const togLbl = enabled ? '✅ ZAP' : '❌ VYP';
+      const togCol = enabled ? 'var(--acc-green)' : 'var(--acc-red)';
+      return `<div style="background:var(--bg-3);border:1px solid ${borderCol};border-radius:var(--r-md);padding:14px;opacity:${opacity};transition:all 180ms;" title="${z.label}: current ${currTxt}, target ${tgtTxt}">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-size:22px;">${z.icon}</span>
+          <strong style="flex:1;font-size:14px;">${z.label}</strong>
+          <button onclick="toggleHeatingZoneV2('${z.id}')" title="Přepnout zóna ON/OFF" style="padding:3px 8px;font-size:10px;border:1px solid ${togCol};color:${togCol};background:transparent;border-radius:3px;cursor:pointer;font-family:var(--font-mono);">${togLbl}</button>
+        </div>
+        <div style="margin-bottom:6px;">${statusBadge}</div>
+        <div style="display:flex;align-items:baseline;gap:8px;font-family:var(--font-mono);margin-bottom:8px;">
+          <span style="font-size:20px;font-weight:700;">${currTxt}</span>
+          <span style="color:var(--tx-3);font-size:12px;">→ ${tgtTxt}</span>
+        </div>
+        <div style="height:4px;background:var(--bg-2);border-radius:2px;overflow:hidden;">
+          <div style="height:100%;background:linear-gradient(90deg,var(--acc-cyan),var(--acc-orange));width:${pct}%;transition:width 300ms;"></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Cfg inputs refresh
+  try {
+    const cfgMap = [
+      ['cfg-h-bath-temp-v2', 'heating_morning_bath_boost_temp', 23],
+      ['cfg-h-bath-min-v2',  'heating_morning_bath_boost_min', 60],
+      ['cfg-h-wake-wd-v2',   'heating_wake_weekday_min', 195],
+      ['cfg-h-wake-we-v2',   'heating_wake_weekend_min', 315],
+      ['cfg-h-prewake-win-v2','heating_prewake_window_min', 30],
+      ['cfg-h-prewake-bath-v2','heating_prewake_bath_delta', 2],
+      ['cfg-h-prewake-toi-v2','heating_prewake_toilet_delta', 1],
+      ['cfg-h-occ-age-v2',   'heating_occupancy_age_max_s', 600],
+      ['cfg-h-occ-bonus-v2', 'heating_occupancy_bonus', 0.5]
+    ];
+    const cfg = DATA.cfg || {};
+    for (const [id, key, def] of cfgMap) {
+      const el = $(id);
+      if (el && !el.value) el.value = cfg[key] != null ? cfg[key] : def;
+    }
+  } catch (_) {}
+}
+
+async function setHeatingModeV2(mode) {
+  try {
+    await writeVar('sh_heating_mode', mode);
+    if (DATA && DATA.heating) DATA.heating.mode = mode;
+    toast('🔥 Režim topení: ' + mode);
+    renderHeatingV2();
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function setHeatingPresetV2(preset) {
+  try {
+    await writeVar('sh_heating_preset', preset);
+    if (DATA && DATA.heating) DATA.heating.preset = preset;
+    toast('🎯 Preset: ' + preset);
+    renderHeatingV2();
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function setHeatingBoostV2(minutes) {
+  try {
+    const until = Math.floor(Date.now() / 1000) + minutes * 60;
+    const zones = (DATA && DATA.heating && DATA.heating.zones) || {};
+    const boostDelta = Number((DATA.cfg && DATA.cfg.heating_boost_delta) || 2);
+    for (const z of HEAT_ZONES_V2) {
+      const curTgt = Number((zones[z.id] && zones[z.id].target) || 20);
+      await writeVar('sh_heating_zone_' + z.id + '_manual_override_temp', curTgt + boostDelta);
+      await writeVar('sh_heating_zone_' + z.id + '_manual_override_until_ts0', until);
+    }
+    await writeVar('sh_heating_preset', 'boost');
+    toast('🔥 Boost +' + boostDelta + ' °C / ' + minutes + ' min');
+    renderHeatingV2();
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function setHeatingNightV2() {
+  try {
+    // Nastaví preset home (schedule pak aplikuje night temps podle času)
+    await writeVar('sh_heating_preset', 'home');
+    toast('🌙 Noc — preset home, schedule aplikuje noční teploty');
+    renderHeatingV2();
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function toggleHeatingZoneV2(zoneId) {
+  try {
+    const cur = (DATA && DATA.heating && DATA.heating.zones && DATA.heating.zones[zoneId] && DATA.heating.zones[zoneId].enabled) !== false;
+    const newVal = cur ? 'no' : 'yes';
+    await writeVar('sh_heating_zone_' + zoneId + '_enabled', newVal);
+    if (DATA.heating && DATA.heating.zones && DATA.heating.zones[zoneId]) {
+      DATA.heating.zones[zoneId].enabled = (newVal === 'yes');
+    }
+    toast((newVal === 'no' ? '❌ Vypnuto: ' : '✅ Zapnuto: ') + zoneId);
+    renderHeatingV2();
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function toggleHeatingAiV2() {
+  try {
+    const cur = String((DATA.cfg && DATA.cfg.heating_ai_enabled) || 'no').toLowerCase();
+    const newVal = cur === 'yes' ? 'no' : 'yes';
+    await writeVar('sh_cfg_heating_ai_enabled', newVal);
+    if (DATA.cfg) DATA.cfg.heating_ai_enabled = newVal;
+    toast('🧠 AI topení: ' + newVal.toUpperCase());
+    renderHeatingV2();
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
+async function saveHeatingCfgV2(varName, value, fallback) {
+  try {
+    const n = Number(value);
+    if (!Number.isFinite(n)) return toast('✗ Neplatné číslo');
+    await writeVar(varName, n);
+    if (DATA.cfg) DATA.cfg[varName.replace('sh_cfg_', '')] = n;
+    toast('✓ ' + varName + ' = ' + n);
+  } catch (e) { toast('✗ ' + e.message); }
+}
+
 // ── Zone DETAIL (port z v1 zone page — 23.4. večer) ───────
 let _currentZoneDetail = null;
 
@@ -5300,7 +5775,13 @@ function switchPage(pageName) {
       if (typeof refreshPocasiPage === 'function') refreshPocasiPage();
     } else if (pageName === 'burza') {
       // 🆕 23.4. — client-side CoinGecko + Binance fallback (port z v1)
-      if (typeof refreshBurzaPage === 'function') refreshBurzaPage();
+      if (typeof refreshBurzaPage === 'function') {
+        refreshBurzaPage().then(() => {
+          // Portfolio init + render po načtení cen
+          if (typeof _burzaLoadPortfolioInputsV2 === 'function') _burzaLoadPortfolioInputsV2();
+          if (typeof renderPortfolioV2 === 'function') renderPortfolioV2();
+        });
+      }
     }
   } catch (_) {}
 }
