@@ -2396,6 +2396,19 @@ function updateUI(d) {
   // settings page loads on-demand via button
 }
 
+// ── Render hash-based skip (23.4. fix pro blikání) ─────────
+// Každá těžká render funkce (s innerHTML replace) sleduje hash poslední dat.
+// Pokud se data nezměnila, render skipne — browser nedělá zbytečné re-painty.
+const _renderHashes = {};
+function shouldRender(section, data) {
+  let h;
+  try { h = JSON.stringify(data); } catch (_) { return true; }
+  if (h && h.length > 500) h = h.substring(0, 500);  // quick hash
+  if (_renderHashes[section] === h) return false;
+  _renderHashes[section] = h;
+  return true;
+}
+
 // ── Zone cards grid — port z v1 (22.4. večer) ───────────────
 const ZONE_META_V2 = [
   { key: 'jidelna',  icon: '🛋', name: 'Jídelna / Open Space', sub: 'Roleta · světla · lux' },
@@ -2412,6 +2425,7 @@ const ZONE_META_V2 = [
 function renderZonesV2(rooms) {
   const wrap = $('zones-grid-v2');
   if (!wrap) return;
+  if (!shouldRender('zones', rooms)) return;  // 🩹 23.4. anti-flicker
   wrap.innerHTML = ZONE_META_V2.map(z => {
     const r = rooms[z.key] || {};
     const chips = [];
@@ -2453,6 +2467,7 @@ function renderZonesV2(rooms) {
 // ║ Phase 53+ Detail page renderers                        ║
 // ╚════════════════════════════════════════════════════════╝
 function renderOsvetleniDetail(lights) {
+  if (!shouldRender('osvetleni-detail', lights)) return;
   const el = $('osvetleni-grid');
   if (!el) return;
   el.innerHTML = lights.map(l => {
@@ -2479,6 +2494,7 @@ function renderOsvetleniDetail(lights) {
 }
 
 function renderAudioDetail(audio) {
+  if (!shouldRender('audio-detail', audio)) return;
   const el = $('audio-list-full');
   if (!el) return;
   el.innerHTML = audio.map(a => {
@@ -2505,6 +2521,7 @@ function renderAudioDetail(audio) {
 }
 
 function renderKlimaDetail(klima, heating) {
+  if (!shouldRender('klima-detail', [klima, heating])) return;
   const el = $('klima-list-full');
   if (!el) return;
   el.innerHTML = klima.map(k => `
@@ -2582,6 +2599,7 @@ function renderHeatingSchedule(klima, heating) {
 function renderCamsDetail(cams) {
   const el = $('cams-grid-full');
   if (!el) return;
+  if (!shouldRender('cams-detail', cams)) return;  // 🩹 23.4. anti-flicker
   el.innerHTML = cams.map(c => `
     <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;" onclick="camOpen('${c.id}')">
       <div style="height:180px;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));display:grid;place-items:center;position:relative;">
@@ -2602,6 +2620,7 @@ function renderCamsDetail(cams) {
 function renderScenyDetail(scenes) {
   const el = $('sceny-grid');
   if (!el) return;
+  if (!shouldRender('sceny-detail', scenes)) return;  // 🩹 23.4. anti-flicker
   el.innerHTML = scenes.map(s => `
     <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:20px;cursor:pointer;transition:all 180ms;" onclick="sceneRun('${s.id}')" onmouseenter="this.style.background='var(--surface-hover)'" onmouseleave="this.style.background='var(--bg-3)'">
       <div class="scene-ico ${s.color}" style="width:48px;height:48px;font-size:22px;margin-bottom:12px;">${s.ico}</div>
@@ -2612,6 +2631,7 @@ function renderScenyDetail(scenes) {
 }
 
 function renderEnergieDetail(energy, health) {
+  if (!shouldRender('energie-detail', [energy, health])) return;
   const d = DATA || {};
 
   // 4 stat tiles top
@@ -2772,6 +2792,7 @@ async function openLogV2(varName, title) {
 }
 
 function renderHistorieDetail(activities) {
+  if (!shouldRender('historie-detail', activities)) return;
   const el = $('historie-list');
   if (!el) return;
   el.innerHTML = activities.map(a => `
@@ -3501,6 +3522,7 @@ async function loadEventLogV2() {
 // ║ Phase 48 — Lights renderer                             ║
 // ╚════════════════════════════════════════════════════════╝
 function renderLights(lights) {
+  if (!shouldRender('lights', lights)) return;
   const grid = $('lights-grid');
   if (!grid) return;
   grid.innerHTML = lights.map(l => {
@@ -3524,6 +3546,7 @@ function renderLights(lights) {
 // ║ Phase 49 — Scenes renderer                             ║
 // ╚════════════════════════════════════════════════════════╝
 function renderScenes(scenes) {
+  if (!shouldRender('scenes', scenes)) return;
   const list = $('scenes-list');
   if (!list) return;
   list.innerHTML = scenes.map(s => `
@@ -3539,6 +3562,7 @@ function renderScenes(scenes) {
 // ║ Phase 49 — Cameras renderer                            ║
 // ╚════════════════════════════════════════════════════════╝
 function renderCameras(cameras) {
+  if (!shouldRender('cameras', cameras)) return;
   const list = $('cams-list');
   if (!list) return;
   list.innerHTML = cameras.map(c => `
@@ -3558,6 +3582,7 @@ function renderCameras(cameras) {
 // ║ Phase 50 — Audio zones renderer                        ║
 // ╚════════════════════════════════════════════════════════╝
 function renderAudio(audio) {
+  if (!shouldRender('audio', audio)) return;
   const list = $('audio-list');
   if (!list) return;
   list.innerHTML = audio.map(a => {
@@ -3587,6 +3612,7 @@ function renderAudio(audio) {
 // ║ Phase 50 — Klima renderer                              ║
 // ╚════════════════════════════════════════════════════════╝
 function renderKlima(klima) {
+  if (!shouldRender('klima', klima)) return;
   const list = $('klima-list');
   if (!list) return;
   list.innerHTML = klima.map(k => `
@@ -3609,6 +3635,7 @@ function renderKlima(klima) {
 // ║ Phase 51 — Activity feed renderer                      ║
 // ╚════════════════════════════════════════════════════════╝
 function renderActivities(acts) {
+  if (!shouldRender('activities', acts)) return;
   const list = $('activity-list');
   if (!list) return;
   list.innerHTML = acts.map(a => `
@@ -4126,8 +4153,14 @@ async function refresh() {
 }
 
 // ── Initial fetch + interval ──
+// 🩹 23.4. fix: CONFIG.refreshInterval byl undefined → setInterval() se spouštěl
+//    s default ~4ms = infinite loop → dashboard blikal (innerHTML replace @ 250 Hz).
+//    Fix: interval v ms z CFG.interval (user-configurable v Config overlay, default 10s),
+//    minimum 3s (safety — Homey API by se zahltil při rychlejším).
 refresh();
-setInterval(refresh, CONFIG.refreshInterval);
+const REFRESH_MS = Math.max(3000, Number(CFG.interval || 10) * 1000);
+setInterval(refresh, REFRESH_MS);
+console.log('[v2] refresh interval: ' + REFRESH_MS + ' ms');
 
 // ── Live clock ──────────────────────────────────────────
 function tick() {
