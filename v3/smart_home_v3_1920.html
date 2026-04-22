@@ -952,71 +952,64 @@ input:focus, select:focus, textarea:focus {
 
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 🎨 v3 ICON OVERLAY (REVISED) — subtle colored + glow              */
-/* 23.4. večer — scale-back fix: ikony pěkné ALE nelámou grid layout */
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🎨 v3 ICONS + COMPACT HOME (v3 — 23.4. večer)                   */
+/* User: "sceny uplně rozhozene, zone tiles velke"                  */
+/* Fix: scale back dimensions, zachovat glow + colors               */
 /* ═══════════════════════════════════════════════════════════════ */
 
-/* 🏠 Home stat tile icons — zachovat 40px, ADD subtle glow na text */
+/* ── 🏠 Home stat tile (top 5 tiles: Přítomnost/Fáze/Spánek/Health/Intent) ── */
 .tile-icon {
-  text-shadow: 0 0 20px rgba(34,211,238,0.4), 0 0 40px rgba(74,158,255,0.25);
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  text-shadow: 0 0 16px rgba(34,211,238,0.35), 0 0 32px rgba(74,158,255,0.2);
+  filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
 }
-/* Přidat decorative circle ZA emoji (jako backdrop) — bez ovlivnění size */
-.tile-icon::before {
-  content: '';
-  position: absolute;
-  width: 72px;
-  height: 72px;
-  background: radial-gradient(circle, rgba(34,211,238,0.18), rgba(74,158,255,0.08) 50%, transparent 70%);
-  border-radius: 50%;
-  z-index: -1;
-  transform: translateX(-50%) translateY(-4px);
-  left: 50%;
-  pointer-events: none;
-}
-.ht { position: relative; }  /* needed for ::before positioning */
+/* NO ::before circle (rozbíjelo layout) */
 
-/* 🎨 t-icon — keep 40px but prettier bg */
+/* ── 🎨 t-icon (row icons v kartách) ── */
 .t-icon {
-  background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(74,158,255,0.06)) !important;
-  box-shadow: 0 0 16px rgba(34,211,238,0.18), inset 0 1px 1px rgba(255,255,255,0.08) !important;
-  border: 1px solid rgba(34,211,238,0.12);
+  background: linear-gradient(135deg, rgba(34,211,238,0.12), rgba(74,158,255,0.05)) !important;
+  box-shadow: 0 0 12px rgba(34,211,238,0.15), inset 0 1px 1px rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(34,211,238,0.1);
 }
 
-/* 💡 card-icon — keep small, just add glow */
+/* ── 💡 card-icon — glow only ── */
 .card-icon {
-  filter: drop-shadow(0 0 8px rgba(34,211,238,0.3));
+  filter: drop-shadow(0 0 6px rgba(34,211,238,0.25));
 }
 
-/* 🎬 Scene tile icons (ONLY v .tile.scene) — větší glow circle */
+/* ── 🎬 Scene tile icons — ZACHOVAT v1 24px (bez circle container) ── */
+/* Jen glow přes text-shadow + barva per scene */
 .tile.scene .ht-icon {
   font-size: 28px !important;
-  width: 52px !important;
-  height: 52px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  border-radius: 50% !important;
-  background: linear-gradient(135deg, rgba(168,85,247,0.22), rgba(74,158,255,0.1)) !important;
-  box-shadow: 0 0 20px rgba(168,85,247,0.25), inset 0 1px 2px rgba(255,255,255,0.1) !important;
-  border: 1px solid rgba(168,85,247,0.2);
-  transition: transform var(--tr-med), box-shadow var(--tr-med);
-  margin-bottom: 6px;
+  line-height: 1 !important;
+  filter: drop-shadow(0 0 8px rgba(168,85,247,0.5));
+  transition: filter var(--tr-fast), transform var(--tr-fast);
 }
 .tile.scene:hover .ht-icon {
-  transform: scale(1.06);
-  box-shadow: 0 0 28px rgba(168,85,247,0.4) !important;
+  transform: scale(1.15);
 }
 
-/* Per-scene colored glow */
-#scn-relax .ht-icon     { background: linear-gradient(135deg, rgba(168,85,247,0.25), rgba(139,92,246,0.12)) !important; box-shadow: 0 0 20px rgba(168,85,247,0.3) !important; }
-#scn-work .ht-icon      { background: linear-gradient(135deg, rgba(74,158,255,0.25), rgba(59,130,246,0.12)) !important; box-shadow: 0 0 20px rgba(74,158,255,0.3) !important; }
-#scn-audio .ht-icon     { background: linear-gradient(135deg, rgba(34,211,238,0.25), rgba(14,165,233,0.12)) !important; box-shadow: 0 0 20px rgba(34,211,238,0.3) !important; }
-#scn-vareni .ht-icon    { background: linear-gradient(135deg, rgba(255,159,64,0.25), rgba(249,115,22,0.12)) !important; box-shadow: 0 0 20px rgba(255,159,64,0.3) !important; }
-#scn-kino .ht-icon      { background: linear-gradient(135deg, rgba(239,68,68,0.25), rgba(220,38,38,0.12)) !important; box-shadow: 0 0 20px rgba(239,68,68,0.3) !important; }
-#scn-romantika .ht-icon { background: linear-gradient(135deg, rgba(251,191,36,0.25), rgba(245,158,11,0.12)) !important; box-shadow: 0 0 20px rgba(251,191,36,0.3) !important; }
+/* Per-scene colored glow (text-shadow místo bg) */
+#scn-relax .ht-icon     { filter: drop-shadow(0 0 10px rgba(168,85,247,0.7)); }
+#scn-work .ht-icon      { filter: drop-shadow(0 0 10px rgba(74,158,255,0.7)); }
+#scn-audio .ht-icon     { filter: drop-shadow(0 0 10px rgba(34,211,238,0.7)); }
+#scn-vareni .ht-icon    { filter: drop-shadow(0 0 10px rgba(255,159,64,0.7)); }
+#scn-kino .ht-icon      { filter: drop-shadow(0 0 10px rgba(239,68,68,0.7)); }
+#scn-romantika .ht-icon { filter: drop-shadow(0 0 10px rgba(251,191,36,0.7)); }
 
-/* 🚶 🌡 💧 Room indicator chips — colored pills */
+/* Scene tile hover — border glow (ne přesahování) */
+.tile.scene {
+  min-height: 60px !important;  /* was 70 */
+  transition: all var(--tr-fast) !important;
+}
+.tile.scene:hover {
+  border-color: var(--cyan) !important;
+  box-shadow: 0 0 16px rgba(34,211,238,0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* ── 🚶 Room indicator chips (.ri) — colored pills ── */
 .room-inds .ri, .zc-inds .ri {
   background: var(--bg3) !important;
   border: 1px solid var(--bd) !important;
@@ -1047,11 +1040,11 @@ input:focus, select:focus, textarea:focus {
 }
 .ri.off { opacity: 0.5 !important; }
 
-/* 🔖 Tab icons — jen hover animation */
+/* ── 🔖 Tab icons (.ti) ── */
 .tab:hover .ti { transform: scale(1.1); }
 .tab.active .ti { filter: drop-shadow(0 0 6px var(--cyan)); }
 
-/* 📷 Camera LIVE badge — pulse */
+/* ── 📷 Camera LIVE badge — pulse ── */
 .cam-live {
   background: var(--red) !important;
   color: white !important;
@@ -1066,9 +1059,9 @@ input:focus, select:focus, textarea:focus {
   50% { box-shadow: 0 0 20px rgba(239,68,68,0.7); }
 }
 
-/* 🎨 v3 banner top-right — subtle */
+/* ── 🎨 v3 banner — subtle ── */
 body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
-  opacity: 0.6;
+  opacity: 0.5;
   font-size: 9px !important;
   padding: 2px 6px !important;
   transition: opacity var(--tr-med);
@@ -1076,70 +1069,65 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hover {
   opacity: 1;
 }
-/* ═══════════════════════════════════════════════════════════════ */
-
 
 /* ═══════════════════════════════════════════════════════════════ */
-/* 🏠 v3 HOME COMPACT MODE — jen main icon + name, skryté chipy    */
-/* 23.4. večer — user: "vešlo by se toho na home stranku vice       */
-/*                      bez scrolu"                                  */
+/* 🏠 HOME COMPACT — zóny menší, víc se vejde bez scrolu            */
 /* ═══════════════════════════════════════════════════════════════ */
 
-/* Skryj detail chipy na Home — detail najdeš po kliku na zónu */
+/* Skryj detail chipy na Home */
 #page-home .hg-rooms .room-inds {
   display: none !important;
 }
 
-/* Hlavní emoji — větší a výraznější */
+/* Hlavní emoji — COMPACT */
 #page-home .hg-rooms .rm-icon {
-  font-size: clamp(32px, 3.5vw, 48px) !important;
+  font-size: clamp(22px, 2.2vw, 30px) !important;
   line-height: 1 !important;
-  margin-bottom: 6px !important;
-  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  margin-bottom: 2px !important;
+  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.3));
   transition: transform var(--tr-fast);
 }
 #page-home .hg-rooms .room:hover .rm-icon {
-  transform: scale(1.1);
+  transform: scale(1.08);
 }
 
-/* Název zóny — čitelnější */
+/* Název — menší ale čitelný */
 #page-home .hg-rooms .room-name {
-  font-size: clamp(12px, 1.3vw, 16px) !important;
+  font-size: clamp(10px, 1.05vw, 13px) !important;
   font-weight: 600 !important;
-  letter-spacing: 0.01em;
   color: var(--tx1) !important;
+  line-height: 1.2;
 }
 
-/* Room tile — compact ale pěkný, lepší spacing */
+/* Room tile — kompaktní */
 #page-home .hg-rooms .room {
-  padding: 14px 8px !important;
-  gap: 2px;
-  background: linear-gradient(135deg, rgba(26,34,54,0.7), rgba(35,44,68,0.5)) !important;
+  padding: 6px 4px !important;
+  gap: 0 !important;
+  background: linear-gradient(135deg, rgba(26,34,54,0.6), rgba(35,44,68,0.4)) !important;
   border: 1px solid var(--bd) !important;
-  border-radius: var(--r2) !important;
+  border-radius: var(--r) !important;
   box-shadow: var(--shadow-sm);
   transition: all var(--tr-med) !important;
   position: relative;
   min-height: 0 !important;
 }
 
-/* Aktivní zóna (.room.lit = svítí něco) — glow + green accent */
+/* Aktivní zóna */
 #page-home .hg-rooms .room.lit {
   background: linear-gradient(135deg, rgba(59,201,125,0.15), rgba(26,34,54,0.5)) !important;
   border-color: rgba(59,201,125,0.4) !important;
-  box-shadow: 0 0 16px rgba(59,201,125,0.22), var(--shadow-sm) !important;
+  box-shadow: 0 0 12px rgba(59,201,125,0.2), var(--shadow-sm) !important;
 }
-/* Pulsing dot pro aktivní zónu (v horním pravém rohu) */
 #page-home .hg-rooms .room.lit::after {
   content: '';
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 8px;
-  height: 8px;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
   background: var(--green);
   border-radius: 50%;
-  box-shadow: 0 0 10px rgba(59,201,125,0.6);
+  box-shadow: 0 0 8px rgba(59,201,125,0.6);
   animation: v3-dot-pulse 2s ease-in-out infinite;
 }
 @keyframes v3-dot-pulse {
@@ -1147,48 +1135,51 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
   50% { opacity: 0.6; transform: scale(0.85); }
 }
 
-/* Hover — lift + cyan glow (klik pro detail) */
+/* Hover */
 #page-home .hg-rooms .room:hover {
-  transform: translateY(-2px);
+  transform: translateY(-1px);
   border-color: var(--bda) !important;
-  box-shadow: 0 0 20px rgba(34,211,238,0.25), var(--shadow-md) !important;
-  background: linear-gradient(135deg, rgba(26,34,54,0.9), rgba(35,44,68,0.7)) !important;
+  box-shadow: 0 0 14px rgba(34,211,238,0.22), var(--shadow-md) !important;
+  background: linear-gradient(135deg, rgba(26,34,54,0.85), rgba(35,44,68,0.65)) !important;
 }
 
-/* Grid density — více zón na řádek */
+/* Grid — 4 columns default, 2 rows = 8 zón */
 #page-home .hg-rooms .floor-grid {
-  gap: 6px !important;
-  grid-template-columns: repeat(4, 1fr) !important;  /* 4 zóny v řádku */
+  gap: 4px !important;
+  grid-template-columns: repeat(4, 1fr) !important;
 }
 
-/* RPi / menší obrazovky — 3 per row */
+/* Na menších obrazovkách (RPi) 3 per row */
 @media (max-width: 1024px) {
   #page-home .hg-rooms .floor-grid {
     grid-template-columns: repeat(3, 1fr) !important;
   }
+  #page-home .hg-rooms .rm-icon {
+    font-size: clamp(20px, 2vw, 26px) !important;
+  }
 }
 
-/* Optional: tooltip on hover pokazující chips z original data */
+/* Hover tooltip s chipy — subtle */
 #page-home .hg-rooms .room:hover .room-inds {
   display: flex !important;
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
   background: var(--bg1) !important;
   border: 1px solid var(--bda) !important;
   border-radius: var(--r) !important;
-  padding: 8px 10px !important;
-  box-shadow: var(--shadow-lg), var(--glow-cyan);
+  padding: 6px 8px !important;
+  box-shadow: var(--shadow-lg);
   z-index: 100;
-  white-space: nowrap;
   flex-wrap: wrap;
-  max-width: 280px;
+  max-width: 260px;
   justify-content: center;
+  gap: 4px;
   animation: v3-tooltip-fade 180ms ease-out;
 }
 @keyframes v3-tooltip-fade {
-  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  from { opacity: 0; transform: translateX(-50%) translateY(-2px); }
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 /* ═══════════════════════════════════════════════════════════════ */
