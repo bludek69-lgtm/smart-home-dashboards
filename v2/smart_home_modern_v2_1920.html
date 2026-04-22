@@ -1367,6 +1367,63 @@ body {
           <button class="ctrl-btn" onclick="toast('⏸ Heating OFF')"><div class="ctrl-ico gray">⏸</div><div class="ctrl-text"><div class="ctrl-title">Vše OFF</div><div class="ctrl-sub">Anti-freeze</div></div></button>
         </div>
       </div>
+
+      <!-- TÝDENNÍ PLÁN VIEWER (z v1 heating2) -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head">
+          <span class="section-title">📅 TÝDENNÍ PROGRAM</span>
+          <span class="section-action" onclick="toast('📋 Plán editor — coming soon')">✎ Upravit</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="klima-schedule" style="width:100%;border-collapse:collapse;font-size:12px;font-family:var(--font-mono);">
+            <thead>
+              <tr style="color:var(--tx-3);text-align:center;">
+                <th style="padding:8px;text-align:left;border-bottom:1px solid var(--border-soft);">Zóna</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">Po</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">Út</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">St</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">Čt</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">Pá</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">So</th>
+                <th style="padding:8px;border-bottom:1px solid var(--border-soft);">Ne</th>
+              </tr>
+            </thead>
+            <tbody id="klima-schedule-body">
+              <!-- rendered by JS -->
+            </tbody>
+          </table>
+        </div>
+        <div style="font-size:11px;color:var(--tx-3);margin-top:12px;display:flex;gap:20px;flex-wrap:wrap;">
+          <span>🟢 Comfort (21-22°C)</span>
+          <span>🔵 Night (17-19°C)</span>
+          <span>🟡 Eco (16°C)</span>
+          <span>⚫ Off/anti-freeze (7°C)</span>
+        </div>
+      </div>
+
+      <!-- CHISTIČKA + ZVLHČOVAČ row -->
+      <div class="overview-main" style="margin-top:16px;grid-template-columns:1fr 1fr;">
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">🌬 ČISTIČKA</span></div>
+          <div class="klima-card">
+            <div class="klima-head">
+              <div class="klima-room">Air Purifier 4 Lite</div>
+              <div id="klima-purifier-state" style="font-size:var(--fs-xl);font-weight:var(--fw-bold);color:var(--acc-green);">—</div>
+            </div>
+            <div class="klima-current" id="klima-purifier-sub">—</div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">💧 ZVLHČOVAČ</span></div>
+          <div class="klima-card">
+            <div class="klima-head">
+              <div class="klima-room">Zvlhčovač (ložnice)</div>
+              <div id="klima-humid-state" style="font-size:var(--fs-xl);font-weight:var(--fw-bold);color:var(--acc-cyan);">—</div>
+            </div>
+            <div class="klima-current" id="klima-humid-sub">—</div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- ══════════ PAGE: BEZPEČNOST ══════════ -->
@@ -1436,27 +1493,67 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>⚡ Energie</h1>
-          <p>Spotřeba · kWh · VT/NT · heating odhad</p>
+          <p>Spotřeba · kWh · VT/NT · měsíční projekce</p>
         </div>
       </div>
+
+      <!-- 4 stat tiles top -->
       <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
-        <div class="stat-tile"><div class="stat-label">AKTUÁLNĚ W</div><div class="stat-ico purple">⚡</div><div class="stat-value" id="en-now-val">—</div><div class="stat-sub">Live spotřeba</div></div>
+        <div class="stat-tile"><div class="stat-label">AKTUÁLNĚ</div><div class="stat-ico purple">⚡</div><div class="stat-value" id="en-now-val">—</div><div class="stat-sub" id="en-now-sub">Live spotřeba</div></div>
         <div class="stat-tile"><div class="stat-label">DNES kWh</div><div class="stat-ico blue">📅</div><div class="stat-value" id="en-today-val">—</div><div class="stat-sub">Heating odhad</div></div>
         <div class="stat-tile"><div class="stat-label">VČERA kWh</div><div class="stat-ico orange">📆</div><div class="stat-value" id="en-yest-val">—</div><div class="stat-sub">Heating odhad</div></div>
         <div class="stat-tile"><div class="stat-label">DELTA vs VČERA</div><div class="stat-ico green">📊</div><div class="stat-value" id="en-delta-val">—</div><div class="stat-sub">Meziroční změna</div></div>
       </div>
-      <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">TARIF</span></div>
-        <div class="activity-list">
-          <div class="activity-row"><div class="activity-ico yellow">☀</div><div class="activity-info"><div class="activity-title">VT (vysoký tarif)</div><div class="activity-sub">5.48 Kč/kWh</div></div><div class="activity-time">D57d</div></div>
-          <div class="activity-row"><div class="activity-ico blue">🌙</div><div class="activity-info"><div class="activity-title">NT (nízký tarif)</div><div class="activity-sub">4.76 Kč/kWh</div></div><div class="activity-time">D57d</div></div>
-          <div class="activity-row"><div class="activity-ico purple">📋</div><div class="activity-info"><div class="activity-title">Fixní poplatek</div><div class="activity-sub">735 Kč/měsíc · 3×25A</div></div><div class="activity-time">—</div></div>
+
+      <!-- MĚSÍČNÍ PROJEKCE -->
+      <div class="overview-main" style="margin-top:16px;grid-template-columns:1fr 1fr;">
+        <div class="section-card">
+          <div class="section-head">
+            <span class="section-title">📅 MĚSÍC (D57d ČEZ)</span>
+            <span class="section-action" onclick="toast('📌 Reset baseline')">📌 Reset</span>
+          </div>
+          <div style="padding:8px 0;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+              <div style="color:var(--tx-3);font-size:13px;">Spotřebováno</div>
+              <div id="en-month-kwh" style="font-size:24px;font-weight:700;color:var(--acc-blue);">— <span style="font-size:14px;color:var(--tx-3);">kWh</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;">
+              <div style="color:var(--tx-3);font-size:13px;">Předpokládaná cena</div>
+              <div id="en-month-price" style="font-size:28px;font-weight:700;color:var(--acc-green);">— <span style="font-size:14px;color:var(--tx-3);">Kč</span></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:10px;border-top:1px solid var(--border-soft);">
+              <div style="color:var(--tx-3);font-size:13px;">Měsíční projekce</div>
+              <div id="en-month-proj" style="font-size:16px;font-weight:600;color:var(--acc-orange);">—</div>
+            </div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-head"><span class="section-title">💰 TARIF</span></div>
+          <div class="activity-list">
+            <div class="activity-row"><div class="activity-ico yellow">☀</div><div class="activity-info"><div class="activity-title">VT vysoký</div><div class="activity-sub">Denní sazba</div></div><div class="activity-time">5.48 Kč/kWh</div></div>
+            <div class="activity-row"><div class="activity-ico blue">🌙</div><div class="activity-info"><div class="activity-title">NT nízký</div><div class="activity-sub">Noční sazba</div></div><div class="activity-time">4.76 Kč/kWh</div></div>
+            <div class="activity-row"><div class="activity-ico purple">📋</div><div class="activity-info"><div class="activity-title">Fixní poplatek</div><div class="activity-sub">3×25A</div></div><div class="activity-time">735 Kč/měs</div></div>
+            <div class="activity-row"><div class="activity-ico green">⚖️</div><div class="activity-info"><div class="activity-title">Průměr</div><div class="activity-sub">80% NT + 20% VT</div></div><div class="activity-time">4.90 Kč/kWh</div></div>
+          </div>
         </div>
       </div>
+
+      <!-- TOP 10 spotřebičů -->
       <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">GRAF 24H</span></div>
-        <div style="min-height:160px;display:grid;place-items:center;color:var(--tx-3);font-size:13px;border:1px dashed var(--border-med);border-radius:var(--r-md);padding:20px;">
-          📊 Graf power_snapshot history — coming soon (Phase 60+)
+        <div class="section-head">
+          <span class="section-title">🏆 TOP 10 SPOTŘEBIČŮ</span>
+          <span class="section-action" onclick="refresh()">🔄 Refresh</span>
+        </div>
+        <div class="activity-list" id="en-top-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+
+      <!-- GRAF placeholder -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">📊 GRAF 24H (power_snapshot)</span></div>
+        <div style="min-height:180px;display:grid;place-items:center;color:var(--tx-3);font-size:13px;border:1px dashed var(--border-med);border-radius:var(--r-md);padding:30px;">
+          📊 SVG graf z EventLog power_snapshot — coming soon
         </div>
       </div>
     </section>
@@ -1560,22 +1657,61 @@ body {
       <div class="page-header">
         <div class="greeting">
           <h1>🕐 Historie</h1>
-          <p>Poslední události · zdroje dat</p>
+          <p>Event log · filter · Google Sheets data</p>
         </div>
       </div>
+
+      <!-- EventLog filter + load -->
       <div class="section-card">
-        <div class="section-head"><span class="section-title">POSLEDNÍ UDÁLOSTI</span></div>
+        <div class="section-head">
+          <span class="section-title">📊 EVENT LOG</span>
+          <span class="section-action" onclick="loadEventLogV2()">🔄 Načíst</span>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;margin-bottom:16px;">
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">Časové okno</span>
+            <select id="hist-hours" style="padding:8px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-md);font-size:13px;">
+              <option value="1">1 hodina</option>
+              <option value="6">6 hodin</option>
+              <option value="24" selected>24 hodin</option>
+              <option value="72">3 dny</option>
+              <option value="168">7 dní</option>
+            </select>
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">Script filter</span>
+            <input id="hist-script" type="text" placeholder="např. sh_heating_*" style="padding:8px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-md);font-size:13px;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;">
+            <span style="color:var(--tx-3);font-size:11px;">Event filter</span>
+            <input id="hist-event" type="text" placeholder="např. heating_demand_*" style="padding:8px;background:var(--bg-3);border:1px solid var(--border-soft);color:var(--tx-1);border-radius:var(--r-md);font-size:13px;">
+          </label>
+          <button class="section-action" onclick="loadEventLogV2()" style="align-self:end;padding:8px 16px;background:var(--acc-blue-soft);color:var(--acc-blue);border-color:var(--acc-blue);">Aplikovat</button>
+        </div>
+        <div id="hist-status" style="color:var(--tx-3);font-size:12px;margin-bottom:12px;">Klikni "Načíst" pro získání událostí ze Sheets</div>
+        <div id="hist-eventlog" class="activity-list" style="max-height:500px;overflow-y:auto;">
+          <!-- rendered after fetch -->
+        </div>
+      </div>
+
+      <!-- Zdroje dat -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">📚 ZDROJE DAT</span></div>
+        <div class="activity-list">
+          <div class="activity-row" onclick="openSheet('EventLog')" style="cursor:pointer;"><div class="activity-ico green">📊</div><div class="activity-info"><div class="activity-title">Google Sheets EventLog</div><div class="activity-sub">10k řádků · script-level eventy</div></div><div class="activity-time">→ web</div></div>
+          <div class="activity-row" onclick="openSheet('Rani+rutina')" style="cursor:pointer;"><div class="activity-ico blue">🌅</div><div class="activity-info"><div class="activity-title">Ranní rutina</div><div class="activity-sub">Morning timeline · 3:15 / 5:15 alarm</div></div><div class="activity-time">→ web</div></div>
+          <div class="activity-row" onclick="openSheet('Battery+History')" style="cursor:pointer;"><div class="activity-ico orange">🔋</div><div class="activity-info"><div class="activity-title">Battery History</div><div class="activity-sub">30-denní trend per zařízení</div></div><div class="activity-time">→ web</div></div>
+          <div class="activity-row" onclick="openSheet('Daily+Report')" style="cursor:pointer;"><div class="activity-ico purple">🧠</div><div class="activity-info"><div class="activity-title">Daily Report</div><div class="activity-sub">Gemini AI souhrn dne (22:00)</div></div><div class="activity-time">→ web</div></div>
+          <div class="activity-row" onclick="openSheet('Zone+Activity')" style="cursor:pointer;"><div class="activity-ico cyan">🗺</div><div class="activity-info"><div class="activity-title">Zone Activity</div><div class="activity-sub">Dimmer audit · current zone tracking</div></div><div class="activity-time">→ web</div></div>
+          <div class="activity-row" onclick="openSheet('TTS+Monitor')" style="cursor:pointer;"><div class="activity-ico blue">🔊</div><div class="activity-info"><div class="activity-title">TTS Monitor</div><div class="activity-sub">Všechny TTS oznámení</div></div><div class="activity-time">→ web</div></div>
+        </div>
+      </div>
+
+      <!-- Posledních 5 z DATA -->
+      <div class="section-card" style="margin-top:16px;">
+        <div class="section-head"><span class="section-title">⚡ NEDÁVNÉ UDÁLOSTI (z dashboard_data)</span></div>
         <div class="activity-list" id="historie-list">
           <!-- rendered by JS -->
-        </div>
-      </div>
-      <div class="section-card" style="margin-top:16px;">
-        <div class="section-head"><span class="section-title">ZDROJE DAT</span></div>
-        <div class="activity-list">
-          <div class="activity-row"><div class="activity-ico green">📊</div><div class="activity-info"><div class="activity-title">Google Sheets EventLog</div><div class="activity-sub">10k řádků · filter by script/event/hours</div></div><div class="activity-time">web</div></div>
-          <div class="activity-row"><div class="activity-ico blue">🌅</div><div class="activity-info"><div class="activity-title">Ranní rutina</div><div class="activity-sub">Morning timeline · 3:15 / 5:15 alarm</div></div><div class="activity-time">daily</div></div>
-          <div class="activity-row"><div class="activity-ico orange">🔋</div><div class="activity-info"><div class="activity-title">Battery History</div><div class="activity-sub">30-denní trend per zařízení</div></div><div class="activity-time">daily</div></div>
-          <div class="activity-row"><div class="activity-ico purple">🧠</div><div class="activity-info"><div class="activity-title">Daily Report</div><div class="activity-sub">Gemini AI souhrn dne</div></div><div class="activity-time">22:00</div></div>
         </div>
       </div>
     </section>
@@ -1682,6 +1818,26 @@ const DEMO_DATA = {
     { ico: '🏠', color: 'green',  title: 'Odchod z domu',   sub: 'Režim změněn na Pryč',          time: '17:45' },
     { ico: '☀️', color: 'orange', title: 'Dobré ráno',      sub: 'Scéna spuštěna',                time: '07:15' },
   ],
+  // TOP 10 spotřebičů — demo data
+  top_devices: [
+    { name: 'Kotel (Protherm)',   power: 850, ico: '🔥', color: 'red' },
+    { name: 'Fibaro Kotel relay',  power: 180, ico: '⚡', color: 'orange' },
+    { name: 'Lednice',             power: 120, ico: '🧊', color: 'blue' },
+    { name: 'TV zasuvka',          power: 85,  ico: '📺', color: 'purple' },
+    { name: 'Air Purifier',        power: 45,  ico: '🌬', color: 'green' },
+    { name: 'Zvlhčovač',           power: 30,  ico: '💧', color: 'cyan' },
+    { name: 'Kávovar (standby)',   power: 12,  ico: '☕', color: 'orange' },
+    { name: 'Mikrovlnka',          power: 4,   ico: '📡', color: 'yellow' },
+    { name: 'Pracovna PC',         power: 3,   ico: '💻', color: 'blue' },
+    { name: 'Pračka (standby)',    power: 2,   ico: '🫧', color: 'cyan' },
+  ],
+  // Finance/měsíční data
+  finance: {
+    month_kwh: 187.5,
+    month_price: 1650,
+    month_projection: 2450,  // projekce na konec měsíce
+    baseline_date: '2026-04-01',
+  },
 };
 
 // ╔════════════════════════════════════════════════════════╗
@@ -1909,6 +2065,58 @@ function renderKlimaDetail(klima, heating) {
   if (status && heating) {
     status.textContent = `mode: ${heating.mode || '—'} · preset: ${heating.preset || '—'} · boiler: ${heating.boiler || '—'}`;
   }
+
+  // Týdenní schedule (jednoduchý viewer — demo/default Pro/Víkend)
+  renderHeatingSchedule(klima, heating);
+
+  // Purifier + Humidifier
+  const app = (DATA || {}).appliances || {};
+  const purifier = app.purifier || {};
+  const humid = app.humidifier || {};
+  const pState = $('klima-purifier-state');
+  if (pState) {
+    pState.textContent = purifier.on ? 'ON' : 'OFF';
+    pState.style.color = purifier.on ? 'var(--acc-green)' : 'var(--tx-3)';
+  }
+  setText('klima-purifier-sub', purifier.on
+    ? `Filtruje · ${purifier.temp != null ? purifier.temp + '°C · ' : ''}${purifier.hum != null ? purifier.hum + '% RH' : ''}`
+    : 'Vypnuto · auto dle PM2.5');
+
+  const hState = $('klima-humid-state');
+  if (hState) {
+    hState.textContent = humid.on ? 'ON' : 'OFF';
+    hState.style.color = humid.on ? 'var(--acc-cyan)' : 'var(--tx-3)';
+  }
+  setText('klima-humid-sub', humid.on
+    ? `Zvlhčuje · ${humid.power != null ? Math.round(humid.power) + ' W' : ''}`
+    : 'Vypnuto · spustí se při <35% RH');
+}
+
+function renderHeatingSchedule(klima, heating) {
+  const tbody = $('klima-schedule-body');
+  if (!tbody) return;
+
+  // Default schedule — ráno comfort, den eco, večer comfort, noc night
+  // Per-zone rozdíly
+  const defaultSchedule = {
+    jidelna:  { day: '21°', night: '18°', eco: '16°' },
+    koupelna: { day: '22°', night: '19°', eco: '16°' },
+    toaleta:  { day: '18°', night: '16°', eco: '16°' },
+    loznice:  { day: '19°', night: '17°', eco: '16°' },
+  };
+
+  // Pro každou enabled zónu
+  const zones = klima.filter(k => k.id).slice(0, 4);
+  tbody.innerHTML = zones.map(z => {
+    const ds = defaultSchedule[z.id] || { day: '20°', night: '18°', eco: '16°' };
+    const weekdays = `<td style="padding:8px;text-align:center;background:var(--acc-green-soft);color:var(--acc-green);border-right:1px solid var(--border-soft);">${ds.day}</td>`;
+    const weekend = `<td style="padding:8px;text-align:center;background:var(--acc-blue-soft);color:var(--acc-blue);border-right:1px solid var(--border-soft);">${ds.day}</td>`;
+    return `
+      <tr>
+        <td style="padding:8px;font-weight:var(--fw-semibold);color:var(--tx-1);border-right:1px solid var(--border-soft);">${z.room}</td>
+        ${weekdays}${weekdays}${weekdays}${weekdays}${weekdays}${weekend}${weekend}
+      </tr>`;
+  }).join('');
 }
 
 function renderCamsDetail(cams) {
@@ -1944,8 +2152,15 @@ function renderScenyDetail(scenes) {
 }
 
 function renderEnergieDetail(energy, health) {
+  const d = DATA || {};
+
+  // 4 stat tiles top
   const pw = health.power_total != null ? Math.round(health.power_total) : null;
   setText('en-now-val', pw != null ? pw + ' W' : '—');
+  // sub — Kč/hod (průměr 4.90 Kč/kWh)
+  const costPerH = pw != null ? ((pw / 1000) * 4.90).toFixed(2) : null;
+  setText('en-now-sub', costPerH != null ? costPerH + ' Kč/h' : 'Live spotřeba');
+
   setText('en-today-val', energy.kwh_today != null ? Number(energy.kwh_today).toFixed(1) + ' kWh' : '—');
   setText('en-yest-val', energy.kwh_yesterday != null ? Number(energy.kwh_yesterday).toFixed(1) + ' kWh' : '—');
   const delta = energy.delta_pct;
@@ -1959,6 +2174,53 @@ function renderEnergieDetail(energy, health) {
       deltaEl.textContent = '—';
     }
   }
+
+  // Měsíční data
+  const finance = d.finance || {};
+  setHTML('en-month-kwh', (finance.month_kwh != null ? finance.month_kwh.toFixed(1) : '—') + ' <span style="font-size:14px;color:var(--tx-3);">kWh</span>');
+  setHTML('en-month-price', (finance.month_price != null ? finance.month_price.toFixed(0) : '—') + ' <span style="font-size:14px;color:var(--tx-3);">Kč</span>');
+  setText('en-month-proj', finance.month_projection != null ? '~' + finance.month_projection.toFixed(0) + ' Kč' : '—');
+
+  // TOP 10 spotřebičů
+  const top = d.top_devices || deriveTopDevices(d);
+  const el = $('en-top-list');
+  if (el) {
+    el.innerHTML = top.slice(0, 10).map((t, i) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : (i + 1);
+      return `
+      <div class="activity-row">
+        <div class="activity-ico ${t.color || 'blue'}">${t.ico || '⚡'}</div>
+        <div class="activity-info">
+          <div class="activity-title">${medal} ${t.name}</div>
+          <div class="activity-sub">${t.power != null ? Math.round(t.power) + ' W' : '—'}</div>
+        </div>
+        <div class="activity-time">${t.power != null ? ((t.power / 1000) * 4.90 * 24).toFixed(0) + ' Kč/den' : ''}</div>
+      </div>`;
+    }).join('');
+  }
+}
+
+// Derive top devices from live plugs + appliances data
+function deriveTopDevices(d) {
+  const out = [];
+  const plugMeta = {
+    oven:     { name: 'Trouba',        ico: '🍞', color: 'orange' },
+    micro:    { name: 'Mikrovlnka',    ico: '📡', color: 'yellow' },
+    fridge:   { name: 'Lednice',       ico: '🧊', color: 'blue' },
+    coffee:   { name: 'Kávovar',       ico: '☕', color: 'orange' },
+    tv:       { name: 'TV',            ico: '📺', color: 'purple' },
+    humidifier:{ name: 'Zvlhčovač',    ico: '💧', color: 'cyan' },
+    boiler:   { name: 'Boiler',        ico: '🔥', color: 'red' },
+    washer:   { name: 'Pračka',        ico: '🫧', color: 'cyan' },
+    office:   { name: 'Pracovna PC',   ico: '💻', color: 'blue' },
+  };
+  for (const [k, v] of Object.entries(d.plugs || {})) {
+    if (!v || typeof v.power !== 'number') continue;
+    const meta = plugMeta[k] || { name: k, ico: '⚡', color: 'blue' };
+    out.push({ name: meta.name, power: v.power, ico: meta.ico, color: meta.color });
+  }
+  out.sort((a, b) => (b.power || 0) - (a.power || 0));
+  return out;
 }
 
 function renderSystemDetail(d) {
@@ -2061,6 +2323,87 @@ function renderHistorieDetail(activities) {
       <div class="activity-time">${a.time}</div>
     </div>
   `).join('');
+}
+
+// ── Historie page helpers ──
+const SHEETS_WEBAPP = 'https://script.google.com/macros/s/AKfycbw9Ow2BhcjKzo_PJzzQOpa_GirCMnTcnfTAyA0cL62b6FxJigYvsAT1uapSAT_rQvY8/exec';
+
+function openSheet(sheetName) {
+  const url = SHEETS_WEBAPP + '?mode=latest&sheet=' + encodeURIComponent(sheetName) + '&count=50';
+  window.open(url, '_blank');
+}
+
+async function loadEventLogV2() {
+  const hours = $('hist-hours')?.value || '24';
+  const script = $('hist-script')?.value?.trim() || '';
+  const event = $('hist-event')?.value?.trim() || '';
+  const status = $('hist-status');
+  const list = $('hist-eventlog');
+
+  if (status) status.textContent = '⏳ Načítám z Google Sheets...';
+  if (list) list.innerHTML = '';
+
+  if (CONFIG.demoMode) {
+    // Demo mock data
+    if (status) status.textContent = '(demo mode — zobrazuji mock data; v live mode by se načetlo z Google Sheets)';
+    const mock = [
+      { ts: '2026-04-22 07:24:03', script: 'sh_heating_scheduler_v1', event: 'heating_targets_updated', result: 'ok', zone: 'system' },
+      { ts: '2026-04-22 07:22:07', script: 'sh_heating_scheduler_v1', event: 'heating_targets_updated', result: 'ok', zone: 'system' },
+      { ts: '2026-04-22 07:18:00', script: 'sh_power_logger_v1',      event: 'power_snapshot',         result: '12_devices', zone: 'system' },
+      { ts: '2026-04-22 07:15:00', script: 'sh_dashboard_bridge_v1',  event: 'dashboard_refresh',      result: 'ok', zone: 'system' },
+      { ts: '2026-04-22 07:14:02', script: 'sh_heating_demand_v1',    event: 'heating_demand_transition', result: 'on→off', zone: 'system' },
+    ];
+    if (list) list.innerHTML = mock.map(m => `
+      <div class="activity-row">
+        <div class="activity-ico blue">📋</div>
+        <div class="activity-info">
+          <div class="activity-title">${m.event}</div>
+          <div class="activity-sub">${m.script} · ${m.zone} · ${m.result}</div>
+        </div>
+        <div class="activity-time">${m.ts.split(' ')[1]}</div>
+      </div>
+    `).join('');
+    return;
+  }
+
+  // Real fetch from Apps Script WebApp
+  try {
+    let url = SHEETS_WEBAPP + '?mode=events&hours=' + encodeURIComponent(hours);
+    if (script) url += '&script=' + encodeURIComponent(script);
+    if (event) url += '&event=' + encodeURIComponent(event);
+    url += '&limit=100';
+
+    const r = await fetch(url, { redirect: 'follow' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const rows = Array.isArray(data.rows) ? data.rows : (Array.isArray(data) ? data : []);
+
+    if (!rows.length) {
+      if (status) status.textContent = '0 událostí nalezeno (filter: ' + (script || '*') + ' / ' + (event || '*') + ' za ' + hours + 'h)';
+      return;
+    }
+
+    if (status) status.textContent = rows.length + ' událostí · ' + hours + ' hodin · filter: ' + (script || '*') + ' / ' + (event || '*');
+    if (list) list.innerHTML = rows.slice(0, 100).map(r => {
+      const ts = r.timestamp || r.ts || '';
+      const scriptName = r.script || '—';
+      const evt = r.event || '—';
+      const result = r.result || '';
+      const zone = r.zone || '';
+      const hasErr = r.error && r.error.length;
+      return `
+      <div class="activity-row" style="${hasErr ? 'background:var(--acc-red-soft);' : ''}">
+        <div class="activity-ico ${hasErr ? 'red' : 'blue'}">${hasErr ? '⚠' : '📋'}</div>
+        <div class="activity-info">
+          <div class="activity-title">${evt}</div>
+          <div class="activity-sub">${scriptName} · ${zone} ${result ? '· ' + result : ''}</div>
+        </div>
+        <div class="activity-time">${ts.split(' ')[1] || ts}</div>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    if (status) status.textContent = '✗ Chyba: ' + e.message + ' (CORS? Apps Script redirect?)';
+  }
 }
 
 // ╔════════════════════════════════════════════════════════╗
