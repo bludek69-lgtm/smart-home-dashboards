@@ -2423,8 +2423,9 @@ const DEMO_DATA = {
     { id: 'romantika', name: 'Romantika', ico: '🕯', color: 'yellow', title: 'Romantika scéna — velmi tlumené teplé světlo (dim 15%, warm), roleta 20%, Italia 80.' },
     { id: 'reset',     name: 'Reset',     ico: '↺', color: 'gray',   title: 'Reset — ukončí aktivní scénu, obnoví normální auto-osvětlení dle fáze dne a lux.' },
   ],
+  // 🆕 23.4. — kamera jen s id, skutečnou URL + auth kódují JS funkce (port :88, auth usr=kamera1)
   cameras: [
-    { id: 'vchod',   name: 'Kamera venkovní (Foscam)', url: 'http://192.168.1.178/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2', time: '—' },
+    { id: 'vchod', name: 'Kamera venkovní (Foscam — Předsíň)', time: '—' },
   ],
   audio: [
     { id: 'kuchyne', name: 'Kuchyně',   source: 'Spotify',   playing: true,  volume: 45 },
@@ -2820,67 +2821,121 @@ function renderHeatingSchedule(klima, heating) {
   }).join('');
 }
 
+// 🆕 23.4. — Foscam camera live (port z v1: port :88, auth usr=kamera1&pwd=bkamera11969)
+const CAM_URL_V2  = 'http://192.168.1.178:88/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2&usr=kamera1&pwd=bkamera11969';
+const CAM_BASE_V2 = 'http://192.168.1.178:88/cgi-bin/CGIProxy.fcgi?usr=kamera1&pwd=bkamera11969';
+const CAM_INTERVAL_V2 = 3000;  // 3s polling = simulate live
+const IR_LABELS_V2 = ['☀ IR: DAY', '🌙 IR: NIGHT', '🔄 IR: AUTO'];
+let _camIrMode = 2;       // 0=day, 1=night, 2=auto
+let _camPollTimer = null;
+
 function renderCamsDetail(cams) {
   const el = $('cams-grid-full');
   if (!el) return;
-  if (!shouldRender('cams-detail', cams)) return;  // 🩹 23.4. anti-flicker
-  // 🆕 23.4. — v1 port: live Foscam snapshot + IR toggle + zasuvka kamera control
-  el.innerHTML = cams.map((c, i) => {
-    const camId = 'cam-img-' + i;
-    const snapUrl = c.url || ('http://192.168.1.178/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2&_=' + Date.now());
-    return `
-    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;">
-      <div style="height:220px;background:linear-gradient(135deg,var(--bg-2),var(--bg-3));display:grid;place-items:center;position:relative;">
-        <span class="cam-live-badge" style="position:absolute;top:8px;left:8px;font-size:10px;padding:3px 8px;background:var(--acc-red);color:white;border-radius:var(--r-sm);z-index:2;">● LIVE</span>
-        <img id="${camId}" src="${snapUrl}" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-        <div style="display:none;flex-direction:column;align-items:center;gap:8px;padding:20px;text-align:center;color:var(--tx-3);">
+  // 🩹 Hash skip pomine — kamera potřebuje znovu-render kvůli polling setup
+  // Jen render pokud ještě není renderovaný (cam-img-v2 chybí) nebo pole se změnilo
+  if (el.innerHTML && el.querySelector('#cam-img-v2')) return;  // už je naplněno
+
+  el.innerHTML = `
+    <div style="background:var(--bg-3);border:1px solid var(--border-soft);border-radius:var(--r-lg);overflow:hidden;max-width:900px;">
+      <div style="position:relative;background:#000;min-height:280px;">
+        <span id="cam-live-v2" style="position:absolute;top:10px;left:10px;font-size:10px;padding:3px 10px;background:var(--acc-red);color:white;border-radius:var(--r-sm);z-index:2;display:none;font-weight:700;">● LIVE</span>
+        <span id="cam-updated-v2" style="position:absolute;top:10px;right:10px;font-size:10px;padding:3px 8px;background:rgba(0,0,0,0.5);color:var(--tx-2);border-radius:var(--r-sm);z-index:2;font-family:var(--font-mono);"></span>
+        <img id="cam-img-v2" alt="Kamera venkovní (Foscam)" style="width:100%;height:auto;min-height:280px;object-fit:contain;display:none;">
+        <div id="cam-off-v2" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px;gap:10px;padding:20px;text-align:center;color:var(--tx-3);">
           <span style="font-size:48px;opacity:0.3;">📹</span>
-          <span style="font-size:12px;">Kamera nedostupná (Foscam 192.168.1.178)</span>
+          <span style="font-size:13px;">Kamera nedostupná</span>
+          <span style="font-size:11px;opacity:0.7;">Foscam 192.168.1.178:88 — zkontroluj LAN připojení</span>
         </div>
       </div>
-      <div style="padding:12px 16px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <div style="padding:14px 16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
           <div>
-            <div style="font-weight:600;">${c.name || 'Kamera'}</div>
-            <div style="font-size:11px;color:var(--tx-3);font-family:var(--font-mono);">${c.url ? 'Foscam HTTP' : '192.168.1.178'}</div>
+            <div style="font-weight:600;font-size:15px;">📷 Kamera venkovní (Foscam — Předsíň)</div>
+            <div style="font-size:11px;color:var(--tx-3);font-family:var(--font-mono);">Polling 3s · port :88</div>
           </div>
+          <div style="font-size:11px;color:var(--tx-3);" id="cam-status-v2">idle</div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
-          <button title="Stáhnout nový snímek z kamery" onclick="refreshCameraV2('${camId}', '${c.url || ''}')" style="flex:1;min-width:100px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">↻ Obnovit</button>
-          <button title="Přepnout IR režim (AUTO/ON/OFF)" onclick="toggleCameraIRV2()" style="flex:1;min-width:100px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔄 IR: AUTO</button>
-          <button title="Zapnout/vypnout zásuvka kamera (vnitřní USB kamera v ložnici)" onclick="toggleCameraPlugV2()" style="flex:1;min-width:100px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--acc-purple);color:var(--acc-purple);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔌 Zásuvka</button>
+          <button title="Okamžitě stáhnout nový snímek" onclick="refreshCameraV2()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">↻ Obnovit</button>
+          <button id="cam-ir-btn-v2" title="Přepnout IR režim (DAY / NIGHT / AUTO)" onclick="toggleCameraIRV2()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-2);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔄 IR: AUTO</button>
+          <button title="Zapnout/vypnout zásuvka kamera (vnitřní USB kamera v ložnici — sh_camera_router_v1)" onclick="toggleCameraPlugV2()" style="flex:1;min-width:120px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--acc-purple);color:var(--acc-purple);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">🔌 Zásuvka</button>
+          <button title="Zastavit live polling (šetření bandwidth)" onclick="stopCameraPollV2()" style="min-width:80px;padding:8px 12px;background:var(--bg-2);border:1px solid var(--border-soft);color:var(--tx-3);border-radius:var(--r-sm);cursor:pointer;font-size:12px;">⏸ Stop</button>
         </div>
       </div>
     </div>`;
-  }).join('');
+
+  // Auto-start live polling (jako v1)
+  startCameraPollV2();
 }
 
-function refreshCameraV2(imgId, baseUrl) {
-  const img = $(imgId);
+function refreshCameraV2() {
+  // Preload pattern (v1 port) — swap až po load, bez bliknutí
+  const img = $('cam-img-v2');
+  const off = $('cam-off-v2');
+  const live = $('cam-live-v2');
+  const status = $('cam-status-v2');
+  const updated = $('cam-updated-v2');
   if (!img) return;
-  const url = (baseUrl || 'http://192.168.1.178/cgi-bin/CGIProxy.fcgi?cmd=snapPicture2') +
-              (baseUrl.includes('?') ? '&_=' : '?_=') + Date.now();
-  img.src = url;
-  img.style.display = 'block';
-  const fallback = img.nextElementSibling;
-  if (fallback) fallback.style.display = 'none';
-  toast('📷 Obnovuji snímek...');
+
+  if (status) status.textContent = 'fetching...';
+
+  const ni = new Image();
+  ni.onload = function() {
+    img.src = this.src;
+    img.style.display = 'block';
+    if (off) off.style.display = 'none';
+    if (live) live.style.display = 'inline-block';
+    if (status) status.textContent = '● live';
+    if (updated) updated.textContent = new Date().toLocaleTimeString('cs-CZ', { timeZone: 'Europe/Prague' });
+  };
+  ni.onerror = function() {
+    img.style.display = 'none';
+    if (off) off.style.display = 'flex';
+    if (live) live.style.display = 'none';
+    if (status) status.textContent = '⚠ offline';
+  };
+  ni.src = CAM_URL_V2 + '&t=' + Date.now();
+}
+
+function startCameraPollV2() {
+  stopCameraPollV2();
+  refreshCameraV2();  // immediate first fetch
+  _camPollTimer = setInterval(refreshCameraV2, CAM_INTERVAL_V2);
+  console.log('[v2] camera polling started (3s)');
+}
+
+function stopCameraPollV2() {
+  if (_camPollTimer) {
+    clearInterval(_camPollTimer);
+    _camPollTimer = null;
+    const status = $('cam-status-v2');
+    if (status) status.textContent = 'paused';
+    const live = $('cam-live-v2');
+    if (live) live.style.display = 'none';
+  }
 }
 
 async function toggleCameraIRV2() {
+  _camIrMode = (_camIrMode + 1) % 3;
+  const btn = $('cam-ir-btn-v2');
+  if (btn) btn.textContent = IR_LABELS_V2[_camIrMode];
   try {
-    await writeVar('sh_camera_ir_mode', 'toggle');
-    toast('🔄 IR režim přepnut (auto/on/off)');
-  } catch (e) { toast('✗ ' + e.message); }
+    const r = await fetch(CAM_BASE_V2 + '&cmd=setInfraLedConfig&mode=' + _camIrMode);
+    if (r.ok) {
+      toast('📷 IR → ' + ['DAY (barva)', 'NIGHT (IR)', 'AUTO'][_camIrMode]);
+    } else {
+      toast('⚠ Kamera IR HTTP ' + r.status);
+    }
+  } catch (e) {
+    toast('⚠ IR fail: ' + e.message);
+  }
 }
 
 async function toggleCameraPlugV2() {
   try {
-    // sh_camera_router_v1 ovládá "zasuvka kamera" — trigger přes presence pipeline
-    const curRezim = (DATA && DATA.state && DATA.state.rezim_doma) || 'home';
-    // Manual override — toggle zasuvka kamera přímo
     await runScript('sh_camera_router_v1');
-    toast('🔌 Kamera zásuvka — router spuštěn (' + curRezim + ' mód)');
+    toast('🔌 Kamera zásuvka — router spuštěn (přepne ON/OFF podle presence)');
   } catch (e) { toast('✗ ' + e.message); }
 }
 
@@ -5122,8 +5177,10 @@ function transformBridge(raw) {
       delta_pct: d.energy?.delta_pct,
     },
     lights: lights.length ? lights : DEMO_DATA.lights,
-    scenes: Array.isArray(d.scenes) && d.scenes.length ? d.scenes : DEMO_DATA.scenes,
-    cameras: Array.isArray(d.cameras) && d.cameras.length ? d.cameras : DEMO_DATA.cameras,
+    // 🩹 23.4. — FORCE správné scény z v1 (ignoruj bridge scenes které mohly být prázdné/nesprávné)
+    scenes: DEMO_DATA.scenes,
+    // 🩹 23.4. — FORCE 1 kamera (Foscam), bridge scenes nemá auth URL
+    cameras: DEMO_DATA.cameras,
     audio: audio.length ? audio : DEMO_DATA.audio,
     klima: klima.length ? klima : DEMO_DATA.klima,
     activities,
@@ -5257,6 +5314,13 @@ function switchPage(pageName) {
           if (typeof renderPortfolioV2 === 'function') renderPortfolioV2();
         });
       }
+    } else if (pageName === 'kamery') {
+      // 🆕 23.4. — start camera live polling při přepnutí na Kamery page
+      if (typeof startCameraPollV2 === 'function') setTimeout(startCameraPollV2, 200);
+    }
+    // Stop camera polling při přepnutí JINAM než na kamery (šetření bandwidth)
+    if (pageName !== 'kamery' && typeof stopCameraPollV2 === 'function') {
+      stopCameraPollV2();
     }
   } catch (_) {}
 }
