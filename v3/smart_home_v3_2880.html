@@ -1076,6 +1076,121 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"]:hove
 }
 /* ═══════════════════════════════════════════════════════════════ */
 
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🏠 v3 HOME COMPACT MODE — jen main icon + name, skryté chipy    */
+/* 23.4. večer — user: "vešlo by se toho na home stranku vice       */
+/*                      bez scrolu"                                  */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* Skryj detail chipy na Home — detail najdeš po kliku na zónu */
+#page-home .hg-rooms .room-inds {
+  display: none !important;
+}
+
+/* Hlavní emoji — větší a výraznější */
+#page-home .hg-rooms .rm-icon {
+  font-size: clamp(32px, 3.5vw, 48px) !important;
+  line-height: 1 !important;
+  margin-bottom: 6px !important;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.3));
+  transition: transform var(--tr-fast);
+}
+#page-home .hg-rooms .room:hover .rm-icon {
+  transform: scale(1.1);
+}
+
+/* Název zóny — čitelnější */
+#page-home .hg-rooms .room-name {
+  font-size: clamp(12px, 1.3vw, 16px) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  color: var(--tx1) !important;
+}
+
+/* Room tile — compact ale pěkný, lepší spacing */
+#page-home .hg-rooms .room {
+  padding: 14px 8px !important;
+  gap: 2px;
+  background: linear-gradient(135deg, rgba(26,34,54,0.7), rgba(35,44,68,0.5)) !important;
+  border: 1px solid var(--bd) !important;
+  border-radius: var(--r2) !important;
+  box-shadow: var(--shadow-sm);
+  transition: all var(--tr-med) !important;
+  position: relative;
+  min-height: 0 !important;
+}
+
+/* Aktivní zóna (.room.lit = svítí něco) — glow + green accent */
+#page-home .hg-rooms .room.lit {
+  background: linear-gradient(135deg, rgba(59,201,125,0.15), rgba(26,34,54,0.5)) !important;
+  border-color: rgba(59,201,125,0.4) !important;
+  box-shadow: 0 0 16px rgba(59,201,125,0.22), var(--shadow-sm) !important;
+}
+/* Pulsing dot pro aktivní zónu (v horním pravém rohu) */
+#page-home .hg-rooms .room.lit::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(59,201,125,0.6);
+  animation: v3-dot-pulse 2s ease-in-out infinite;
+}
+@keyframes v3-dot-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.85); }
+}
+
+/* Hover — lift + cyan glow (klik pro detail) */
+#page-home .hg-rooms .room:hover {
+  transform: translateY(-2px);
+  border-color: var(--bda) !important;
+  box-shadow: 0 0 20px rgba(34,211,238,0.25), var(--shadow-md) !important;
+  background: linear-gradient(135deg, rgba(26,34,54,0.9), rgba(35,44,68,0.7)) !important;
+}
+
+/* Grid density — více zón na řádek */
+#page-home .hg-rooms .floor-grid {
+  gap: 6px !important;
+  grid-template-columns: repeat(4, 1fr) !important;  /* 4 zóny v řádku */
+}
+
+/* RPi / menší obrazovky — 3 per row */
+@media (max-width: 1024px) {
+  #page-home .hg-rooms .floor-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* Optional: tooltip on hover pokazující chips z original data */
+#page-home .hg-rooms .room:hover .room-inds {
+  display: flex !important;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg1) !important;
+  border: 1px solid var(--bda) !important;
+  border-radius: var(--r) !important;
+  padding: 8px 10px !important;
+  box-shadow: var(--shadow-lg), var(--glow-cyan);
+  z-index: 100;
+  white-space: nowrap;
+  flex-wrap: wrap;
+  max-width: 280px;
+  justify-content: center;
+  animation: v3-tooltip-fade 180ms ease-out;
+}
+@keyframes v3-tooltip-fade {
+  from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+/* ═══════════════════════════════════════════════════════════════ */
+
 </style>
 </head>
 <body>
