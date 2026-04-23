@@ -1474,6 +1474,43 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 }
 
 /* ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🗺 ZONES page — 3×3 dlaždice bez scrolu (fix 2026-04-23)         */
+/* ═══════════════════════════════════════════════════════════════ */
+.zone-list {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 10px !important;
+  margin-bottom: 0 !important;
+}
+.zone-card {
+  flex-direction: column !important;
+  align-items: center !important;
+  text-align: center !important;
+  justify-content: center !important;
+  padding: 14px 10px !important;
+  gap: 8px !important;
+  min-height: 110px;
+}
+.zone-card .zc-info { text-align: center !important; flex: 0 0 auto !important; width: 100% !important; }
+.zone-card .zc-icon { width: 54px !important; height: 54px !important; font-size: 26px !important; background: var(--bg3) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+.zone-card .zc-name { font-size: 13px !important; font-weight: 700 !important; letter-spacing: 0.3px; margin-top: 2px; }
+.zone-card .zc-meta { font-size: 9px !important; color: var(--tx3) !important; margin-top: 1px !important; }
+.zone-card .zc-inds { display: flex; gap: 3px; justify-content: center; margin-top: 4px; min-height: 8px; }
+.zone-card:hover { transform: translateY(-2px); border-color: var(--cyan) !important; box-shadow: 0 4px 16px rgba(34,211,238,0.15); }
+@media (max-height: 720px) {
+  .zone-card { padding: 10px 8px !important; min-height: 92px; gap: 4px !important; }
+  .zone-card .zc-icon { width: 42px !important; height: 42px !important; font-size: 20px !important; }
+  .zone-card .zc-name { font-size: 12px !important; }
+}
+@media (max-height: 560px) {
+  .zone-list { gap: 6px !important; }
+  .zone-card { padding: 6px 6px !important; min-height: 64px; gap: 2px !important; }
+  .zone-card .zc-icon { width: 28px !important; height: 28px !important; font-size: 15px !important; }
+  .zone-card .zc-name { font-size: 10px !important; }
+  .zone-card .zc-meta { display: none !important; }
+}
 </style>
 </head>
 <body>
