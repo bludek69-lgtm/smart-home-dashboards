@@ -2134,7 +2134,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
       <!-- PHASE4_WEATHER_3DAY_APPLIED -->
       <div class="sect" style="color:var(--green);margin-top:8px;">
       <span class="help-sect-header">
-        <span>PŘEDPOVĚĎ · 3 DNY</span>
+        <span>PŘEDPOVĚĎ · 5 DNÍ</span>
         <button class="help-btn" data-help-for="help-weather3d" onclick="toggleHelp('help-weather3d')">ℹ</button>
       </span>
     </div>
@@ -2536,6 +2536,19 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
         <span>0</span><span>3</span><span>6</span><span>9</span><span>12</span><span>15</span><span>18</span><span>21</span><span>24</span>
       </div>
       <div id="h2-preview-legend" style="font-size:10px;color:var(--tx2);margin-top:8px;"></div>
+    </div>
+
+    <!-- Weekly heatmap (fix 2026-04-23 — fill empty space) -->
+    <div class="sect" style="color:var(--orange);margin-top:12px;">TÝDENNÍ PŘEHLED</div>
+    <div class="card" style="padding:10px;">
+      <div id="h2-week-heatmap"></div>
+      <div style="font-size:9px;color:var(--tx3);margin-top:6px;text-align:center;">Klikni na den pro editaci · řádek = den, sloupec = hodina (0–24)</div>
+    </div>
+
+    <!-- Zone summary (all 4 zones) -->
+    <div class="sect" style="color:var(--orange);margin-top:12px;">VŠECHNY ZÓNY — DNES</div>
+    <div class="card" style="padding:10px;">
+      <div id="h2-all-zones" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;"></div>
     </div>
 
     <div style="height:24px;flex-shrink:0;"></div>
@@ -7486,7 +7499,7 @@ async function fetchWeather() {
 
     // 5-day forecast
     const fcRes = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${WX_LAT}&lon=${WX_LON}&units=metric&lang=cz&cnt=24&appid=${key}`
+      `https://api.openweathermap.org/data/2.5/forecast?lat=${WX_LAT}&lon=${WX_LON}&units=metric&lang=cz&cnt=40&appid=${key}`
     );
     const fc = await fcRes.json();
 
@@ -7574,7 +7587,7 @@ function aggregateDailyForecast(fc) {
   const days = Object.keys(byDay).sort();
   const todayKey = _wxPragueDateKey(Math.floor(Date.now() / 1000));
   // Skip today (already shown in hourly) — take next 3 days
-  const future = days.filter(k => k > todayKey).slice(0, 3);
+  const future = days.filter(k => k > todayKey).slice(0, 5);
   return future.map(k => {
     const day = byDay[k];
     const temps = day.items.map(x => Number(x.main && x.main.temp) || 0);
@@ -8651,6 +8664,100 @@ function h2RenderSlotsFromState() {
   h2State.currentSlots = h2ResolveDaySlots(h2State.day).map(s => ({...s}));
   h2RenderSlotsList();
   h2RenderPreview();
+  h2RenderWeekHeatmap();
+  h2RenderAllZones();
+}
+
+// ═ Weekly heatmap (7 × 24) — fix 2026-04-23 =====================
+function h2TempAtMinute(slots, m) {
+  for (const s of slots) {
+    const f = h2MinutesOfDay(s.from);
+    const t = h2MinutesOfDay(s.to);
+    if (f < t) { if (m >= f && m < t) return Number(s.temp) || null; }
+    else        { if (m >= f || m < t) return Number(s.temp) || null; }
+  }
+  return null;
+}
+function h2RenderWeekHeatmap() {
+  const c = document.getElementById('h2-week-heatmap');
+  if (!c || !h2State.scheduleObj) return;
+  const todayIdx = new Date().getDay();
+  const todayDayId = H2_DAYS[(todayIdx + 6) % 7].id;
+  let html = '<div style="display:grid;grid-template-columns:28px 1fr;gap:2px;font-family:var(--mono);font-size:9px;">';
+  html += '<div></div><div style="display:grid;grid-template-columns:repeat(24,1fr);gap:1px;color:var(--tx3);">';
+  for (let h = 0; h < 24; h++) html += '<div style="text-align:center;">' + (h % 3 === 0 ? h : '') + '</div>';
+  html += '</div>';
+  for (const d of H2_DAYS) {
+    const slots = h2ResolveDaySlots(d.id);
+    const isActive = d.id === h2State.day;
+    const isToday = d.id === todayDayId;
+    const lblStyle = 'text-align:center;padding:2px;color:' + (isActive ? 'var(--cyan)' : (isToday ? 'var(--green)' : 'var(--tx2)')) + ';cursor:pointer;font-weight:' + (isActive || isToday ? '700' : '500') + ';';
+    html += '<div style="' + lblStyle + '" onclick="h2SwitchDay(\'' + d.id + '\')" title="Přepni na ' + d.label + '">' + d.label + '</div>';
+    html += '<div style="display:grid;grid-template-columns:repeat(24,1fr);gap:1px;">';
+    for (let h = 0; h < 24; h++) {
+      const t = h2TempAtMinute(slots, h * 60 + 30);
+      const bg = (t == null) ? 'var(--bg3)' : h2TempColor(t);
+      const tt = (t == null) ? d.label + ' ' + h + ':00 · bez slotu' : d.label + ' ' + h + ':00 · ' + t + '°C';
+      html += '<div style="height:14px;background:' + bg + ';border-radius:1px;cursor:pointer;" title="' + tt + '" onclick="h2SwitchDay(\'' + d.id + '\')"></div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  c.innerHTML = html;
+}
+
+// ═ All zones summary ==============================================
+function h2RenderAllZones() {
+  const c = document.getElementById('h2-all-zones');
+  if (!c) return;
+  const zones = [
+    { id: 'jidelna',  icon: '🍽', label: 'Jídelna' },
+    { id: 'loznice',  icon: '🛏', label: 'Ložnice' },
+    { id: 'koupelna', icon: '🚿', label: 'Koupelna' },
+    { id: 'toaleta',  icon: '🚽', label: 'Toaleta' },
+  ];
+  const todayIdx = new Date().getDay();
+  const todayDayId = H2_DAYS[(todayIdx + 6) % 7].id;
+  const nowMin = new Date().getHours() * 60 + new Date().getMinutes();
+  let html = '';
+  for (const z of zones) {
+    let sched = null;
+    try {
+      const raw = String((ALL_VARS['sh_heating_schedule_' + z.id] || {}).value || '{}');
+      sched = JSON.parse(raw);
+    } catch(e) { sched = null; }
+    let slots = [];
+    if (sched && sched.schedule) {
+      let s = sched.schedule[todayDayId];
+      let chain = [todayDayId];
+      while (typeof s === 'string' && s.startsWith('same_as:')) {
+        const ref = s.replace('same_as:', '').trim();
+        if (chain.includes(ref)) break;
+        chain.push(ref);
+        s = sched.schedule[ref];
+      }
+      slots = Array.isArray(s) ? s : [];
+    }
+    const nowTemp = h2TempAtMinute(slots, nowMin);
+    const tempStr = nowTemp != null ? nowTemp + '°C' : '—';
+    const barColor = nowTemp != null ? h2TempColor(nowTemp) : 'var(--bg4)';
+    const slotsStr = slots.length > 0 ? slots.length + ' slotů' : 'bez programu';
+    const enabled = sched && sched.enabled !== false;
+    const dotColor = enabled ? 'var(--green)' : 'var(--tx3)';
+    html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:8px 10px;cursor:pointer;" ' +
+            'onclick="document.getElementById(\'h2-zone-picker\').value=\'' + z.id + '\';h2LoadSchedule();">' +
+            '<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px;">' +
+              '<span style="font-size:14px;">' + z.icon + '</span>' +
+              '<span style="font-size:11px;color:var(--tx1);font-weight:600;flex:1;">' + z.label + '</span>' +
+              '<span style="width:6px;height:6px;border-radius:50%;background:' + dotColor + ';"></span>' +
+            '</div>' +
+            '<div style="display:flex;align-items:baseline;gap:8px;">' +
+              '<span style="font-size:18px;font-weight:700;color:' + (nowTemp != null ? '#fff' : 'var(--tx3)') + ';font-family:var(--mono);background:' + barColor + ';padding:2px 8px;border-radius:4px;">' + tempStr + '</span>' +
+              '<span style="font-size:9px;color:var(--tx3);">' + slotsStr + '</span>' +
+            '</div>' +
+          '</div>';
+  }
+  c.innerHTML = html;
 }
 
 function h2RenderSlotsList() {
