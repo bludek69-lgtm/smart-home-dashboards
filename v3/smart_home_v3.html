@@ -281,8 +281,8 @@ input[type=range].purple::-webkit-slider-thumb{background:var(--purple);}
 .roleta-cfg-val{font-family:var(--mono);font-size:11px;color:var(--cyan);background:var(--bg3);padding:2px 8px;border-radius:4px;}
 .roleta-cfg-desc{font-size:10px;color:rgba(180,200,220,.7);padding-left:22px;line-height:1.4;}
 .roleta-cfg-example{font-size:10px;color:var(--light);padding-left:22px;font-style:italic;margin-top:2px;}
-/* Padding-top pro nové stránky aby je nepřekrýval topbar */
-#page-logy, #page-advanced, #page-finance, #page-burza, #page-ai { padding-top: 28px !important; }
+/* Padding-top pro VŠECHNY stránky aby je nepřekrýval topbar (fix 2026-04-23) */
+.page { padding-top: 28px !important; }
 #page-logy.active, #page-advanced.active, #page-finance.active, #page-burza.active { display: block !important; }
 .cfg-missing{opacity:.5;}
 .save-btn{width:100%;padding:12px;background:var(--cyan);color:#000;border:none;border-radius:var(--r2);font-weight:700;font-size:13px;cursor:pointer;margin-top:10px;text-transform:uppercase;}
@@ -1479,8 +1479,9 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 </style>
 </head>
 <body>
-<!-- 🎨 v3 theme banner -->
-<div style="position:fixed;top:10px;right:10px;z-index:9999;font-size:10px;padding:4px 10px;background:linear-gradient(135deg,rgba(34,211,238,0.15),rgba(74,158,255,0.1));border:1px solid rgba(34,211,238,0.35);border-radius:999px;color:#22d3ee;font-family:'Inter',sans-serif;font-weight:600;box-shadow:0 0 12px rgba(34,211,238,0.2);">v3 • theme</div>
+<!-- 🎨 v3 theme banner — REMOVED (overlapping clock). Filename identifies version. -->
+<!-- <div style="position:fixed;top:10px;right:10px;...">v3 • theme</div> -->
+
 
 
 <!-- ALERT BANNER -->
