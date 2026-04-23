@@ -1579,6 +1579,36 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
   .zone-card .zc-name { font-size: 10px !important; }
   .zone-card .zc-meta { display: none !important; }
 }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🗺 ZONE DETAIL — 2-col multicolumn layout (fix 2026-04-23)       */
+/* ═══════════════════════════════════════════════════════════════ */
+#zoneDetailView { max-width: 1400px; margin: 0 auto; }
+#zdContent {
+  column-count: 2;
+  column-gap: 24px;
+  column-fill: balance;
+  padding-bottom: 20px;
+}
+#zdContent > .sect {
+  break-after: avoid-column;
+  -webkit-column-break-after: avoid;
+  page-break-after: avoid;
+  margin-top: 10px;
+}
+#zdContent > .sensor-tiles,
+#zdContent > .dev-tiles,
+#zdContent > .card,
+#zdContent > .btn-row,
+#zdContent > div {
+  break-inside: avoid-column;
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 10px;
+}
+#zdContent .sensor-tiles { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important; gap: 8px !important; }
+#zdContent .dev-tiles { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 8px !important; }
+@media (max-width: 900px) { #zdContent { column-count: 1 !important; } }
 </style>
 </head>
 <body>
