@@ -1548,6 +1548,11 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 }
 
 /* ═══════════════════════════════════════════════════════════════ */
+/* 🌐 GLOBAL: max-width centering na wide screens (fix 2026-04-23) */
+/* ═══════════════════════════════════════════════════════════════ */
+.page { padding-inline: max(12px, calc((100% - 1600px) / 2)) !important; }
+
+/* ═══════════════════════════════════════════════════════════════ */
 /* 🗺 ZONE DETAIL — 2-col multicolumn layout (fix 2026-04-23)       */
 /* ═══════════════════════════════════════════════════════════════ */
 #zoneDetailView { max-width: 1400px; margin: 0 auto; }
@@ -1619,6 +1624,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 <div class="topbar">
   <div class="topbar-logo">SEMILY</div>
   <div class="topbar-chips" id="topChips"></div>
+  <div id="topbar-pomo" style="display:none;cursor:pointer;padding:4px 12px;border-radius:999px;font-family:var(--mono);font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(59,201,125,0.25),rgba(34,211,238,0.15));border:1px solid rgba(59,201,125,0.45);color:var(--green);letter-spacing:0.5px;transition:all var(--tr-fast);" onclick="openPomodoro()" title="Pomodoro timer — klikni pro detail">🍅 <span id="topbar-pomo-time">25:00</span></div>
   <div class="topbar-time" id="topTime">—</div>
   <div class="topbar-clock" id="clock">--:--:--</div>
   <span class="conn-led off" id="connLed" onclick="showConfig()">●</span>
@@ -5979,6 +5985,32 @@ function _pomoTick() {
 
 function refreshPomodoroTile() {
   _pomoLoad();
+  const tbar = document.getElementById('topbar-pomo');
+  const tbarTime = document.getElementById('topbar-pomo-time');
+  if (tbar && tbarTime) {
+    if (_pomoState.mode === 'idle') {
+      tbar.style.display = 'none';
+    } else {
+      const min = Math.floor(_pomoState.remaining / 60);
+      const sec = _pomoState.remaining % 60;
+      const t = String(min).padStart(2,'0') + ':' + String(sec).padStart(2,'0');
+      const icon = _pomoState.mode === 'work' ? '💼' : '☕';
+      const pauseMark = _pomoState.paused ? '⏸ ' : '';
+      tbarTime.textContent = pauseMark + icon + ' ' + t;
+      tbar.style.display = 'inline-flex';
+      tbar.style.alignItems = 'center';
+      tbar.style.gap = '4px';
+      if (_pomoState.mode === 'work') {
+        tbar.style.background = 'linear-gradient(135deg,rgba(59,201,125,0.25),rgba(34,211,238,0.15))';
+        tbar.style.borderColor = 'rgba(59,201,125,0.45)';
+        tbar.style.color = 'var(--green)';
+      } else {
+        tbar.style.background = 'linear-gradient(135deg,rgba(34,211,238,0.25),rgba(74,158,255,0.15))';
+        tbar.style.borderColor = 'rgba(34,211,238,0.45)';
+        tbar.style.color = 'var(--cyan)';
+      }
+    }
+  }
   const el = document.getElementById('pc-pomo-state');
   if (!el) return;
   if (_pomoState.mode === 'idle') {
