@@ -1548,6 +1548,36 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 }
 
 /* ═══════════════════════════════════════════════════════════════ */
+/* ♿ GLOBAL A11Y — Fáze 22 (2026-04-24) — keyboard nav + focus      */
+/* ═══════════════════════════════════════════════════════════════ */
+/* Skip-to-content link (viditelný jen na focus) */
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: var(--cyan); color: #000; padding: 8px 16px;
+  text-decoration: none; font-weight: 700; z-index: 9999;
+  border-radius: 0 0 4px 0;
+}
+.skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: -2px; }
+
+/* Focus ring pro všechny interactive elementy (WCAG 2.4.7) */
+[onclick]:focus-visible,
+[role="button"]:focus-visible,
+.tab:focus-visible,
+.btn:focus-visible,
+.tile:focus-visible,
+.dev-tile:focus-visible,
+.zone-card:focus-visible,
+.card-row:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--cyan) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.25) !important;
+}
+
+/* Zakázat outline pro myší kliknutí (ale keep pro klávesnici) */
+[onclick]:focus:not(:focus-visible) { outline: none; }
+
+/* ═══════════════════════════════════════════════════════════════ */
 /* 🌐 GLOBAL: max-width centering na wide screens (fix 2026-04-23) */
 /* ═══════════════════════════════════════════════════════════════ */
 /* Na 1920/2880 obrazovkách centrujeme obsah do 1600px, na menších plná šířka */
@@ -7758,6 +7788,32 @@ setTimeout(fixGap, 50);
 setTimeout(fixGap, 200);
 setTimeout(fixGap, 500);
 window.addEventListener('resize', fixGap);
+
+// ═══ A11Y Fáze B (2026-04-24) — auto tabindex + keyboard handler ═══
+// Všechny [onclick] elementy dostanou tabindex="0" + Enter/Space trigger click.
+function a11yEnhance() {
+  const sel = '[onclick]:not(input):not(textarea):not(select):not(button):not(a)';
+  document.querySelectorAll(sel).forEach(el => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+    if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+    // Převzít title= jako aria-label pokud chybí
+    const t = el.getAttribute('title');
+    if (t && !el.hasAttribute('aria-label')) el.setAttribute('aria-label', t);
+  });
+}
+// Enter/Space → click (delegated, handluje i nově přidané elementy)
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const tgt = e.target;
+    if (tgt && tgt.getAttribute && tgt.getAttribute('role') === 'button' && tgt.onclick) {
+      e.preventDefault();
+      tgt.click();
+    }
+  }
+});
+// Run on load + periodically (pro dynamicky přidané elementy jako zone detail)
+setTimeout(a11yEnhance, 300);
+setInterval(a11yEnhance, 5000);
 if (loadConfig() && CFG.host && CFG.token) {
   document.getElementById('configOverlay').classList.add('hidden');
   document.getElementById('cfgHostDisplay').textContent = CFG.host;
