@@ -1671,15 +1671,15 @@ button:focus-visible {
   </div>
 </div>
 
-<div class="topbar">
-  <div class="topbar-logo">SEMILY</div>
-  <div class="topbar-chips" id="topChips"></div>
-  <div id="topbar-pomo" style="display:none;cursor:pointer;padding:4px 12px;border-radius:999px;font-family:var(--mono);font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(59,201,125,0.25),rgba(34,211,238,0.15));border:1px solid rgba(59,201,125,0.45);color:var(--green);letter-spacing:0.5px;transition:all var(--tr-fast);" onclick="openPomodoro()" title="Pomodoro timer — klikni pro detail">🍅 <span id="topbar-pomo-time">25:00</span></div>
-  <div class="topbar-time" id="topTime">—</div>
-  <div class="topbar-clock" id="clock">--:--:--</div>
-  <span class="conn-led off" id="connLed" onclick="showConfig()">●</span>
-  <span onclick="showConfig()" style="cursor:pointer;font-size:10px;font-family:var(--mono);color:var(--cyan);padding:3px 8px;border:1px solid var(--cyan);border-radius:5px;white-space:nowrap;">⚙ API</span>
-</div>
+<header class="topbar" role="banner" aria-label="Horní stavová lišta">
+  <div class="topbar-logo" aria-label="Lokalita Semily">SEMILY</div>
+  <div class="topbar-chips" id="topChips" role="status" aria-live="polite" aria-atomic="false" aria-label="Stavové indikátory — přítomnost, fáze dne, baterie"></div>
+  <div id="topbar-pomo" style="display:none;cursor:pointer;padding:4px 12px;border-radius:999px;font-family:var(--mono);font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(59,201,125,0.25),rgba(34,211,238,0.15));border:1px solid rgba(59,201,125,0.45);color:var(--green);letter-spacing:0.5px;transition:all var(--tr-fast);" onclick="openPomodoro()" title="Pomodoro timer — klikni pro detail" role="button" aria-label="Pomodoro timer — klikni pro detail">🍅 <span id="topbar-pomo-time">25:00</span></div>
+  <div class="topbar-time" id="topTime" aria-label="Východ/západ slunce">—</div>
+  <div class="topbar-clock" id="clock" aria-label="Aktuální čas" aria-live="off">--:--:--</div>
+  <span class="conn-led off" id="connLed" onclick="showConfig()" role="button" aria-label="Stav API připojení — klikni pro konfiguraci">●</span>
+  <span onclick="showConfig()" style="cursor:pointer;font-size:10px;font-family:var(--mono);color:var(--cyan);padding:3px 8px;border:1px solid var(--cyan);border-radius:5px;white-space:nowrap;" role="button" aria-label="Otevřít konfiguraci API připojení">⚙ API</span>
+</header>
 
 <main class="pages" id="pagesContainer" role="main" tabindex="-1">
   <div class="page active" id="page-home">
