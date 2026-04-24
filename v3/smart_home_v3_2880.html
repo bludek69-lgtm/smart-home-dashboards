@@ -5697,6 +5697,21 @@ const DEVICE_CFG = {
     { name: 'sh_cfg_power_alert', label: 'Power alert', unit: 'W',
       desc: 'Upozornění při překročení spotřeby mimo obvyklou dobu.' },
   ],
+  // ── Pračka (Zasuvka pracka pradelna) ──
+  washer: [
+    { name: 'sh_cfg_pracka_run_power_w', label: 'Pračka běží — práh', unit: 'W',
+      desc: 'Nad touto spotřebou = pračka aktivně pere (detekce startu cyklu). Default 50W.' },
+    { name: 'sh_cfg_pracka_idle_power_w', label: 'Pračka idle — práh', unit: 'W',
+      desc: 'Pod touto spotřebou = pračka stojí (cyklus skončil nebo ještě nezačal). Default 5W.' },
+    { name: 'sh_cfg_pracka_done_duration_s', label: 'Done — doba pod idle', unit: 's',
+      desc: 'Kolik sekund musí zásuvka setrvat pod idle prahem → potvrzení "dopráno". Default 180s (3 min).' },
+    { name: 'sh_cfg_pracka_auto_off', label: 'Auto-vypnutí zásuvky', unit: '',
+      desc: 'yes/no — po dopraní vypnout Zasuvka pracka pradelna. Default yes.' },
+    { name: 'sh_cfg_pracka_tts_message', label: 'TTS hlášení', unit: '',
+      desc: 'Text hlášení po dopraní. Default "Pračka dokončila cyklus".' },
+    { name: 'sh_cfg_pracka_tts_speaker', label: 'TTS speaker', unit: '',
+      desc: 'Kam pustit hlášení (kuchyn / loznice / koupelna). Default kuchyn.' },
+  ],
   // ── Roleta (special key) ──
   roleta: [
     { name: 'sh_cfg_lux_roleta_open', label: 'Práh den', unit: 'lux',

@@ -67,6 +67,13 @@ def patch_variant(fn):
         txt = txt.replace(v_cfg, m_cfg, 1)
         changed += 1
 
+    # Patch 6: DEVICE_CFG boiler + washer
+    m_dc = extract(master, "  // ── Boiler ──\n  boiler: [", "\n  ],\n  // ── Roleta")
+    v_dc = extract(txt, "  // ── Boiler ──\n  boiler: [", "\n  ],\n  // ── Roleta")
+    if m_dc and v_dc and v_dc != m_dc:
+        txt = txt.replace(v_dc, m_dc, 1)
+        changed += 1
+
     p.write_text(txt, encoding='utf-8')
     print(f'  [OK] {fn}: {changed} bloky sync')
 
