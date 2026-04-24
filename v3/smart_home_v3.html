@@ -1709,7 +1709,7 @@ button:focus-visible {
           <div class="room" id="fr-bedroom"  onclick="goZone('bedroom')" title="Otevřít detail zóny bedroom"><div class="rm-icon">🛏</div><div class="room-name">Ložnice</div><div class="room-inds" id="ri-bedroom"></div></div>
           <div class="room" id="fr-bathroom" onclick="goZone('bathroom')" title="Otevřít detail zóny bathroom"><div class="rm-icon">🚿</div><div class="room-name">Koupelna</div><div class="room-inds" id="ri-bathroom"></div></div>
           <div class="room" id="fr-pracovna" onclick="goZone('pracovna')" title="Otevřít detail zóny pracovna"><div class="rm-icon">💻</div><div class="room-name">Pracovna</div><div class="room-inds" id="ri-pracovna"></div></div>
-          <div class="room" id="fr-pradelna" onclick="goZone('pradelna')" title="Otevřít detail zóny pradelna"><div class="rm-icon">🧺</div><div class="room-name">Prádelna</div><div class="room-inds" id="ri-pradelna"></div></div>
+          <div class="room" id="fr-pradelna" onclick="goZone('pradelna')" title="Otevřít detail zóny pradelna"><div class="rm-icon">🌀</div><div class="room-name">Prádelna</div><div class="room-inds" id="ri-pradelna"></div></div>
           <div class="room" id="fr-predsin"  onclick="goZone('predsin')" title="Otevřít detail zóny predsin"><div class="rm-icon">🚪</div><div class="room-name">Předsíň</div><div class="room-inds" id="ri-predsin"></div></div>
           <div class="room" id="fr-toilet"   onclick="goZone('toilet')" title="Otevřít detail zóny toilet"><div class="rm-icon">🚽</div><div class="room-name">Toaleta</div><div class="room-inds" id="ri-toilet"></div></div>
         </div>
@@ -1766,7 +1766,7 @@ button:focus-visible {
           <li><strong>🛏 Ložnice</strong> — Žárovka Ložnice, Led pasek postel, Nest Hub Max (ložnice), teplotní senzor. <em>Motion v noci → LED pásek (orientační). Ráno → sunrise simulace.</em></li>
           <li><strong>🚿 Koupelna</strong> — Svetlo Koupelna, Speaker koupelna, 2× PIR senzory, teplotně-vlhkostní senzor. <em>Motion → světlo + ranní rádio. Večer auto-off.</em></li>
           <li><strong>💻 Pracovna</strong> — PC setup zásuvka (kritická), monitor, světlo. <em>Kritické zařízení — automatizace drží ON dokud jsi doma.</em></li>
-          <li><strong>🧺 Prádelna</strong> — Prádelna žárovka, Boiler zásuvka, PIR, pračka Lavastoviglie. <em>Cluster s koupelnou, motion → světlo.</em></li>
+          <li><strong>🌀 Prádelna</strong> — Prádelna žárovka, Boiler zásuvka, PIR, pračka Lavastoviglie. <em>Cluster s koupelnou, motion → světlo.</em></li>
           <li><strong>🚪 Předsíň</strong> — Předsíň světlo, Door/Window kontakt, kamera. <em>Entry motion → světlo na 2 min.</em></li>
           <li><strong>🚽 Toaleta</strong> — Toaleta světlo, PIR. <em>Auto ON/OFF při pohybu.</em></li>
           <li><strong>🏠 Společné</strong> — Cubo sensor, Aqara remote, hlavní scény.</li>
@@ -1779,7 +1779,7 @@ button:focus-visible {
         <div class="zone-card" id="zc-bedroom"  onclick="openZone('bedroom')"  title="Ložnice — sunrise simulace, LED pásek, Nest Hub"><div class="zc-icon">🛏</div><div class="zc-info"><div class="zc-name">Ložnice</div><div class="zc-meta">Nest Hub Max</div><div class="zc-inds" id="zci-bedroom"></div></div></div>
         <div class="zone-card" id="zc-bathroom" onclick="openZone('bathroom')" title="Koupelna — motion, rádio, teploměr"><div class="zc-icon">🚿</div><div class="zc-info"><div class="zc-name">Koupelna</div><div class="zc-meta">+ reproduktor</div><div class="zc-inds" id="zci-bathroom"></div></div></div>
         <div class="zone-card" id="zc-pracovna" onclick="openZone('pracovna')" title="Pracovna — kritická zásuvka PC, monitor"><div class="zc-icon">💻</div><div class="zc-info"><div class="zc-name">Pracovna</div><div class="zc-meta">PC setup</div><div class="zc-inds" id="zci-pracovna"></div></div></div>
-        <div class="zone-card" id="zc-pradelna" onclick="openZone('pradelna')" title="Prádelna — boiler, pračka, motion"><div class="zc-icon">🧺</div><div class="zc-info"><div class="zc-name">Prádelna</div><div class="zc-meta">Boiler</div><div class="zc-inds" id="zci-pradelna"></div></div></div>
+        <div class="zone-card" id="zc-pradelna" onclick="openZone('pradelna')" title="Prádelna — boiler, pračka, motion"><div class="zc-icon">🌀</div><div class="zc-info"><div class="zc-name">Prádelna</div><div class="zc-meta">Boiler</div><div class="zc-inds" id="zci-pradelna"></div></div></div>
         <div class="zone-card" id="zc-predsin"  onclick="openZone('predsin')"  title="Předsíň — entry motion, kamera, auto-off 2min"><div class="zc-icon">🚪</div><div class="zc-info"><div class="zc-name">Předsíň</div><div class="zc-meta">kamera</div><div class="zc-inds" id="zci-predsin"></div></div></div>
         <div class="zone-card" id="zc-toilet"   onclick="openZone('toilet')"   title="Toaleta — PIR auto ON/OFF"><div class="zc-icon">🚽</div><div class="zc-info"><div class="zc-name">Toaleta</div><div class="zc-meta">—</div><div class="zc-inds" id="zci-toilet"></div></div></div>
         <div class="zone-card" id="zc-spolecne" onclick="openZone('spolecne')" title="Společné — Cubo, Aqara remote, scény"><div class="zc-icon">🏠</div><div class="zc-info"><div class="zc-name">Společné</div><div class="zc-meta">Cubo · Remote</div><div class="zc-inds" id="zci-spolecne"></div></div></div>
@@ -4667,9 +4667,11 @@ const ZONE_HELP = {
       '<strong>Teploměr-vlhkoměr</strong> — anomaly detector (studená ložnice alert)'
     ,
       '<strong>📺 TV remote</strong> — Power, Vol, Play, Channel, D-pad, Home/Back, numpad 0-9 (native capabilities)',
-      '<strong>💧 Zvlhčovač1</strong> — auto zap pod sh_cfg_humidity_low (default 30%), vyp nad sh_cfg_humidity_high (default 45%)'
+      '<strong>💧 Zvlhčovač1</strong> — auto zap pod sh_cfg_humidity_low (default 30%), vyp nad sh_cfg_humidity_high (default 45%)',
+      '<strong>📷 indoor kamera</strong> (Foscam) — live feed + IR day/night/auto (viz page KAMERA)',
+      '<strong>🔌 zasuvka kamera</strong> — napájení kamery (security), auto ON při odchodu přes sh_camera_router_v1'
 ],
-    flow: 'Motion < 3:00 → LED pásek (WC). Motion 3:00+ → 2× do 3 min = confirmed wake → rutina. Alarm → sunrise simulace (6 kroků).'
+    flow: 'Motion < 3:00 → LED pásek (WC). Motion 3:00+ → 2× do 3 min = confirmed wake → rutina. Alarm → sunrise simulace (6 kroků). Odchod → zasuvka kamera ON (camera_router).'
   },
   bathroom: {
     title: '🚿 Koupelna — automatizace a zařízení',
@@ -4696,14 +4698,15 @@ const ZONE_HELP = {
     flow: 'Kritická ochrana — zásuvka nesmí zůstat vypnutá když jsi doma. Critical Devices flow každé 5 min kontroluje.'
   },
   pradelna: {
-    title: '🧺 Prádelna — automatizace a zařízení',
+    title: '🌀 Prádelna — automatizace a zařízení',
     items: [
       '<strong>Pradelna zarovka</strong> — auto ON při motion',
       '<strong>Boiler zasuvka</strong> — měření spotřeby (anomaly detector: divný průtok)',
-      '<strong>Lavastoviglie</strong> (myčka) — energy tracking',
+      '<strong>Zasuvka pracka pradelna</strong> — měření spotřeby + <em>auto-vypnutí po dopraní</em> (sh_pracka_done_detector_v1)',
+      '<strong>🌀 Pračka done detector</strong> — sleduje power drop; po 3 min pod 5W → TTS "Pračka dokončila cyklus" + vypnout zásuvku (config v tomto okně)',
       '<strong>PIR senzor prádelna</strong> — cluster s koupelnou'
     ],
-    flow: 'Motion ON → laundry_router → světlo. Cluster check — pokud koupelna/toaleta off ale prádelna motion = user stále v clusteru, neshazovat světla.'
+    flow: 'Motion ON → laundry_router → světlo. Cluster check — pokud koupelna/toaleta off ale prádelna motion = user stále v clusteru, neshazovat světla. Pračka: running → finishing (power drop) → done (3 min low) → TTS + auto-off.'
   },
   predsin: {
     title: '🚪 Předsíň — automatizace a zařízení',
@@ -5971,6 +5974,18 @@ const ZONE_CFG = {
   pradelna: [
     { name: 'sh_cfg_power_alert',             label: 'Power alert (boiler)', unit: 'W',
       desc: 'Upozornění pokud boiler nebo pračka překročí tuto spotřebu mimo obvyklou dobu.' },
+    { name: 'sh_cfg_pracka_run_power_w',      label: 'Pračka běží — práh', unit: 'W',
+      desc: 'Nad touto spotřebou = pračka aktivně pere. Default 50W.' },
+    { name: 'sh_cfg_pracka_idle_power_w',     label: 'Pračka idle — práh', unit: 'W',
+      desc: 'Pod touto spotřebou = pračka nic nedělá (cyklus skončil). Default 5W.' },
+    { name: 'sh_cfg_pracka_done_duration_s',  label: 'Pračka done — doba pod idle', unit: 's',
+      desc: 'Kolik sekund musí být pračka pod idle prahem → potvrzení dopráno. Default 180s (3 min).' },
+    { name: 'sh_cfg_pracka_auto_off',         label: 'Auto-vypnutí zásuvky po dopraní', unit: '',
+      desc: 'yes/no — po dopraní vypnout Zasuvka pracka pradelna. Default yes.' },
+    { name: 'sh_cfg_pracka_tts_message',      label: 'TTS hlášení', unit: '',
+      desc: 'Text hlášení po dopraní. Default "Pračka dokončila cyklus".' },
+    { name: 'sh_cfg_pracka_tts_speaker',      label: 'TTS speaker', unit: '',
+      desc: 'Kam pustit hlášení (kuchyn / loznice / koupelna). Default kuchyn.' },
   ],
 };
 
@@ -6061,7 +6076,7 @@ const ZONE_META = {
   bedroom:  { name: 'Ložnice', sub: 'Zarovka · LED pásek · TV · Nest Hub Max', icon: '🛏' },
   bathroom: { name: 'Koupelna', sub: 'Světlo · Temp · Motion · Speaker', icon: '🚿', speaker: 'bathroom' },
   pracovna: { name: 'Pracovna', sub: 'Světlo · PC zasuvka · Tiskárna', icon: '💻' },
-  pradelna: { name: 'Prádelna', sub: 'Světlo · Boiler', icon: '🧺' },
+  pradelna: { name: 'Prádelna', sub: 'Světlo · Boiler', icon: '🌀' },
   predsin:  { name: 'Předsíň', sub: 'Světlo · Kamera · Kontaktní senzor', icon: '🚪' },
   toilet:   { name: 'Toaleta', sub: 'Světlo · Pohyb', icon: '🚽' },
   spolecne: { name: 'Společné', sub: 'Cubo T1 · Dálkové ovládání', icon: '🏠' },
@@ -6086,6 +6101,8 @@ const ZONE_ACTIONS = {
     ['💡 OFF', 'sh_light_request', 'bedroom_off'],
     ['💡 LED ON', 'sh_light_request', 'bed_led_on'],
     ['💡 LED OFF', 'sh_light_request', 'bed_led_off'],
+    ['📷 Kamera ON', '_device_cap', 'zasuvka kamera|onoff|true'],
+    ['📷 Kamera OFF', '_device_cap', 'zasuvka kamera|onoff|false'],
   ],
   bathroom: [
     ['💡 ON', 'sh_light_request', 'bathroom_on'],
@@ -7316,6 +7333,12 @@ function renderZoneDetail(zone) {
       // Audio stop → dedikovaný skript místo pipeline
       if (varName === 'sh_audio_request' && val === 'stop') {
         html += '<div class="btn" onclick="audioStop()" title="Zastavit přehrávání">' + lbl + '</div>';
+      } else if (varName === '_device_cap') {
+        // 24.4. — direct device capability call: 'device_name|capability|value'
+        const [devName, cap, rawVal] = val.split('|');
+        const v = rawVal === 'true' ? 'true' : rawVal === 'false' ? 'false' : JSON.stringify(rawVal);
+        const onc = "setDeviceCap('" + devName.replace(/'/g,"\\'") + "','" + cap + "'," + v + ")";
+        html += '<div class="btn" onclick="' + onc + '" title="' + devName + ' → ' + cap + '=' + rawVal + '">' + lbl + '</div>';
       } else {
         html += '<div class="btn" onclick="sendReq(\'' + varName + '\',\'' + val + '\')" title="Požadavek \'' + varName + '\'">' + lbl + '</div>';
       }
