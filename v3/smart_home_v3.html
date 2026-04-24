@@ -7732,9 +7732,25 @@ async function toggleIR() {
     btn.className = 'btn ' + (IR_CLASSES[irMode] || '');
     btn.style.cssText = 'padding:2px 7px;font-size:9px;';
   }
+  const url = CAM_BASE + '&cmd=setInfraLedConfig&mode=' + irMode;
+  const label = ['DAY (barva)', 'NIGHT (IR)', 'AUTO'][irMode];
+  // v3.1 (24.4.): file:// CORS workaround — fetch no-cors + <img> fallback
+  // Foscam CGI endpoint ignoruje HTTP method (GET/HEAD/opaque), stačí request reach.
+  console.log('[IR] toggleIR mode=' + irMode + ' URL=' + url);
   try {
-    await fetch(CAM_BASE + '&cmd=setInfraLedConfig&mode=' + irMode);
-    flash('Kamera IR → ' + ['DAY (barva)', 'NIGHT (IR)', 'AUTO'][irMode]);
+    await fetch(url, { mode: 'no-cors', cache: 'no-store' });
+    flash('Kamera IR → ' + label);
+    return;
+  } catch(e) {
+    console.warn('[IR] fetch no-cors failed:', e.message);
+  }
+  // Fallback: img tag (always works cross-origin for file://)
+  try {
+    const probe = new Image();
+    probe.onload = probe.onerror = function() {
+      flash('Kamera IR → ' + label + ' (img fallback)');
+    };
+    probe.src = url + '&_=' + Date.now();
   } catch(e) {
     flash('⚠ Kamera nedostupná: ' + e.message);
   }
