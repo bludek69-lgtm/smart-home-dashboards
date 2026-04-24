@@ -5152,6 +5152,12 @@ function openDeviceDetail(d) {
         '<div class="dd-pw-val">' + Math.round(d.power) + ' W</div>' +
       '</div>';
     }
+    // 24.4. — kWh total (meter_power) — fetched on-demand z Homey API
+    html += '<div class="dd-power-row" id="dd-kwh-row-' + (d.key || d.rawName || d.name || '').replace(/[^a-zA-Z0-9]/g,'_') + '">' +
+      '<div class="dd-pw-icon">📊</div>' +
+      '<div class="dd-pw-lbl">Celkem kWh</div>' +
+      '<div class="dd-pw-val" data-kwh-loading="1">—</div>' +
+    '</div>';
     if (d.plugTemp !== null) {
       const t = Math.round(d.plugTemp);
       const warnT = 60, critT = 75;
@@ -5163,6 +5169,22 @@ function openDeviceDetail(d) {
       '</div>';
     }
     html += '</div>';
+    // Kick off async kWh fetch
+    const devDisplayName = d.rawName || d.name;
+    if (devDisplayName) {
+      setTimeout(async () => {
+        try {
+          const pd = await fetchDevicePower(devDisplayName);
+          const row = document.querySelector('#dd-kwh-row-' + (d.key || d.rawName || d.name || '').replace(/[^a-zA-Z0-9]/g,'_') + ' .dd-pw-val');
+          if (row && pd && pd.energy !== undefined) {
+            row.textContent = pd.energy.toFixed(2) + ' kWh';
+            row.removeAttribute('data-kwh-loading');
+          } else if (row) {
+            row.textContent = 'N/A';
+          }
+        } catch(_) {}
+      }, 50);
+    }
   }
 
   // PHASE9_NEST_MAX_ENHANCED_APPLIED — rozšířený speaker detail
