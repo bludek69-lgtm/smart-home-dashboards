@@ -2817,6 +2817,62 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
     <div style="height:14px;"></div>
   </div>
 
+  <!-- ═══════════ HISTORIE PAGE (Fáze A scaffold — 2026-04-24) ═══════════ -->
+  <div class="page" id="page-historie">
+    <div style="height:14px;flex-shrink:0;"></div>
+
+    <div class="sect" style="color:var(--cyan);">
+      <span class="help-sect-header">
+        <span>📉 HISTORIE — trendy &amp; timeline</span>
+        <button class="help-btn" data-help-for="help-historie" onclick="toggleHelp('help-historie')">ℹ Jak to funguje</button>
+      </span>
+    </div>
+    <div id="help-historie" class="help-panel">
+      <h4>📉 Historie — data z Google Sheets</h4>
+      <ul>
+        <li><strong>Lux 24h</strong> — indoor/okno lux trend (Lux Monitor)</li>
+        <li><strong>Battery 30d</strong> — baterie top 4 devices (Battery History)</li>
+        <li><strong>Event stats</strong> — top scripts + zones + errors (EventLog)</li>
+        <li><strong>Exceptions</strong> — errors v posledních hodinách (ExceptionLog v16)</li>
+        <li><strong>Morning timeline</strong> — průběh ranní rutiny (Ranni_Rutina_Budik)</li>
+      </ul>
+      <p>Všechny sekce se načítají <strong>na kliknutí</strong> (šetří data). Auto-load při prvním otevření tab.</p>
+    </div>
+
+    <!-- Fáze B: Lux + Battery charts (reuse existing render fns) -->
+    <div class="cfg-tile-grid" style="grid-template-columns: 1fr 1fr;">
+      <div class="cfg-tile">
+        <div class="sect" style="color:var(--cyan);">💡 LUX trend (Lux Monitor)</div>
+        <div class="card" id="histChartLux" style="min-height:200px;padding:12px;">
+          <div style="color:var(--tx3);text-align:center;padding:60px 0;">Klikni pro načtení</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderLux(6)">↻ 6h</div>
+          <div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderLux(24)">24h</div>
+          <div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderLux(168)">7 dní</div>
+        </div>
+      </div>
+      <div class="cfg-tile">
+        <div class="sect" style="color:var(--cyan);">🔋 BATTERY trend (Battery History)</div>
+        <div class="card" id="histChartBattery" style="min-height:200px;padding:12px;">
+          <div style="color:var(--tx3);text-align:center;padding:60px 0;">Klikni pro načtení</div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderBattery(7)">↻ 7d</div>
+          <div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderBattery(30)">30d</div>
+          <div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderBattery(90)">90d</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Fáze C-E placeholders (budou naplněny) -->
+    <div id="hist-stats"      style="margin-top:10px;"></div>
+    <div id="hist-exceptions" style="margin-top:10px;"></div>
+    <div id="hist-timeline"   style="margin-top:10px;"></div>
+
+    <div style="height:24px;flex-shrink:0;"></div>
+  </div>
+
   <!-- ═══════════ FINANCE PAGE ═══════════ -->
   <div class="page" id="page-finance">
     <div style="height:14px;flex-shrink:0;"></div>
@@ -2972,6 +3028,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
   <div class="tab"        id="tab-audio"    onclick="switchPage('audio')" title="AUDIO — speakers, radio, TTS, priority engine"><span class="ti">🔊</span>AUDIO</div>
   <div class="tab"        id="tab-ai"       onclick="switchPage('ai')" title="AI CONTROL — Meta Brain, Predict, Coordinator, autonomy level"><span class="ti">🧠</span>AI</div>
   <div class="tab"        id="tab-logy"     onclick="switchPage('logy')" title="LOGY — event log ze Sheets, baterie, offline, Gemini diagnostika"><span class="ti">📊</span>LOGY</div>
+  <div class="tab"        id="tab-historie" onclick="switchPage('historie')" title="HISTORIE — trendy 24h/7d (lux, battery, events, exceptions, rutina timeline)"><span class="ti">📉</span>HISTORIE</div>
   <div class="tab"        id="tab-weather"  onclick="switchPage('weather')"><span class="ti">🌤</span>POČASÍ</div>
   <div class="tab"        id="tab-camera"   onclick="switchPage('camera')"><span class="ti">📷</span>KAMERA</div>
   <div class="tab"        id="tab-settings" onclick="switchPage('settings')"><span class="ti">⚙</span>CONFIG</div>
@@ -3640,6 +3697,183 @@ async function renderChartBattery(days) {
   } catch(e) {
     el.innerHTML = '<div style="color:var(--red);text-align:center;padding:40px 0;">⚠ '+e.message+'</div>';
   }
+}
+
+// ═══ HISTORIE PAGE (Fáze B-E, 2026-04-24) ═══════════════════════════════
+// Wrappers: delegují do chartLux/chartBattery funkcí, jen s jiným target DOM id.
+async function histRenderLux(hours) {
+  const orig = document.getElementById('chartLux');
+  const el = document.getElementById('histChartLux');
+  if (!el) return;
+  // Temporarily redirect chartLux → histChartLux by swapping DOM
+  const tmpHolder = document.createElement('div');
+  tmpHolder.id = 'chartLux_holder';
+  if (orig) { orig.id = 'chartLux_backup'; }
+  el.id = 'chartLux';
+  try { await renderChartLux(hours); } catch(_){}
+  el.id = 'histChartLux';
+  if (orig) { orig.id = 'chartLux'; }
+}
+
+async function histRenderBattery(days) {
+  const orig = document.getElementById('chartBattery');
+  const el = document.getElementById('histChartBattery');
+  if (!el) return;
+  if (orig) { orig.id = 'chartBattery_backup'; }
+  el.id = 'chartBattery';
+  try { await renderChartBattery(days); } catch(_){}
+  el.id = 'histChartBattery';
+  if (orig) { orig.id = 'chartBattery'; }
+}
+
+// Fáze C: Event stats (top scripts/zones/errors z EventLog)
+async function histRenderStats(hours) {
+  const el = document.getElementById('hist-stats');
+  if (!el) return;
+  el.innerHTML = '<div class="sect" style="color:var(--cyan);">📊 EVENT STATS (posledních '+(hours||24)+'h)</div>' +
+    '<div class="card" style="padding:12px;"><div style="color:var(--tx3);text-align:center;padding:20px;">⏳ Načítám stats…</div></div>';
+  try {
+    const data = await _fetchSheetsApi('mode=stats&hours=' + (hours||24));
+    const s = data.stats || {};
+    const topScripts = Object.entries(s.by_script || {}).sort((a,b)=>b[1]-a[1]).slice(0,8);
+    const topZones = Object.entries(s.by_zone || {}).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const topEvents = Object.entries(s.by_event || {}).sort((a,b)=>b[1]-a[1]).slice(0,6);
+    const errColor = s.errors > 0 ? 'var(--red)' : 'var(--green)';
+
+    let html = '<div class="sect" style="color:var(--cyan);">📊 EVENT STATS (posledních '+(hours||24)+'h)</div>' +
+      '<div class="card" style="padding:12px;">' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;font-family:var(--mono);">' +
+        '<div><div style="color:var(--tx3);font-size:10px;">TOTAL</div><div style="font-size:22px;font-weight:700;color:var(--cyan);">'+ (s.total||0) +'</div></div>' +
+        '<div><div style="color:var(--tx3);font-size:10px;">ERRORS</div><div style="font-size:22px;font-weight:700;color:'+errColor+';">'+ (s.errors||0) +'</div></div>' +
+        '<div><div style="color:var(--tx3);font-size:10px;">UNIQUE SCRIPTS</div><div style="font-size:22px;font-weight:700;color:var(--tx1);">'+ Object.keys(s.by_script||{}).length +'</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;font-size:10px;">';
+
+    const renderList = (title, items, color) => {
+      let h = '<div><div style="color:'+color+';margin-bottom:4px;font-weight:600;">'+title+'</div>';
+      for (const [k,v] of items) h += '<div style="display:flex;justify-content:space-between;color:var(--tx2);line-height:1.5;"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;">'+k+'</span><span style="color:var(--tx1);font-family:var(--mono);">'+v+'</span></div>';
+      h += '</div>';
+      return h;
+    };
+    html += renderList('Top scripts', topScripts, 'var(--cyan)');
+    html += renderList('Top zones', topZones, 'var(--green)');
+    html += renderList('Top events', topEvents, 'var(--purple)');
+    html += '</div></div>' +
+      '<div style="display:flex;gap:6px;margin-top:6px;">' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderStats(6)">↻ 6h</div>' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderStats(24)">24h</div>' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderStats(168)">7 dní</div>' +
+      '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="sect" style="color:var(--cyan);">📊 EVENT STATS</div><div class="card" style="padding:12px;color:var(--red);">⚠ '+e.message+'</div>';
+  }
+}
+
+// Fáze D: Exception log (z ExceptionLog v16)
+async function histRenderExceptions(hours) {
+  const el = document.getElementById('hist-exceptions');
+  if (!el) return;
+  el.innerHTML = '<div class="sect" style="color:var(--red);">🔴 EXCEPTIONS (posledních '+(hours||24)+'h)</div>' +
+    '<div class="card" style="padding:12px;"><div style="color:var(--tx3);text-align:center;padding:20px;">⏳ Načítám…</div></div>';
+  try {
+    const data = await _fetchSheetsApi('mode=exceptions&hours=' + (hours||24));
+    const rows = data.rows || [];
+    const total = data.total || 0;
+
+    let html = '<div class="sect" style="color:'+(total>0?'var(--red)':'var(--green)')+';">'+(total>0?'🔴':'✅')+' EXCEPTIONS (posledních '+(hours||24)+'h) · '+total+'</div>' +
+      '<div class="card" style="padding:12px;">';
+
+    if (total === 0) {
+      html += '<div style="text-align:center;color:var(--green);padding:20px;font-size:14px;">✨ Žádné exceptions — systém zdravý</div>';
+    } else {
+      const bySeverity = data.by_severity || {};
+      html += '<div style="display:flex;gap:12px;margin-bottom:10px;font-family:var(--mono);font-size:10px;">';
+      for (const [sev,cnt] of Object.entries(bySeverity)) {
+        const col = sev === 'critical' ? '#ff3b3b' : sev === 'error' ? '#ff6b6b' : sev === 'warn' ? '#ffb84d' : '#64f4d8';
+        html += '<div><span style="color:'+col+';font-weight:700;">'+sev.toUpperCase()+'</span>: '+cnt+'</div>';
+      }
+      html += '</div>';
+      html += '<div style="max-height:280px;overflow-y:auto;font-size:10px;font-family:var(--mono);">';
+      for (const r of rows.slice(0, 20)) {
+        const col = r.severity === 'critical' ? '#ff3b3b' : r.severity === 'error' ? '#ff6b6b' : '#ffb84d';
+        html += '<div style="border-bottom:1px solid var(--bd);padding:6px 0;">' +
+          '<div style="color:var(--tx3);font-size:9px;">'+r.timestamp+' · '+r.script+' · <span style="color:'+col+';">'+r.severity+'</span> · '+(r.zone||'')+'</div>' +
+          '<div style="color:var(--tx1);margin-top:2px;">'+(r.error_msg||'').substring(0,200)+'</div>' +
+        '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:6px;">' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderExceptions(6)">↻ 6h</div>' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderExceptions(24)">24h</div>' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderExceptions(168)">7 dní</div>' +
+      '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="sect" style="color:var(--red);">🔴 EXCEPTIONS</div><div class="card" style="padding:12px;color:var(--red);">⚠ '+e.message+'</div>';
+  }
+}
+
+// Fáze E: Morning rutina timeline (Ranni_Rutina_Budik + Motion + EventLog)
+async function histRenderTimeline(days) {
+  const el = document.getElementById('hist-timeline');
+  if (!el) return;
+  el.innerHTML = '<div class="sect" style="color:var(--orange);">🌅 MORNING TIMELINE ('+(days||3)+' dní)</div>' +
+    '<div class="card" style="padding:12px;"><div style="color:var(--tx3);text-align:center;padding:20px;">⏳ Načítám…</div></div>';
+  try {
+    const data = await _fetchSheetsApi('mode=morning_timeline&days=' + (days||3));
+    const events = data.events || [];
+    let html = '<div class="sect" style="color:var(--orange);">🌅 MORNING TIMELINE ('+(days||3)+' dní, '+events.length+' eventů)</div>' +
+      '<div class="card" style="padding:12px;max-height:340px;overflow-y:auto;">';
+    if (events.length === 0) {
+      html += '<div style="text-align:center;color:var(--tx3);padding:20px;">Žádné eventy. Čekej na příští ranní rutinu.</div>';
+    } else {
+      // Group by date
+      const byDate = {};
+      for (const ev of events) {
+        const d = (ev.timestamp||'').substring(0,10);
+        if (!byDate[d]) byDate[d] = [];
+        byDate[d].push(ev);
+      }
+      const dates = Object.keys(byDate).sort().reverse();
+      for (const d of dates) {
+        html += '<div style="color:var(--orange);font-weight:600;margin-top:10px;margin-bottom:4px;border-bottom:1px solid var(--bd);padding-bottom:2px;">📅 '+d+'</div>';
+        for (const ev of byDate[d].slice(0,25)) {
+          const t = (ev.timestamp||'').substring(11,19);
+          const src = ev.source || 'other';
+          const srcCol = src === 'tts_monitor' ? '#64f4d8' : src === 'rani_rutina' ? '#ffb84d' : 'var(--tx3)';
+          html += '<div style="display:flex;gap:8px;font-family:var(--mono);font-size:10px;line-height:1.5;padding:2px 0;">' +
+            '<span style="color:var(--tx3);min-width:58px;">'+t+'</span>' +
+            '<span style="color:'+srcCol+';min-width:95px;">['+(ev.script||ev.source||'?').substring(0,14)+']</span>' +
+            '<span style="color:var(--tx1);overflow:hidden;text-overflow:ellipsis;">'+(ev.event||'')+(ev.detail?' · '+ev.detail.substring(0,50):'')+'</span>' +
+          '</div>';
+        }
+      }
+    }
+    html += '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:6px;">' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderTimeline(1)">↻ Dnes</div>' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderTimeline(3)">3 dny</div>' +
+        '<div class="btn" style="flex:1;text-align:center;font-size:11px;" onclick="histRenderTimeline(7)">Týden</div>' +
+      '</div>';
+    el.innerHTML = html;
+  } catch(e) {
+    el.innerHTML = '<div class="sect" style="color:var(--orange);">🌅 MORNING TIMELINE</div><div class="card" style="padding:12px;color:var(--red);">⚠ '+e.message+'</div>';
+  }
+}
+
+// Auto-load při prvním otevření Historie tabu
+let _histLoaded = false;
+async function histAutoLoad() {
+  if (_histLoaded) return;
+  _histLoaded = true;
+  try { await histRenderLux(24); } catch(_) {}
+  try { await histRenderBattery(30); } catch(_) {}
+  try { await histRenderStats(24); } catch(_) {}
+  try { await histRenderExceptions(24); } catch(_) {}
+  try { await histRenderTimeline(3); } catch(_) {}
 }
 
 async function loadMorningTune() {
@@ -7803,6 +8037,7 @@ switchPage = function(name) {
   if (name === 'advanced') renderValidatorPanels();
   if (name === 'finance') renderFinancePage();
   if (name === 'burza') renderBurzaPage();
+  if (name === 'historie') histAutoLoad();
   if (name === 'logy') {
     // Auto-render sheet widgets po malém delay (data fetch trvá)
     setTimeout(() => { loadMorningTune(); }, 300);

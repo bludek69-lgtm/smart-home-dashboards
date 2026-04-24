@@ -2834,6 +2834,34 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
     <div style="height:14px;"></div>
   </div>
 
+  <!-- ═══════════ HISTORIE PAGE (Fáze A scaffold — 2026-04-24) ═══════════ -->
+  <div class="page" id="page-historie">
+    <div style="height:14px;flex-shrink:0;"></div>
+
+    <div class="sect" style="color:var(--cyan);">
+      <span class="help-sect-header">
+        <span>📉 HISTORIE — trendy &amp; timeline</span>
+        <button class="help-btn" data-help-for="help-historie" onclick="toggleHelp('help-historie')">ℹ Jak to funguje</button>
+      </span>
+    </div>
+    <div id="help-historie" class="help-panel">
+      <h4>📉 Historie — data z Google Sheets</h4>
+      <ul>
+        <li><strong>Lux / Battery</strong> — trend grafy (Lux Monitor, Battery History)</li>
+        <li><strong>Event stats</strong> — top scripts + errors</li>
+        <li><strong>Exceptions</strong> — ExceptionLog v16</li>
+        <li><strong>Morning timeline</strong> — průběh ranní rutiny</li>
+      </ul>
+    </div>
+
+    <div id="hist-charts"     style="margin-top:8px;"></div>
+    <div id="hist-stats"      style="margin-top:8px;"></div>
+    <div id="hist-exceptions" style="margin-top:8px;"></div>
+    <div id="hist-timeline"   style="margin-top:8px;"></div>
+
+    <div style="height:24px;flex-shrink:0;"></div>
+  </div>
+
   <!-- ═══════════ FINANCE PAGE (RPi kompaktní) ═══════════ -->
   <div class="page" id="page-finance">
     <div style="height:10px;flex-shrink:0;"></div>
@@ -2942,6 +2970,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
   <div class="tab"        id="tab-audio"    onclick="switchPage('audio')" title="AUDIO — speakers, radio, TTS, priority engine"><span class="ti">🔊</span>AUDIO</div>
   <div class="tab"        id="tab-ai"       onclick="switchPage('ai')" title="AI CONTROL — Meta Brain, Predict, Coordinator, autonomy level"><span class="ti">🧠</span>AI</div>
   <div class="tab"        id="tab-logy"     onclick="switchPage('logy')" title="LOGY — event log ze Sheets, baterie, offline, Gemini diagnostika"><span class="ti">📊</span>LOGY</div>
+  <div class="tab"        id="tab-historie" onclick="switchPage('historie')" title="HISTORIE — trendy 24h/7d (lux, battery, events, exceptions, rutina timeline)"><span class="ti">📉</span>HISTORIE</div>
   <div class="tab"        id="tab-weather"  onclick="switchPage('weather')"><span class="ti">🌤</span>POČASÍ</div>
   <div class="tab"        id="tab-camera"   onclick="switchPage('camera')"><span class="ti">📷</span>KAMERA</div>
   <div class="tab"        id="tab-settings" onclick="switchPage('settings')"><span class="ti">⚙</span>CONFIG</div>
@@ -7384,6 +7413,7 @@ switchPage = function(name) {
   if (name === 'advanced') renderValidatorPanels();
   if (name === 'finance') renderFinancePage();
   if (name === 'burza') renderBurzaPage();
+  if (name === 'historie') histAutoLoad();
   if (name === 'logy') setTimeout(() => { loadMorningTune(); }, 300);
 };
 setInterval(() => { if (currentPage === 'weather') fetchWeather(); }, WX_COOLDOWN);
