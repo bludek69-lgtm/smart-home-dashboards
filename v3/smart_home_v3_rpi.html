@@ -7850,25 +7850,36 @@ async function toggleIR() {
     btn.className = 'btn ' + (IR_CLASSES[irMode] || '');
     btn.style.cssText = 'padding:2px 7px;font-size:9px;';
   }
-  const url = CAM_BASE + '&cmd=setInfraLedConfig&mode=' + irMode;
   const label = ['DAY (barva)', 'NIGHT (IR)', 'AUTO'][irMode];
-  // v3.1 (24.4.): file:// CORS workaround — fetch no-cors + <img> fallback
-  // Foscam CGI endpoint ignoruje HTTP method (GET/HEAD/opaque), stačí request reach.
-  console.log('[IR] toggleIR mode=' + irMode + ' URL=' + url);
-  try {
-    await fetch(url, { mode: 'no-cors', cache: 'no-store' });
-    flash('Kamera IR → ' + label);
-    return;
-  } catch(e) {
-    console.warn('[IR] fetch no-cors failed:', e.message);
+  // v3.2 (24.4.): Foscam CGI potřebuje dvoukrokový protokol:
+  //   mode=0 = AUTO (kamera sama podle světla)
+  //   mode=1 = MANUAL → potom openInfraLed / closeInfraLed
+  // Předchozí 1-step setInfraLedConfig&mode=0/1/2 jen ukládal config bez efektu.
+  let urls = [];
+  if (irMode === 0) {        // DAY (barva)
+    urls = [CAM_BASE + '&cmd=setInfraLedConfig&mode=1', CAM_BASE + '&cmd=closeInfraLed'];
+  } else if (irMode === 1) { // NIGHT (IR)
+    urls = [CAM_BASE + '&cmd=setInfraLedConfig&mode=1', CAM_BASE + '&cmd=openInfraLed'];
+  } else {                   // AUTO
+    urls = [CAM_BASE + '&cmd=setInfraLedConfig&mode=0'];
   }
-  // Fallback: img tag (always works cross-origin for file://)
+  console.log('[IR] toggleIR mode=' + irMode + ' (' + label + ')', urls);
+  async function send(u) {
+    try {
+      await fetch(u, { mode: 'no-cors', cache: 'no-store' });
+      return true;
+    } catch(e) {
+      // Fallback: <img> tag (file:// friendly)
+      return new Promise(res => {
+        const probe = new Image();
+        probe.onload = probe.onerror = () => res(true);
+        probe.src = u + '&_=' + Date.now();
+      });
+    }
+  }
   try {
-    const probe = new Image();
-    probe.onload = probe.onerror = function() {
-      flash('Kamera IR → ' + label + ' (img fallback)');
-    };
-    probe.src = url + '&_=' + Date.now();
+    for (const u of urls) { await send(u); await new Promise(r=>setTimeout(r,250)); }
+    flash('Kamera IR → ' + label);
   } catch(e) {
     flash('⚠ Kamera nedostupná: ' + e.message);
   }
