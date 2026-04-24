@@ -1580,6 +1580,43 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
   .zone-card .zc-meta { display: none !important; }
 }
 
+/* ♿ GLOBAL A11Y — Fáze 22 (2026-04-24) — keyboard nav + focus      */
+/* ═══════════════════════════════════════════════════════════════ */
+/* Skip-to-content link (viditelný jen na focus) */
+.skip-link {
+  position: absolute; top: -40px; left: 0;
+  background: var(--cyan); color: #000; padding: 8px 16px;
+  text-decoration: none; font-weight: 700; z-index: 9999;
+  border-radius: 0 0 4px 0;
+}
+.skip-link:focus { top: 0; outline: 2px solid #fff; outline-offset: -2px; }
+
+/* Focus ring pro všechny interactive elementy (WCAG 2.4.7) */
+[onclick]:focus-visible,
+[role="button"]:focus-visible,
+.tab:focus-visible,
+.btn:focus-visible,
+.tile:focus-visible,
+.dev-tile:focus-visible,
+.zone-card:focus-visible,
+.card-row:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--cyan) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(34, 211, 238, 0.25) !important;
+}
+
+/* Zakázat outline pro myší kliknutí (ale keep pro klávesnici) */
+[onclick]:focus:not(:focus-visible) { outline: none; }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* 🌐 GLOBAL: max-width centering na wide screens (fix 2026-04-23) */
+/* ═══════════════════════════════════════════════════════════════ */
+/* Na 1920/2880 obrazovkách centrujeme obsah do 1600px, na menších plná šířka */
+.page {
+  padding-inline: max(12px, calc((100% - 1600px) / 2)) !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════ */
 /* 🌐 GLOBAL: max-width centering na wide screens (fix 2026-04-23) */
 /* ═══════════════════════════════════════════════════════════════ */
@@ -1617,6 +1654,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 </style>
 </head>
 <body>
+<a href="#pagesContainer" class="skip-link">Přeskočit na obsah</a>
 <!-- 🎨 v3 theme banner — REMOVED (overlapping clock). Filename identifies version. -->
 <!-- <div style="position:fixed;top:10px;right:10px;...">v3 • theme</div> -->
 
@@ -1654,17 +1692,17 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
   </div>
 </div>
 
-<div class="topbar">
-  <div class="topbar-logo">SEMILY</div>
-  <div class="topbar-chips" id="topChips"></div>
-  <div id="topbar-pomo" style="display:none;cursor:pointer;padding:4px 12px;border-radius:999px;font-family:var(--mono);font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(59,201,125,0.25),rgba(34,211,238,0.15));border:1px solid rgba(59,201,125,0.45);color:var(--green);letter-spacing:0.5px;transition:all var(--tr-fast);" onclick="openPomodoro()" title="Pomodoro timer — klikni pro detail">🍅 <span id="topbar-pomo-time">25:00</span></div>
-  <div class="topbar-time" id="topTime">—</div>
-  <div class="topbar-clock" id="clock">--:--:--</div>
-  <span class="conn-led off" id="connLed" onclick="showConfig()">●</span>
+<header class="topbar" role="banner" aria-label="Horní stavová lišta">
+  <div class="topbar-logo" aria-label="Lokalita Semily">SEMILY</div>
+  <div class="topbar-chips" id="topChips" role="status" aria-live="polite" aria-atomic="false" aria-label="Stavové indikátory — přítomnost, fáze dne, baterie"></div>
+  <div id="topbar-pomo" style="display:none;cursor:pointer;padding:4px 12px;border-radius:999px;font-family:var(--mono);font-size:11px;font-weight:700;background:linear-gradient(135deg,rgba(59,201,125,0.25),rgba(34,211,238,0.15));border:1px solid rgba(59,201,125,0.45);color:var(--green);letter-spacing:0.5px;transition:all var(--tr-fast);" onclick="openPomodoro()" title="Pomodoro timer — klikni pro detail" role="button" aria-label="Pomodoro timer — klikni pro detail">🍅 <span id="topbar-pomo-time">25:00</span></div>
+  <div class="topbar-time" id="topTime" aria-label="Východ/západ slunce">—</div>
+  <div class="topbar-clock" id="clock" aria-label="Aktuální čas" aria-live="off">--:--:--</div>
+  <span class="conn-led off" id="connLed" onclick="showConfig()" role="button" aria-label="Stav API připojení - klikni pro konfiguraci">●</span>
   <span onclick="showConfig()" style="cursor:pointer;font-size:10px;font-family:var(--mono);color:var(--cyan);padding:3px 8px;border:1px solid var(--cyan);border-radius:5px;white-space:nowrap;">⚙ API</span>
-</div>
+</header>
 
-<div class="pages" id="pagesContainer">
+<main class="pages" id="pagesContainer" role="main" tabindex="-1">
   <div class="page active" id="page-home">
     <div style="height:8px;flex-shrink:0;"></div>
 
@@ -1785,7 +1823,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
     </div>
   </div>
 
-  </div>
+  </main>
 
     <div class="page" id="page-audio">
     <div style="height:14px;flex-shrink:0;"></div>
@@ -3520,7 +3558,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
 </div>
 
 <!-- BOTTOM TABS -->
-<div class="tabs">
+<nav class="tabs" role="navigation" aria-label="Hlavní navigace">
   <div class="tab active" id="tab-home"     onclick="switchPage('home')"><span class="ti">🏠</span>HOME</div>
   <div class="tab"        id="tab-zones"    onclick="switchPage('zones')" title="Detail zón — proklik na každou místnost (kuchyň, ložnice, koupelna...)"><span class="ti">🗺</span>ZÓNY</div>
   <div class="tab"        id="tab-heating"  onclick="switchPage('heating')" title="TOPENÍ — kotel + 4 TRV, boiler state, demand, kWh, rychlé akce"><span class="ti">🔥</span>TOPENÍ</div>
@@ -3535,7 +3573,7 @@ body > div[style*="position:fixed"][style*="top:10px"][style*="right:10px"] {
   <div class="tab"        id="tab-advanced" onclick="switchPage('advanced')" title="ADVANCED — Validator, Energie, Zásuvky, AI nastavení (rizikové)"><span class="ti">🔧</span>ADVANCED</div>
   <div class="tab"        id="tab-finance"  onclick="switchPage('finance')" title="FINANCE — spotřeba kWh, cena VT/NT, měsíční report"><span class="ti">💰</span>FINANCE</div>
   <div class="tab"        id="tab-burza"    onclick="switchPage('burza')" title="BURZA — crypto (Bitcoin, ETH, ...) + akciové tituly"><span class="ti">📈</span>BURZA</div>
-</div>
+</nav>
 
 <div class="flash" id="flashBar"></div>
 
@@ -7870,6 +7908,28 @@ setTimeout(fixGap, 50);
 setTimeout(fixGap, 200);
 setTimeout(fixGap, 500);
 window.addEventListener('resize', fixGap);
+
+// A11Y Faze B (2026-04-24) — auto tabindex + keyboard handler
+function a11yEnhance() {
+  const sel = '[onclick]:not(input):not(textarea):not(select):not(button):not(a)';
+  document.querySelectorAll(sel).forEach(el => {
+    if (!el.hasAttribute('tabindex')) el.setAttribute('tabindex', '0');
+    if (!el.hasAttribute('role')) el.setAttribute('role', 'button');
+    const t = el.getAttribute('title');
+    if (t && !el.hasAttribute('aria-label')) el.setAttribute('aria-label', t);
+  });
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const tgt = e.target;
+    if (tgt && tgt.getAttribute && tgt.getAttribute('role') === 'button' && tgt.onclick) {
+      e.preventDefault();
+      tgt.click();
+    }
+  }
+});
+setTimeout(a11yEnhance, 300);
+setInterval(a11yEnhance, 5000);
 if (loadConfig() && CFG.host && CFG.token) {
   document.getElementById('configOverlay').classList.add('hidden');
   document.getElementById('cfgHostDisplay').textContent = CFG.host;
