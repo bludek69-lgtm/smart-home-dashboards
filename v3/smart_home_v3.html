@@ -1632,6 +1632,8 @@ button:focus-visible {
 </style>
 </head>
 <body>
+<!-- A11Y Fáze C: Skip-to-content link (visible on focus, keyboard-first nav) -->
+<a href="#pagesContainer" class="skip-link">Přeskočit na obsah</a>
 <!-- 🎨 v3 theme banner — REMOVED (overlapping clock). Filename identifies version. -->
 <!-- <div style="position:fixed;top:10px;right:10px;...">v3 • theme</div> -->
 
@@ -1679,7 +1681,7 @@ button:focus-visible {
   <span onclick="showConfig()" style="cursor:pointer;font-size:10px;font-family:var(--mono);color:var(--cyan);padding:3px 8px;border:1px solid var(--cyan);border-radius:5px;white-space:nowrap;">⚙ API</span>
 </div>
 
-<div class="pages" id="pagesContainer">
+<main class="pages" id="pagesContainer" role="main" tabindex="-1">
   <div class="page active" id="page-home">
     <div style="height:8px;flex-shrink:0;"></div>
 
@@ -1801,7 +1803,7 @@ button:focus-visible {
     </div>
   </div>
 
-  </div>
+  </main>
 
     <div class="page" id="page-audio">
     <div style="height:14px;flex-shrink:0;"></div>
@@ -3050,7 +3052,7 @@ button:focus-visible {
 </div>
 
 <!-- BOTTOM TABS -->
-<div class="tabs">
+<nav class="tabs" role="navigation" aria-label="Hlavní navigace">
   <div class="tab active" id="tab-home"     onclick="switchPage('home')"><span class="ti">🏠</span>HOME</div>
   <div class="tab"        id="tab-zones"    onclick="switchPage('zones')" title="Detail zón — proklik na každou místnost (kuchyň, ložnice, koupelna...)"><span class="ti">🗺</span>ZÓNY</div>
   <div class="tab"        id="tab-heating"  onclick="switchPage('heating')" title="TOPENÍ — kotel + 4 TRV, boiler state, demand, kWh, rychlé akce"><span class="ti">🔥</span>TOPENÍ</div>
@@ -3065,7 +3067,7 @@ button:focus-visible {
   <div class="tab"        id="tab-advanced" onclick="switchPage('advanced')" title="ADVANCED — Validator, Energie, Zásuvky, AI nastavení (rizikové)"><span class="ti">🔧</span>ADVANCED</div>
   <div class="tab"        id="tab-finance"  onclick="switchPage('finance')" title="FINANCE — spotřeba kWh, cena VT/NT, měsíční report"><span class="ti">💰</span>FINANCE</div>
   <div class="tab"        id="tab-burza"    onclick="switchPage('burza')" title="BURZA — crypto (Bitcoin, ETH, ...) + akciové tituly"><span class="ti">📈</span>BURZA</div>
-</div>
+</nav>
 
 <div class="flash" id="flashBar"></div>
 
