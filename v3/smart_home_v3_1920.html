@@ -5736,6 +5736,18 @@ function updateZoneCard(id, data) {
     // Update meta text
     const meta = card.querySelector('.zc-meta');
     if (meta && data?.temp !== undefined) meta.textContent = data.temp + '°C' + (data.humidity ? ' · ' + data.humidity + '%' : '');
+    // Pračka state badge in Prádelna zone (2026-04-25)
+    if (id === 'pradelna' && meta) {
+      try {
+        const pState = (_getVar('sh_pracka_state') || 'idle').toString().toLowerCase();
+        const pCycles = parseInt(_getVar('sh_pracka_cycle_count')) || 0;
+        const labels = {idle:'', running:'⏳ pere', finishing:'🌀 dokončuje', done:'✅ dopráno'};
+        const label = labels[pState] || '';
+        if (label) {
+          meta.textContent = label + (pCycles > 0 ? ' · cyklů: ' + pCycles : '');
+        }
+      } catch(_) {}
+    }
   }
 }
 
