@@ -2378,6 +2378,38 @@ button:focus-visible {
       </div>
     </div>
 
+    
+<!-- ══ WAKE SCORER (2026-04-25) ══ -->
+    <div class="sect" style="color:var(--orange);">😴 WAKE DETEKTOR (sh_wake_scorer_v1) — passive observation</div>
+    <div class="card" style="margin-bottom:10px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;align-items:center;padding:6px 0;">
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);">SKÓRE</div>
+          <div id="wakeScoreBig" style="font-size:32px;font-weight:600;color:var(--cyan);font-family:var(--mono);">—</div>
+          <div style="font-size:9px;color:var(--tx3);">threshold <span id="wakeThreshold">75</span></div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);">ROZHODNUTÍ</div>
+          <div id="wakeDecision" style="font-size:18px;font-weight:600;margin-top:8px;">—</div>
+          <div style="font-size:9px;color:var(--tx3);">cron 1 min</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);margin-bottom:4px;">AKTIVNÍ SIGNÁLY</div>
+          <div id="wakeSignals" style="font-family:var(--mono);font-size:10px;color:var(--tx2);min-height:40px;">—</div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--tx3);padding:6px 0;border-top:1px solid var(--bd);">
+        <strong>Fáze 1 (passive)</strong>: jen loguje, NEMĚNÍ sh_spim. Po týdnu calibrace → Fáze 2 (aktivní reset).<br>
+        Signály s váhou: presence_sustained +60 · pracovna_motion +45 · pc_power +30 · door_recent_home +40 · cube_button +40 · wake_confidence_strong +20 · tv_on_day +15 · led_postel +10 · kitchen_transit +5 · WC_trip −30
+      </div>
+      <div class="cfg-row" style="margin-top:8px;">
+        <span class="cfg-lbl">Threshold (skóre pro 'awake')</span>
+        <input type="number" id="wakeThresholdInput" min="30" max="100" step="5" onchange="writeVar('sh_cfg_wake_threshold', parseInt(this.value))">
+        <span class="cfg-unit">/100</span>
+      </div>
+    </div>
+    <!-- ══ /WAKE SCORER ══ -->
+
     <!-- Roleta detail s vysvětlením -->
     <div class="sect" style="color:var(--light);">
       <span class="help-sect-header">
@@ -7823,6 +7855,37 @@ function renderSettingsForms() {
   // Host display
   const hd = document.getElementById('cfgHostDisplay');
   if (hd) hd.textContent = CFG.host || '—';
+
+  // Wake Scorer panel (2026-04-25)
+  try {
+    const score = parseFloat(_getVar('sh_wake_score_current')) || 0;
+    const decision = (_getVar('sh_wake_score_decision') || 'sleeping').toString().trim();
+    const signalsRaw = _getVar('sh_wake_score_signals') || '[]';
+    const threshold = parseInt(_getVar('sh_cfg_wake_threshold')) || 75;
+    const sb = document.getElementById('wakeScoreBig');
+    const sd = document.getElementById('wakeDecision');
+    const sg = document.getElementById('wakeSignals');
+    const th = document.getElementById('wakeThreshold');
+    const ti = document.getElementById('wakeThresholdInput');
+    if (sb) {
+      sb.textContent = score;
+      sb.style.color = score >= threshold ? 'var(--green)' : score >= 45 ? 'var(--orange)' : 'var(--cyan)';
+    }
+    if (sd) {
+      const labels = {awake:'😎 VZHŮRU', uncertain:'🤔 NEJISTÉ', sleeping:'😴 SPÍ'};
+      sd.textContent = labels[decision] || decision;
+      sd.style.color = decision === 'awake' ? 'var(--green)' : decision === 'uncertain' ? 'var(--orange)' : 'var(--tx2)';
+    }
+    if (sg) {
+      let signals = [];
+      try { signals = JSON.parse(signalsRaw); } catch(_) { signals = []; }
+      sg.innerHTML = signals.length
+        ? signals.map(s => '<span style="background:var(--bg3);padding:2px 6px;border-radius:4px;margin:2px;display:inline-block;">' + s + '</span>').join('')
+        : '<span style="color:var(--tx3);">žádné aktivní</span>';
+    }
+    if (th) th.textContent = threshold;
+    if (ti && !ti._userTouched) ti.value = threshold;
+  } catch(e) { console.warn('[wake-scorer panel]', e); }
 }
 
 async function saveAllConfig() {
