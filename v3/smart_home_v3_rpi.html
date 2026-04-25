@@ -2641,6 +2641,48 @@ button:focus-visible {
       <div class="btn" id="heat-ai-btn" onclick="toggleHeatingAi()" title="Fáze C AI vrstvy — preWakeBoost + weatherAdjust + occupancyBonus">🧠 AI: —</div>
     </div>
 
+    <!-- ═══ AI PŘEMÝŠLÍ panel (2026-04-25) ═══ -->
+    <div class="sect" style="color:var(--purple);margin-top:14px;">
+      <span class="help-sect-header">
+        <span>🧠 AI PŘEMÝŠLÍ — co dělá s topením</span>
+        <button class="help-btn" data-help-for="help-heat-ai" onclick="toggleHelp('help-heat-ai')">ℹ</button>
+      </span>
+    </div>
+    <div id="help-heat-ai" class="help-panel">
+      <h4>🧠 AI vrstvy (Fáze C)</h4>
+      <ul>
+        <li><strong>preWakeBoost</strong> +1-2 °C — nahřeje koupelnu/toaletu 5-30 min před budíkem (3:15 PO-PÁ / 5:15 SO-NE)</li>
+        <li><strong>weatherAdjust</strong> ±0.5-1.5 °C — granular dle venkovní teploty (mráz +1.5, horko -1)</li>
+        <li><strong>occupancyBonus</strong> +0.5 °C — zóna kde právě jste (sh_current_zone)</li>
+      </ul>
+      <p>AI cap: max ±3 °C celková delta. Pokud žádná AI vrstva nezasahuje → ai_deltas={} (normální mimo aktivní okna).</p>
+    </div>
+    <div class="card" style="padding:12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);">AI ENABLED</div>
+          <div id="ai-h-enabled" style="font-size:18px;font-weight:600;margin-top:4px;color:var(--cyan);">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);">SCHEDULER LAST RUN</div>
+          <div id="ai-h-lastrun" style="font-size:14px;font-family:var(--mono);margin-top:4px;color:var(--tx1);">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);">USER ZONE</div>
+          <div id="ai-h-userzone" style="font-size:14px;font-family:var(--mono);margin-top:4px;color:var(--tx1);">—</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--tx3);font-family:var(--mono);">VENKU °C</div>
+          <div id="ai-h-outtemp" style="font-size:14px;font-family:var(--mono);margin-top:4px;color:var(--tx1);">—</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--tx3);font-family:var(--mono);margin-bottom:6px;">PER-ZONE TARGETS + AI DELTAS (pokud jsou)</div>
+      <div id="ai-h-zones" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;margin-bottom:10px;"></div>
+      <div style="font-size:11px;color:var(--tx3);font-family:var(--mono);margin-bottom:4px;border-top:1px solid var(--bd);padding-top:8px;">POSLEDNÍ AI ROZHODNUTÍ (heating_ai_delta z EventLogu)</div>
+      <div id="ai-h-history" style="font-family:var(--mono);font-size:10px;color:var(--tx2);min-height:40px;max-height:120px;overflow-y:auto;">—</div>
+    </div>
+    <!-- ═══ /AI PŘEMÝŠLÍ ═══ -->
+
     <!-- PHASE28: KONFIGURACE TOPENÍ -->
     <details style="margin-top:12px;">
       <summary class="sect" style="color:var(--orange);cursor:pointer;list-style:none;user-select:none;" title="Klikni pro rozbalení konfigurace topení">⚙️ KONFIGURACE <span style="font-size:10px;color:var(--tx3);">▸ klikni</span></summary>
@@ -9103,6 +9145,85 @@ async function refreshHeating() {
     }
     // PHASE28: refresh cfg inputs
     try { refreshHeatingCfgInputs(); } catch(_) {}
+
+    // ═══ AI PŘEMÝŠLÍ panel (2026-04-25) ═══
+    try {
+      // Enabled
+      const aiEnEl = document.getElementById('ai-h-enabled');
+      if (aiEnEl) {
+        aiEnEl.textContent = aiEnabled ? '✅ ZAPNUTO' : '⏸ VYPNUTO';
+        aiEnEl.style.color = aiEnabled ? 'var(--green)' : 'var(--tx3)';
+      }
+      // Last scheduler ts
+      const lastTs = parseInt((ALL_VARS['sh_heating_last_scheduler_ts'] || {}).value) || 0;
+      const lastEl = document.getElementById('ai-h-lastrun');
+      if (lastEl) {
+        if (lastTs > 0) {
+          const ageMin = Math.floor((Date.now()/1000 - lastTs) / 60);
+          const d = new Date(lastTs * 1000);
+          lastEl.textContent = d.toLocaleTimeString('cs-CZ', {hour:'2-digit', minute:'2-digit'}) + ' (před ' + ageMin + ' min)';
+          lastEl.style.color = ageMin <= 6 ? 'var(--green)' : ageMin <= 15 ? 'var(--orange)' : 'var(--red)';
+        } else { lastEl.textContent = 'NIKDY'; }
+      }
+      // User zone
+      const cz = (ALL_VARS['sh_current_zone'] || {}).value || 'unknown';
+      const cza = parseInt((ALL_VARS['sh_current_zone_age_s'] || {}).value) || 0;
+      const czEl = document.getElementById('ai-h-userzone');
+      if (czEl) czEl.textContent = cz + ' (' + Math.floor(cza/60) + 'min)';
+      // Outside temp (z context)
+      const ctxRaw = (ALL_VARS['sh_context_json'] || {}).value || '{}';
+      let outT = null;
+      try { const ctx = JSON.parse(ctxRaw); outT = Number(ctx.teplota); } catch(_) {}
+      const outEl = document.getElementById('ai-h-outtemp');
+      if (outEl) outEl.textContent = (outT !== null && Number.isFinite(outT)) ? outT.toFixed(1) + '°C' : '—';
+
+      // Per-zone targets + AI deltas
+      const zonesGrid = document.getElementById('ai-h-zones');
+      if (zonesGrid) {
+        const ZONES = ['jidelna','loznice','koupelna','toaleta'];
+        const ZICONS = {jidelna:'🛋', loznice:'🛏', koupelna:'🚿', toaleta:'🚽'};
+        let html = '';
+        for (const z of ZONES) {
+          const target = parseFloat((ALL_VARS['sh_heating_zone_'+z+'_target_temp'] || {}).value) || 0;
+          // AI deltas: stored in JSON sh_heating_ai_deltas (if exists) or derived from last event
+          const enabled = String((ALL_VARS['sh_heating_zone_'+z+'_enabled'] || {}).value || 'yes').toLowerCase() === 'yes';
+          html += '<div style="background:var(--bg3);padding:8px;border-radius:var(--r);">' +
+                  '<div style="font-size:10px;color:var(--tx3);">' + (ZICONS[z]||'') + ' ' + z + (enabled ? '' : ' (off)') + '</div>' +
+                  '<div style="font-size:18px;font-weight:600;color:var(--orange);font-family:var(--mono);margin-top:2px;">' +
+                  (target > 0 ? target.toFixed(1) + '°C' : '—') + '</div>' +
+                  '</div>';
+        }
+        zonesGrid.innerHTML = html;
+      }
+
+      // History — fetch heating_ai_delta events from sheets (last 24h)
+      const histEl = document.getElementById('ai-h-history');
+      const sheetsUrl = String((ALL_VARS['sh_sheets_url'] || {}).value || '').trim();
+      if (histEl && sheetsUrl) {
+        try {
+          const resp = await fetch(sheetsUrl + '?mode=events&hours=24&event=heating_ai_delta&limit=10');
+          const data = await resp.json();
+          const rows = (data.rows || []).sort((a,b) => (b.timestamp||'').localeCompare(a.timestamp||''));
+          if (rows.length === 0) {
+            histEl.innerHTML = '<span style="color:var(--tx3);">Žádné AI úpravy v posledních 24h (mimo aktivní okna nebo žádné delta).</span>';
+          } else {
+            let html = '';
+            for (const r of rows.slice(0, 10)) {
+              const ts = (r.timestamp||'').replace('T',' ').substring(0,19);
+              let d = {};
+              try { d = JSON.parse(r.params || '{}'); } catch(_) {}
+              const deltas = d.deltas || {};
+              const parts = Object.entries(deltas).map(([z, v]) => z + ':' + (v.total > 0 ? '+' : '') + v.total + '°C').join(' · ');
+              html += '<div style="padding:3px 0;border-bottom:1px dotted var(--bd);">' +
+                      '<span style="color:var(--tx3);">' + ts + '</span> ' +
+                      '<span style="color:var(--orange);">' + (parts || '—') + '</span></div>';
+            }
+            histEl.innerHTML = html;
+          }
+        } catch(e) { histEl.innerHTML = '<span style="color:var(--red);">Sheets fetch error: ' + e.message + '</span>'; }
+      }
+    } catch(e) { console.warn('[ai-heating panel]', e); }
+    // ═══ /AI PŘEMÝŠLÍ ═══
 
 
     // PHASE27: yesterday runtime + kwh
