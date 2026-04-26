@@ -3832,6 +3832,45 @@ button:hover, .btn:hover {
     <div class="page" id="page-audio">
     <div style="height:14px;flex-shrink:0;"></div>
 
+<!-- 🎵 V3.7 NYNI HRAJE — Premium audio player hero card -->
+    <div class="card" id="audio-hero-card" style="padding:24px;margin-bottom:14px;display:grid;grid-template-columns:140px 1fr;gap:24px;align-items:center;">
+      <!-- Album art / icon (left) -->
+      <div id="audio-hero-art" style="width:140px;height:140px;border-radius:var(--r2);background:linear-gradient(135deg,rgba(74,222,128,0.18),rgba(34,211,238,0.12));border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;overflow:hidden;">
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 30% 30%,rgba(74,222,128,0.25) 0%,transparent 60%);"></div>
+        <span style="position:relative;z-index:1;filter:drop-shadow(0 0 16px rgba(74,222,128,0.5));" id="audio-hero-icon">🎵</span>
+      </div>
+      <!-- Track info + controls (right) -->
+      <div style="display:flex;flex-direction:column;gap:10px;min-width:0;">
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--tx3);" id="audio-hero-label">NYNÍ HRAJE</div>
+          <div style="font-size:22px;font-weight:700;color:var(--tx1);margin-top:4px;line-height:1.2;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;" id="audio-hero-track">—</div>
+          <div style="font-size:13px;color:var(--tx2);margin-top:2px;" id="audio-hero-source">Kuchyň · idle</div>
+        </div>
+        <!-- Progress bar (visual only — Google Cast doesn't always expose position) -->
+        <div style="display:flex;align-items:center;gap:10px;font-size:11px;color:var(--tx3);font-family:var(--mono);">
+          <span id="audio-hero-time-cur">—:—</span>
+          <div style="flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;position:relative;overflow:hidden;">
+            <div id="audio-hero-progress" style="position:absolute;left:0;top:0;bottom:0;width:0%;background:linear-gradient(90deg,var(--green),var(--cyan));border-radius:2px;transition:width 600ms ease-out;box-shadow:0 0 8px var(--greenb);"></div>
+          </div>
+          <span id="audio-hero-time-tot">—:—</span>
+        </div>
+        <!-- Controls + volume -->
+        <div style="display:flex;align-items:center;gap:14px;">
+          <button class="btn-secondary" style="padding:8px 12px;" onclick="audioStop('Kuchyn')" title="Stop kuchyň">⏹</button>
+          <button class="btn-primary" style="padding:10px 16px;font-size:16px;" onclick="sendReq('sh_audio_request','radio_kitchen')" title="Play radio kitchen">▶</button>
+          <button class="btn-secondary" style="padding:8px 12px;" onclick="sendReq('sh_audio_request','radio_low')" title="Tise">🔉</button>
+          <div style="flex:1;display:flex;align-items:center;gap:8px;font-size:11px;color:var(--tx2);">
+            <span>🔊</span>
+            <input type="range" min="0" max="100" value="30" id="audio-hero-vol"
+              style="flex:1;height:6px;accent-color:var(--green);"
+              oninput="document.getElementById('audio-hero-vol-val').textContent=this.value+'%'"
+              onchange="setDeviceCap('Kuchyn','volume_set',this.value/100)">
+            <span style="font-family:var(--mono);font-weight:600;color:var(--green);min-width:36px;text-align:right;" id="audio-hero-vol-val">30%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="sect">REPRODUKTORY</div>
 
     <div class="speaker-card">
@@ -4465,22 +4504,63 @@ button:hover, .btn:hover {
     <div class="page" id="page-camera">
     <div style="height:8px;flex-shrink:0;"></div>
 
-      <div class="sect" style="color:var(--green);">KAMERA · PŘEDSÍŇ</div>
-      <div class="cam-card" style="margin:0;">
-        <div class="cam-header">
-          <span class="cam-title">📷 Kamera venkovní</span>
-          <span class="cam-live" id="camLive" style="display:none">● LIVE</span>
-          <span class="btn" id="irBtn" onclick="toggleIR()" style="padding:4px 10px;font-size:11px;">🔄 IR: AUTO</span>
+<!-- 📷 V3.7 CAMERA premium layout — hero card + status grid (ready for multi-cam) -->
+    <div class="sect" style="color:var(--green);">📷 KAMERY · ŽIVÝ NÁHLED</div>
+    <div id="v37-cam-grid" style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px;">
+      <!-- Camera #1: Předsíň -->
+      <div class="card" style="padding:0;overflow:hidden;border-radius:var(--r2);">
+        <!-- Header bar with LIVE indicator + status pills -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:linear-gradient(180deg,rgba(13,20,36,0.6),transparent);border-bottom:1px solid var(--bd);">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <span style="font-size:18px;">📷</span>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:var(--tx1);">Předsíň · venkovní</div>
+              <div style="font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.1em;">vstupní zóna</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="live-indicator" id="camLive" style="display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,var(--red),#dc2626);color:white;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;box-shadow:0 0 12px rgba(248,113,113,0.5);">● LIVE</span>
+            <span class="status-pill" id="cam-motion-pill" title="Detekce pohybu" style="font-size:10px;padding:4px 10px;">
+              <span>🚶</span><span>MOTION</span><span class="v37-pill-value" id="cam-motion-state">—</span>
+            </span>
+            <button class="btn-secondary" id="irBtn" onclick="toggleIR()" style="padding:6px 12px;font-size:11px;">🔄 IR: AUTO</button>
+          </div>
         </div>
-        <div class="cam-body open" id="camBody" style="display:block;">
-          <img id="camImg" alt="Camera feed">
-          <div class="cam-offline" id="camOff">Kamera nedostupná</div>
+        <!-- Camera feed body — 16:9 aspect ratio -->
+        <div class="cam-body open" id="camBody" style="display:block;position:relative;background:#000;aspect-ratio:16/9;max-height:500px;">
+          <img id="camImg" alt="Camera feed" style="display:block;width:100%;height:100%;object-fit:cover;">
+          <div class="cam-offline" id="camOff" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--tx3);font-size:14px;background:rgba(0,0,0,0.6);">📷 Kamera nedostupná</div>
+        </div>
+        <!-- Footer: action bar -->
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 18px;background:rgba(13,20,36,0.4);border-top:1px solid var(--bd);">
+          <button class="btn-secondary" onclick="refreshCamera()" style="padding:6px 14px;">↻ Obnovit</button>
+          <button class="btn-secondary" onclick="toggleIR()" style="padding:6px 14px;">🔄 IR režim</button>
+          <div style="flex:1;text-align:right;font-size:10px;color:var(--tx3);">
+            Poslední pohyb: <span id="cam-last-motion" style="color:var(--green);font-weight:600;font-family:var(--mono);">—</span>
+          </div>
         </div>
       </div>
-      <div style="margin-top:8px;display:flex;gap:8px;">
-        <div class="btn" onclick="refreshCamera()">↻ Obnovit</div>
-        <div class="btn" onclick="toggleIR()">🔄 Změnit IR režim</div>
+    </div>
+
+    <!-- Camera info panel -->
+    <div class="card" style="padding:14px 18px;font-size:11px;color:var(--tx2);">
+      <div style="font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--tx3);margin-bottom:8px;">📡 STAV KAMERY</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);">
+          <span>Resolution</span><span style="color:var(--tx1);font-weight:600;">1920×1080</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);">
+          <span>FPS</span><span style="color:var(--tx1);font-weight:600;">15</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);">
+          <span>IR režim</span><span style="color:var(--cyan);font-weight:600;" id="cam-ir-mode">AUTO</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bd);">
+          <span>Stream</span><span style="color:var(--green);font-weight:600;" id="cam-stream-state">—</span>
+        </div>
       </div>
+    </div>
+    </div>
     </div>
 
   <!-- SETTINGS -->
@@ -8077,6 +8157,44 @@ function updateUI(d) {
     if (now) now.innerHTML = a.track ? '<span>' + a.track + '</span>' : (a.mode || 'idle');
   }
 
+  // V3.7 Audio Hero player update (defensive)
+  try {
+    const playing = a.playing === 'yes';
+    const mode = a.mode || 'idle';
+    // Active speaker source
+    const activeSpk = a.active_speaker || ALL_VARS?.['sh_audio_active_speaker']?.value || 'Kuchyň';
+    const sourceText = playing
+      ? (activeSpk + ' · ' + (mode === 'idle' ? 'hraje' : mode))
+      : 'Kuchyň · idle';
+    setText('audio-hero-source', sourceText);
+    // Track name
+    const trackName = a.track || (mode !== 'idle' ? mode.toUpperCase().replace(/_/g, ' ') : 'Nic nehraje');
+    setText('audio-hero-track', trackName);
+    // Icon based on mode
+    const iconEl = document.getElementById('audio-hero-icon');
+    if (iconEl) {
+      if (mode.includes('radio')) iconEl.textContent = '📻';
+      else if (mode.includes('tts')) iconEl.textContent = '🗣';
+      else if (mode.includes('briefing')) iconEl.textContent = '☀';
+      else if (playing) iconEl.textContent = '🎵';
+      else iconEl.textContent = '🎵';
+    }
+    // Progress bar — use volume as proxy if no real position (Cast doesn't expose for radio)
+    const progressEl = document.getElementById('audio-hero-progress');
+    if (progressEl) {
+      // Visual heartbeat when playing — pulse to 60% then animate
+      progressEl.style.width = playing ? '100%' : '0%';
+      progressEl.style.opacity = playing ? '1' : '0.3';
+    }
+    // Times — use mode age if available (DATA may have audio_request_ts)
+    setText('audio-hero-time-cur', playing ? '0:00' : '—:—');
+    setText('audio-hero-time-tot', playing ? 'live' : '—:—');
+    // Volume sync from device cap if available
+    const kuchynVol = ALL_VARS?.['Kuchyn_volume_set']?.value;  // unlikely
+    // (we rely on user manually adjusting slider; backend sync not strictly needed)
+  } catch(e) { console.debug('[audio hero]', e && e.message); }
+
+
   // AI page
   const hScore = h.score || 0;
   setText('ai-health', hScore + '%');
@@ -11663,39 +11781,67 @@ async function refreshHeating() {
     if (kwhYestEl) kwhYestEl.textContent = rtYestSec > 0 ? (kwhYest + ' kWh') : '—';
 
 
-    // Zones
+    // Zones — V3.7 PREMIUM heat zone cards (per-room hero with circular ring + temps)
     const grid = document.getElementById('heat-zones-grid');
     if (grid) {
       grid.innerHTML = HEAT_ZONES.map(z => {
         const enabled = String((ALL_VARS['sh_heating_zone_' + z.id + '_enabled'] || {}).value || 'yes').toLowerCase() === 'yes';
         const curr = Number((ALL_VARS['sh_heating_zone_' + z.id + '_current_temp'] || {}).value || -99);
         const tgt = Number((ALL_VARS['sh_heating_zone_' + z.id + '_target_temp'] || {}).value || 20);
-        const currTxt = curr > 0 ? curr.toFixed(1) + ' °C' : '— °C';
-        const tgtTxt = tgt.toFixed(1) + ' °C';
+        const currTxt = curr > 0 ? curr.toFixed(1) : '—';
+        const tgtTxt = tgt.toFixed(1);
+        // Map temp to ring fill: 10°C → 0%, 28°C → 100%
         const pct = curr > 0 ? Math.max(0, Math.min(100, ((curr - 10) / (28 - 10)) * 100)) : 0;
+        // Ring color: heating (orange), satisfied (green), cold (red), disabled (gray)
         const heating = enabled && (tgt - curr) > 0.3 && curr > 0;
-        const borderColor = !enabled ? 'var(--red)' : heating ? 'var(--orange)' : 'var(--bd)';
-        const tileOpacity = !enabled ? '0.55' : '1';
-        const statusBadge = !enabled
-          ? '<span style="color:var(--red);font-size:10px;">❌ VYPNUTO</span>'
-          : heating ? '<span style="color:var(--orange);font-size:10px;">🔥 topí</span>' : '';
-        const toggleLabel = enabled ? '✅ ZAP' : '❌ VYP';
-        const toggleColor = enabled ? 'var(--green)' : 'var(--red)';
-        return `<div class="heat-zone-tile" style="border-color:${borderColor}; opacity:${tileOpacity};">
-          <div class="zone-hdr">
-            <span>${z.icon}</span>
-            <strong>${z.label}</strong>
-            <div class="zone-tog-btn" onclick="toggleHeatingZone('${z.id}'); event.stopPropagation();"
-                 style="margin-left:auto;padding:2px 6px;font-size:10px;border:1px solid ${toggleColor};color:${toggleColor};border-radius:3px;cursor:pointer;font-family:var(--mono);">
-              ${toggleLabel}
+        const cold = enabled && curr > 0 && (tgt - curr) > 1.5;
+        const ringColor = !enabled ? '#5e6e85' : cold ? '#f87171' : heating ? '#fb923c' : '#4ade80';
+        const ringGlow = !enabled ? 'transparent' : `${ringColor}55`;
+        const opacity = !enabled ? '0.55' : '1';
+        const accentColor = !enabled ? 'var(--red)' : heating ? 'var(--orange)' : 'var(--green)';
+        const stateBadge = !enabled
+          ? '<span style="color:var(--red);font-size:10px;font-weight:600;">❌ VYPNUTO</span>'
+          : heating ? '<span style="color:var(--orange);font-size:10px;font-weight:600;">🔥 TOPÍ</span>'
+          : '<span style="color:var(--green);font-size:10px;font-weight:600;">✓ V CÍLI</span>';
+        const togChecked = enabled ? 'checked' : '';
+        // Ring SVG: r=42, circumference = 2*π*42 ≈ 263.9
+        const ringDashOffset = 263.9 * (1 - pct / 100);
+
+        return `<div class="card heat-zone-tile-v37" style="padding:18px;display:grid;grid-template-columns:120px 1fr;gap:18px;align-items:center;opacity:${opacity};border-color:${enabled ? (heating ? 'rgba(251,146,60,0.4)' : 'var(--bd)') : 'var(--bd)'};box-shadow:${heating ? '0 0 16px rgba(251,146,60,0.2)' : ''};">
+          <!-- Left: SVG circular gauge with current temp in middle -->
+          <svg viewBox="0 0 100 100" style="width:120px;height:120px;display:block;">
+            <defs>
+              <filter id="hz-glow-${z.id}" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="2"/>
+              </filter>
+            </defs>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+            <circle cx="50" cy="50" r="42" fill="none" stroke="${ringColor}" stroke-width="6"
+                    stroke-linecap="round" stroke-dasharray="263.9" stroke-dashoffset="${ringDashOffset}"
+                    transform="rotate(-90 50 50)" filter="url(#hz-glow-${z.id})"
+                    style="transition: stroke-dashoffset 800ms cubic-bezier(0.16,1,0.3,1);"/>
+            <text x="50" y="48" text-anchor="middle" dominant-baseline="middle" fill="#e8edf5" font-size="22" font-weight="700" font-family="Inter, sans-serif">${currTxt}</text>
+            <text x="50" y="65" text-anchor="middle" fill="${ringColor}" font-size="9" font-weight="600">°C</text>
+          </svg>
+          <!-- Right: zone info + target + toggle -->
+          <div style="display:flex;flex-direction:column;gap:6px;min-width:0;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:18px;">${z.icon}</span>
+              <strong style="font-size:14px;color:var(--tx1);font-weight:600;">${z.label}</strong>
+              <label class="toggle-pill" style="margin-left:auto;" title="ZAP/VYP zóna">
+                <input type="checkbox" ${togChecked} onchange="toggleHeatingZone('${z.id}')">
+                <span></span>
+              </label>
+            </div>
+            ${stateBadge}
+            <div style="display:flex;align-items:center;gap:12px;font-size:11px;color:var(--tx2);margin-top:4px;">
+              <div>
+                <div style="font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:0.1em;">Cíl</div>
+                <div style="font-size:18px;font-weight:700;color:${accentColor};font-family:Inter, sans-serif;">${tgtTxt}<span style="font-size:11px;color:var(--tx3);font-weight:500;"> °C</span></div>
+              </div>
+              ${heating && curr > 0 ? `<div style="margin-left:auto;color:var(--orange);font-size:11px;font-weight:600;">+${(tgt-curr).toFixed(1)}°C ↑</div>` : ''}
             </div>
           </div>
-          <div style="font-size:9px;color:var(--tx3);margin-top:-2px;margin-bottom:4px;">${statusBadge}</div>
-          <div class="zone-temps">
-            <span class="curr">${currTxt}</span>
-            <span class="tgt">→ ${tgtTxt}</span>
-          </div>
-          <div class="zone-bar"><div class="zone-bar-fill" style="width:${pct}%;"></div></div>
         </div>`;
       }).join('');
     }
