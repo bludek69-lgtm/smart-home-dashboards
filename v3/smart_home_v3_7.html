@@ -1891,6 +1891,96 @@ button:hover, .btn:hover {
   animation: live-pulse 2s ease-in-out infinite;
 }
 
+/* === SCENE TILES — premium mode-color gradient backgrounds (per reference image 3) === */
+/* Each scene gets unique radial gradient + accent border + glow on hover */
+#scn-relax {
+  background: radial-gradient(ellipse at 30% 20%, rgba(167,139,250,0.18) 0%, transparent 60%), var(--bg2) !important;
+  border-color: rgba(167,139,250,0.25) !important;
+}
+#scn-relax:hover {
+  background: radial-gradient(ellipse at 30% 20%, rgba(167,139,250,0.30) 0%, transparent 60%), var(--bg2) !important;
+  box-shadow: 0 0 24px rgba(167,139,250,0.25) !important;
+}
+#scn-relax .ht-icon { filter: drop-shadow(0 0 12px rgba(167,139,250,0.6)) !important; }
+
+#scn-work {
+  background: radial-gradient(ellipse at 30% 20%, rgba(96,165,250,0.18) 0%, transparent 60%), var(--bg2) !important;
+  border-color: rgba(96,165,250,0.25) !important;
+}
+#scn-work:hover {
+  background: radial-gradient(ellipse at 30% 20%, rgba(96,165,250,0.30) 0%, transparent 60%), var(--bg2) !important;
+  box-shadow: 0 0 24px rgba(96,165,250,0.25) !important;
+}
+#scn-work .ht-icon { filter: drop-shadow(0 0 12px rgba(96,165,250,0.6)) !important; }
+
+#scn-audio {
+  background: radial-gradient(ellipse at 30% 20%, rgba(74,222,128,0.18) 0%, transparent 60%), var(--bg2) !important;
+  border-color: rgba(74,222,128,0.25) !important;
+}
+#scn-audio:hover {
+  background: radial-gradient(ellipse at 30% 20%, rgba(74,222,128,0.30) 0%, transparent 60%), var(--bg2) !important;
+  box-shadow: 0 0 24px rgba(74,222,128,0.25) !important;
+}
+#scn-audio .ht-icon { filter: drop-shadow(0 0 12px rgba(74,222,128,0.6)) !important; }
+
+#scn-vareni {
+  background: radial-gradient(ellipse at 30% 20%, rgba(251,146,60,0.20) 0%, transparent 60%), var(--bg2) !important;
+  border-color: rgba(251,146,60,0.30) !important;
+}
+#scn-vareni:hover {
+  background: radial-gradient(ellipse at 30% 20%, rgba(251,146,60,0.35) 0%, transparent 60%), var(--bg2) !important;
+  box-shadow: 0 0 24px rgba(251,146,60,0.30) !important;
+}
+#scn-vareni .ht-icon { filter: drop-shadow(0 0 12px rgba(251,146,60,0.6)) !important; }
+
+#scn-kino {
+  background: radial-gradient(ellipse at 30% 20%, rgba(248,113,113,0.16) 0%, transparent 60%), linear-gradient(180deg, rgba(0,0,0,0.3), transparent), var(--bg2) !important;
+  border-color: rgba(248,113,113,0.25) !important;
+}
+#scn-kino:hover {
+  background: radial-gradient(ellipse at 30% 20%, rgba(248,113,113,0.30) 0%, transparent 60%), linear-gradient(180deg, rgba(0,0,0,0.3), transparent), var(--bg2) !important;
+  box-shadow: 0 0 24px rgba(248,113,113,0.25) !important;
+}
+#scn-kino .ht-icon { filter: drop-shadow(0 0 12px rgba(248,113,113,0.6)) !important; }
+
+#scn-romantika {
+  background: radial-gradient(ellipse at 30% 20%, rgba(244,114,182,0.18) 0%, transparent 60%), var(--bg2) !important;
+  border-color: rgba(244,114,182,0.30) !important;
+}
+#scn-romantika:hover {
+  background: radial-gradient(ellipse at 30% 20%, rgba(244,114,182,0.32) 0%, transparent 60%), var(--bg2) !important;
+  box-shadow: 0 0 24px rgba(244,114,182,0.30) !important;
+}
+#scn-romantika .ht-icon { filter: drop-shadow(0 0 12px rgba(244,114,182,0.6)) !important; }
+
+#scn-reset {
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), transparent), var(--bg2) !important;
+  border-color: rgba(255,255,255,0.10) !important;
+  opacity: 0.85;
+}
+#scn-reset:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.08), transparent), var(--bg2) !important;
+  opacity: 1;
+}
+
+/* Scene currently active — golden ring accent */
+.tile.scene.active-c {
+  box-shadow: 0 0 0 2px var(--cyan), 0 0 28px var(--cyanb), var(--shadow-md) !important;
+  border-color: var(--cyan) !important;
+}
+.tile.scene.active-c::before {
+  content: '✓';
+  position: absolute;
+  top: 6px; right: 6px;
+  width: 18px; height: 18px;
+  background: var(--cyan);
+  color: #0a0f1c;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  box-shadow: 0 0 12px var(--cyanb);
+}
+
 /* === STATUS TILES (.tile.ht) — premium hero treatment ════════════
    Reference: image 1 — top status row (REŽIM DOMU / PŘÍTOMNOST / DENNÍ FÁZE / ...)
    icon big + glowing, label uppercase tiny, value medium bold
@@ -3934,11 +4024,30 @@ function v37SetActive(page) {
       <p><strong>Režim MANUAL</strong>: sloty se aplikují 1:1. <strong>AUTO</strong>: sloty jako baseline + AI úpravy.</p>
     </div>
 
+    <!-- 📊 V3.7 WEEKLY HEATMAP — visual overview all 4 zones × 7 days × 24h -->
+    <div class="card" id="h2-heatmap-card" style="padding:18px;margin-bottom:12px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--tx3);">📊 TÝDENNÍ PŘEHLED</div>
+          <div style="font-size:13px;color:var(--tx2);margin-top:2px;">Heatmap teplot · všechny 4 zóny × 7 dní × 24 hodin</div>
+        </div>
+        <!-- Color legend -->
+        <div style="display:flex;align-items:center;gap:12px;font-size:10px;color:var(--tx3);">
+          <span>16°C</span>
+          <div style="width:120px;height:10px;border-radius:5px;background:linear-gradient(90deg,#60a5fa,#4ade80,#fbbf24,#fb923c,#f87171);"></div>
+          <span>24°C</span>
+        </div>
+      </div>
+      <div id="h2-week-heatmap" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <!-- 4 zone heatmaps generated by JS -->
+      </div>
+    </div>
+
     <!-- Zone + Day picker -->
     <div class="card" style="padding:10px;">
       <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px;">
         <span style="font-size:12px;">Zóna:</span>
-        <select id="h2-zone-picker" onchange="h2LoadSchedule()"
+        <select id="h2-zone-picker" onchange="h2LoadSchedule(); renderHeatingHeatmap()"
                 style="background:var(--bg2);border:1px solid var(--bd);color:var(--tx1);padding:4px 8px;border-radius:var(--r2);font-size:12px;">
           <option value="jidelna">🍽 Jídelna</option>
           <option value="loznice">🛏 Ložnice</option>
@@ -10887,10 +10996,90 @@ function h2SwitchDay(dayId) {
   h2RenderSlotsFromState();
 }
 
+// V3.7 Heating Heatmap renderer — week × hours visualization for all 4 zones
+function renderHeatingHeatmap() {
+  try {
+    const container = document.getElementById('h2-week-heatmap');
+    if (!container) return;
+    const ZONES = [
+      { id: 'jidelna',  label: 'Jídelna',  icon: '🍽' },
+      { id: 'loznice',  label: 'Ložnice',  icon: '🛏' },
+      { id: 'koupelna', label: 'Koupelna', icon: '🚿' },
+      { id: 'toaleta',  label: 'Toaleta',  icon: '🚽' }
+    ];
+    const DAYS_LBL = ['Po','Út','St','Čt','Pá','So','Ne'];
+    // Color map: 16°C blue → 18 green → 20 amber → 22 orange → 24 red
+    const tempToColor = (t) => {
+      if (!t || t <= 7) return 'rgba(255,255,255,0.04)';  // off / anti-freeze
+      if (t < 17) return 'rgba(96,165,250,0.45)';   // cool blue
+      if (t < 19) return 'rgba(74,222,128,0.45)';   // green
+      if (t < 21) return 'rgba(251,191,36,0.45)';   // amber
+      if (t < 23) return 'rgba(251,146,60,0.55)';   // orange
+      return 'rgba(248,113,113,0.55)';              // red hot
+    };
+    // Default schedule fallback: Po-Pá komfort 6-22h @ target, jinak 16°C
+    const getHourTemp = (zone, dayIdx, hour) => {
+      // Try parse sh_heating_schedule_<zone>
+      try {
+        const raw = ALL_VARS?.['sh_heating_schedule_' + zone]?.value;
+        if (raw && raw.length > 2) {
+          const sched = JSON.parse(raw);
+          // Schedule structure varies — handle weekly: {mon: [{from:6, to:22, temp:21}]}
+          const dayKey = ['mon','tue','wed','thu','fri','sat','sun'][dayIdx];
+          const slots = sched[dayKey] || sched.weekday || sched;
+          if (Array.isArray(slots)) {
+            for (const s of slots) {
+              const f = Number(s.from || 0);
+              const t = Number(s.to || 24);
+              if (hour >= f && hour < t) return Number(s.temp || s.target || 18);
+            }
+          }
+        }
+      } catch(_) {}
+      // Fallback: zone-specific default
+      const isWeekend = dayIdx >= 5;
+      if (zone === 'jidelna' || zone === 'loznice') {
+        if (isWeekend) return hour >= 7 && hour < 23 ? 21 : 18;
+        return hour >= 6 && hour < 22 ? 21 : 18;
+      } else { // koupelna, toaleta
+        return hour >= 6 && hour < 22 ? 22 : 18;
+      }
+    };
+
+    container.innerHTML = ZONES.map(z => {
+      // 7 days × 24 cells per zone
+      let cellsHtml = '';
+      for (let d = 0; d < 7; d++) {
+        cellsHtml += `<div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:18px;font-size:9px;color:var(--tx3);font-weight:600;text-align:center;">${DAYS_LBL[d]}</div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(24,1fr);gap:1px;height:14px;">`;
+        for (let h = 0; h < 24; h++) {
+          const t = getHourTemp(z.id, d, h);
+          cellsHtml += `<div title="${z.label} · ${DAYS_LBL[d]} ${h}:00 → ${t}°C" style="background:${tempToColor(t)};border-radius:2px;cursor:help;"></div>`;
+        }
+        cellsHtml += '</div></div>';
+      }
+      return `<div style="padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:16px;">${z.icon}</span>
+          <strong style="font-size:13px;color:var(--tx1);font-weight:600;">${z.label}</strong>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;">${cellsHtml}</div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--tx3);margin-top:6px;padding-left:24px;font-family:var(--mono);">
+          <span>0</span><span>6</span><span>12</span><span>18</span><span>24</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.debug('[heating heatmap]', e && e.message); }
+}
+
 async function h2LoadSchedule() {
   if (!varMapLoaded) await loadVarMap();
   const zonePicker = document.getElementById('h2-zone-picker');
   h2State.zone = zonePicker ? zonePicker.value : 'jidelna';
+
+  // V3.7: render weekly heatmap of all zones
+  try { renderHeatingHeatmap(); } catch(_) {}
 
   const rawVar = ALL_VARS['sh_heating_schedule_' + h2State.zone];
   const raw = rawVar ? String(rawVar.value || '{}') : '{}';

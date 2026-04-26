@@ -12037,8 +12037,90 @@ function h2SwitchDay(dayId) {
   h2RenderSlotsFromState();
 }
 
+// V3.7 Heating Heatmap renderer — week × hours visualization for all 4 zones
+function renderHeatingHeatmap() {
+  try {
+    const container = document.getElementById('h2-week-heatmap');
+    if (!container) return;
+    const ZONES = [
+      { id: 'jidelna',  label: 'Jídelna',  icon: '🍽' },
+      { id: 'loznice',  label: 'Ložnice',  icon: '🛏' },
+      { id: 'koupelna', label: 'Koupelna', icon: '🚿' },
+      { id: 'toaleta',  label: 'Toaleta',  icon: '🚽' }
+    ];
+    const DAYS_LBL = ['Po','Út','St','Čt','Pá','So','Ne'];
+    // Color map: 16°C blue → 18 green → 20 amber → 22 orange → 24 red
+    const tempToColor = (t) => {
+      if (!t || t <= 7) return 'rgba(255,255,255,0.04)';  // off / anti-freeze
+      if (t < 17) return 'rgba(96,165,250,0.45)';   // cool blue
+      if (t < 19) return 'rgba(74,222,128,0.45)';   // green
+      if (t < 21) return 'rgba(251,191,36,0.45)';   // amber
+      if (t < 23) return 'rgba(251,146,60,0.55)';   // orange
+      return 'rgba(248,113,113,0.55)';              // red hot
+    };
+    // Default schedule fallback: Po-Pá komfort 6-22h @ target, jinak 16°C
+    const getHourTemp = (zone, dayIdx, hour) => {
+      // Try parse sh_heating_schedule_<zone>
+      try {
+        const raw = ALL_VARS?.['sh_heating_schedule_' + zone]?.value;
+        if (raw && raw.length > 2) {
+          const sched = JSON.parse(raw);
+          // Schedule structure varies — handle weekly: {mon: [{from:6, to:22, temp:21}]}
+          const dayKey = ['mon','tue','wed','thu','fri','sat','sun'][dayIdx];
+          const slots = sched[dayKey] || sched.weekday || sched;
+          if (Array.isArray(slots)) {
+            for (const s of slots) {
+              const f = Number(s.from || 0);
+              const t = Number(s.to || 24);
+              if (hour >= f && hour < t) return Number(s.temp || s.target || 18);
+            }
+          }
+        }
+      } catch(_) {}
+      // Fallback: zone-specific default
+      const isWeekend = dayIdx >= 5;
+      if (zone === 'jidelna' || zone === 'loznice') {
+        if (isWeekend) return hour >= 7 && hour < 23 ? 21 : 18;
+        return hour >= 6 && hour < 22 ? 21 : 18;
+      } else { // koupelna, toaleta
+        return hour >= 6 && hour < 22 ? 22 : 18;
+      }
+    };
+
+    container.innerHTML = ZONES.map(z => {
+      // 7 days × 24 cells per zone
+      let cellsHtml = '';
+      for (let d = 0; d < 7; d++) {
+        cellsHtml += `<div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:18px;font-size:9px;color:var(--tx3);font-weight:600;text-align:center;">${DAYS_LBL[d]}</div>
+          <div style="flex:1;display:grid;grid-template-columns:repeat(24,1fr);gap:1px;height:14px;">`;
+        for (let h = 0; h < 24; h++) {
+          const t = getHourTemp(z.id, d, h);
+          cellsHtml += `<div title="${z.label} · ${DAYS_LBL[d]} ${h}:00 → ${t}°C" style="background:${tempToColor(t)};border-radius:2px;cursor:help;"></div>`;
+        }
+        cellsHtml += '</div></div>';
+      }
+      return `<div style="padding:12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+          <span style="font-size:16px;">${z.icon}</span>
+          <strong style="font-size:13px;color:var(--tx1);font-weight:600;">${z.label}</strong>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:3px;">${cellsHtml}</div>
+        <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--tx3);margin-top:6px;padding-left:24px;font-family:var(--mono);">
+          <span>0</span><span>6</span><span>12</span><span>18</span><span>24</span>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.debug('[heating heatmap]', e && e.message); }
+}
+
+
 async function h2LoadSchedule() {
   if (!varMapLoaded) await loadVarMap();
+
+  // V3.7: render weekly heatmap of all zones
+  try { renderHeatingHeatmap(); } catch(_) {}
+
   const zonePicker = document.getElementById('h2-zone-picker');
   h2State.zone = zonePicker ? zonePicker.value : 'jidelna';
 
