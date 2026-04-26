@@ -2586,6 +2586,84 @@ body.v37 main.pages {
   padding-right: 16px !important;
 }
 
+/* === V3.7 SIDE RAIL — glanceable widgets (only on ultrawide ≥2200px) === */
+.v37-side-rail {
+  display: none;  /* hidden by default */
+  position: fixed;
+  top: 60px;       /* below topbar */
+  right: 0;
+  bottom: 0;
+  width: 280px;
+  background: linear-gradient(180deg,
+    rgba(13, 20, 36, 0.92),
+    rgba(5, 8, 16, 0.95)
+  );
+  border-left: 1px solid var(--bd);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 16px;
+  overflow-y: auto;
+  z-index: 40;
+  flex-direction: column;
+  gap: 14px;
+}
+.v37-rail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.v37-rail-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--tx3);
+  padding: 0 4px;
+}
+.v37-rail-card {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.025) 0%,
+    rgba(255, 255, 255, 0) 50%
+  ), var(--bg2);
+  border: 1px solid var(--bd);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.v37-rail-big {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--tx1);
+  font-family: Inter, sans-serif;
+  letter-spacing: -0.01em;
+  font-feature-settings: "tnum";
+  line-height: 1.1;
+}
+.v37-rail-sub {
+  font-size: 10px;
+  color: var(--tx3);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+.v37-rail-meta {
+  font-size: 11px;
+  color: var(--tx2);
+  margin-top: 4px;
+  font-family: var(--mono);
+}
+
+/* Show side rail at ultrawide AND adjust pages margin-right */
+@media (min-width: 2200px) {
+  body.v37 .v37-side-rail { display: flex; }
+  body.v37 .pages,
+  body.v37 #pagesContainer,
+  body.v37 main.pages {
+    margin-right: 280px !important;
+  }
+}
+
 /* === V3.7 RESPONSIVE — collapse sidebar to icon-only on narrow === */
 @media (max-width: 1280px) {
   body.v37 .v37-sidebar {
@@ -2772,6 +2850,77 @@ function v37SetActive(page) {
   if (el) el.classList.add('active');
 }
 </script>
+
+<!-- V3.7 SIDE RAIL — glanceable widgets for ultrawide screens (≥2200px) -->
+<aside class="v37-side-rail" id="v37SideRail" aria-label="Boční rail s glanceable info">
+  <div class="v37-rail-section">
+    <div class="v37-rail-label">⚡ ENERGIE</div>
+    <div class="v37-rail-card">
+      <div class="v37-rail-big" id="rail-power">— W</div>
+      <div class="v37-rail-sub">aktuálně</div>
+      <div class="v37-rail-meta" id="rail-kwh">— kWh dnes</div>
+    </div>
+  </div>
+
+  <div class="v37-rail-section">
+    <div class="v37-rail-label">🌤 POČASÍ</div>
+    <div class="v37-rail-card">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:32px;" id="rail-wx-icon">☀</div>
+        <div style="flex:1;">
+          <div class="v37-rail-big" id="rail-wx-temp">—°C</div>
+          <div class="v37-rail-sub" id="rail-wx-desc">—</div>
+        </div>
+      </div>
+      <div class="v37-rail-meta" style="margin-top:8px;">
+        <span>💧 <span id="rail-wx-hum">—</span>%</span> ·
+        <span>💨 <span id="rail-wx-wind">—</span> km/h</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="v37-rail-section">
+    <div class="v37-rail-label">🧠 AI STATUS</div>
+    <div class="v37-rail-card">
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="width:10px;height:10px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);" class="live-indicator"></div>
+        <div style="font-size:13px;font-weight:600;color:var(--green);" id="rail-ai-state">ACTIVE</div>
+      </div>
+      <div class="v37-rail-meta" style="margin-top:6px;" id="rail-ai-intent">— intent</div>
+      <div class="v37-rail-sub" style="margin-top:4px;font-family:var(--mono);" id="rail-ai-conf">— % conf</div>
+    </div>
+  </div>
+
+  <div class="v37-rail-section">
+    <div class="v37-rail-label">🔥 TOPENÍ</div>
+    <div class="v37-rail-card" id="rail-heating-zones">
+      <div style="font-size:11px;color:var(--tx3);text-align:center;padding:6px 0;">— zón aktivních</div>
+    </div>
+  </div>
+
+  <div class="v37-rail-section">
+    <div class="v37-rail-label">📡 ZAŘÍZENÍ</div>
+    <div class="v37-rail-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div class="v37-rail-big" id="rail-dev-online">—</div>
+          <div class="v37-rail-sub">online</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:18px;font-weight:600;color:var(--red);" id="rail-dev-offline">—</div>
+          <div class="v37-rail-sub">offline</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="v37-rail-section">
+    <div class="v37-rail-label">🔔 POSLEDNÍ AKCE</div>
+    <div class="v37-rail-card" style="font-size:11px;color:var(--tx2);" id="rail-last-action">
+      —
+    </div>
+  </div>
+</aside>
 
 <main class="pages" id="pagesContainer" role="main" tabindex="-1">
   <div class="page active" id="page-home">
@@ -7174,6 +7323,49 @@ function updateUI(d) {
     setNode('hist-stat-ai', ALL_VARS?.['sh_ai_savings_kwh_week']?.value || '—');
     // Events count
     setNode('hist-stat-events', ALL_VARS?.['sh_events_count_week']?.value || '—');
+
+    // V3.7 SIDE RAIL widgets (only visible on ultrawide ≥2200px)
+    setNode('rail-power', Math.round(h.power_total || 0) + ' W');
+    const finSnapRail = (() => { try { return JSON.parse(ALL_VARS?.['sh_finance_snapshot']?.value || '{}'); } catch(_){ return {}; } })();
+    setNode('rail-kwh', (finSnapRail.totalKWh ? finSnapRail.totalKWh.toFixed(1) : '—') + ' kWh dnes');
+    // Weather rail
+    const railWxTemp = document.getElementById('wx-temp');
+    if (railWxTemp && railWxTemp.textContent && !railWxTemp.textContent.includes('—')) {
+      setNode('rail-wx-temp', railWxTemp.textContent.trim());
+    } else {
+      setNode('rail-wx-temp', ALL_VARS?.['sh_teplota_venku']?.value ? Number(ALL_VARS['sh_teplota_venku'].value).toFixed(1) + '°C' : '—°C');
+    }
+    setNode('rail-wx-desc', document.getElementById('wx-desc')?.textContent || '—');
+    setNode('rail-wx-hum', ALL_VARS?.['sh_humidita_venku']?.value || '—');
+    setNode('rail-wx-wind', ALL_VARS?.['sh_vitr_venku']?.value || '—');
+    // AI rail
+    setNode('rail-ai-state', aiActive === 'yes' ? 'ACTIVE' : 'IDLE');
+    setNode('rail-ai-intent', (s.intent || ai.intent || 'idle').toUpperCase() + ' intent');
+    setNode('rail-ai-conf', (conf > 0 ? Math.round(conf) : '—') + '% conf');
+    // Heating rail (active zones count)
+    const heatActive = ['jidelna','loznice','koupelna','toaleta'].filter(z => {
+      const en = String(ALL_VARS?.['sh_heating_zone_'+z+'_enabled']?.value || 'yes').toLowerCase() === 'yes';
+      const cur = Number(ALL_VARS?.['sh_heating_zone_'+z+'_current_temp']?.value || -99);
+      const tgt = Number(ALL_VARS?.['sh_heating_zone_'+z+'_target_temp']?.value || 20);
+      return en && cur > 0 && (tgt - cur) > 0.3;
+    }).length;
+    const heatTotal = 4;
+    const heatRail = document.getElementById('rail-heating-zones');
+    if (heatRail) {
+      heatRail.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><div class="v37-rail-big" style="color:${heatActive > 0 ? 'var(--orange)' : 'var(--tx3)'};">${heatActive}</div><div class="v37-rail-sub">topí</div></div>
+        <div style="text-align:right;"><div style="font-size:18px;font-weight:600;color:var(--tx2);">${heatTotal - heatActive}</div><div class="v37-rail-sub">v cíli</div></div>
+      </div>`;
+    }
+    // Devices rail
+    setNode('rail-dev-online', onlineDevs);
+    setNode('rail-dev-offline', offDevs);
+    // Last action rail (from sh_open_space_last_action or generic)
+    const lastA = ALL_VARS?.['sh_open_space_last_action']?.value
+                || ALL_VARS?.['sh_light_router_last_action']?.value
+                || ALL_VARS?.['sh_audio_current_mode']?.value
+                || '—';
+    setNode('rail-last-action', String(lastA).substring(0, 40));
 
     // V3.7 GOVERNANCE CONSOLE hero (Settings page)
     setNode('gov-health', score > 0 ? score + '/100' : '—');
