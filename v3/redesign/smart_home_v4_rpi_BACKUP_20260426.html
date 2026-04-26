@@ -1653,11 +1653,706 @@ button:focus-visible {
 @media (max-width: 900px) { #zdContent { column-count: 1 !important; } }
 
 /* ═══════════════════════════════════════════════════════════════════════ */
+/* === V4 INTUITIVNÍ SIDEBAR LAYOUT (25.4.2026) === */
+/* === RPi 1024×600: bez scrolu (sub-tabs)        === */
+/* === 14" 1920×1080 / 32" 2880×1800: scroll OK   === */
+/* === @media queries scale up sidebars + content === */
+/* ═══════════════════════════════════════════════════════════════════════ */
+
+/* Skryj originální V3 topbar + tabs — nahradí V4 sidebar+header */
+.topbar { display: none !important; }
+.tabs { display: none !important; }
+
+/* V4 Shell: sidebar + main na 1024×600 */
+.v4-shell {
+  position: fixed; inset: 0;
+  width: 1024px; height: 600px;
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  background: linear-gradient(135deg, #0a0f1c 0%, #13192b 50%, #1a1f3a 100%);
+  z-index: 50;
+}
+
+/* === V4 SIDEBAR === */
+.v4-sidebar {
+  background: linear-gradient(180deg, #0d1424 0%, #0a0f1c 100%);
+  border-right: 1px solid rgba(74, 158, 255, 0.15);
+  display: flex; flex-direction: column;
+  padding: 10px 8px;
+  gap: 2px;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.v4-brand {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 8px 8px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.v4-brand-icon {
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  background: linear-gradient(135deg, var(--cyan), var(--blue));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+  flex-shrink: 0;
+}
+.v4-brand-name { font-size: 10px; font-weight: 700; color: #fff; letter-spacing: 0.8px; line-height: 1.1; }
+.v4-brand-sub { font-size: 7px; color: var(--tx3); margin-top: 1px; font-family: var(--mono); }
+
+.v4-nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--tx2);
+  transition: background 120ms, color 120ms, border-color 120ms;
+  font-weight: 500;
+  user-select: none;
+  min-height: 32px;
+  border-left: 3px solid transparent;
+}
+.v4-nav-item:hover { background: rgba(74, 158, 255, 0.08); color: var(--tx1); }
+.v4-nav-item:active { background: rgba(74, 158, 255, 0.16); transform: scale(.98); }
+.v4-nav-item.active {
+  background: linear-gradient(90deg, rgba(34, 211, 238, 0.15), rgba(74, 158, 255, 0.05));
+  color: var(--cyan);
+  border-left-color: var(--cyan);
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.1);
+}
+.v4-nav-icon { font-size: 14px; line-height: 1; width: 18px; text-align: center; flex-shrink: 0; }
+
+.v4-side-foot {
+  margin-top: auto;
+  padding-top: 6px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex; flex-direction: column; gap: 5px;
+}
+.v4-health {
+  background: rgba(59, 201, 125, 0.1);
+  border: 1px solid rgba(59, 201, 125, 0.2);
+  border-radius: 6px;
+  padding: 5px 7px;
+  font-size: 8px;
+  color: var(--green);
+  display: flex; align-items: center; gap: 5px;
+}
+.v4-user { display: flex; align-items: center; gap: 7px; padding: 4px; }
+.v4-avatar {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4a9eff, #a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: #fff;
+  flex-shrink: 0;
+}
+.v4-user-name { font-size: 9px; font-weight: 600; color: var(--tx1); line-height: 1.1; }
+.v4-user-loc { font-size: 7px; color: var(--tx3); font-family: var(--mono); }
+
+/* === V4 MAIN AREA === */
+.v4-main {
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  background: transparent;
+  min-width: 0;
+}
+.v4-header {
+  height: 50px;
+  display: flex; align-items: center;
+  padding: 0 14px;
+  gap: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(13, 20, 36, 0.5);
+  backdrop-filter: blur(10px);
+  flex-shrink: 0;
+}
+.v4-greet { flex: 1; display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.v4-greet-title { font-size: 13px; font-weight: 700; color: var(--tx1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v4-greet-sub { font-size: 9px; color: var(--tx3); font-family: var(--mono); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v4-head-widget {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 9px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  font-size: 9px;
+  color: var(--tx2);
+  min-height: 30px;
+  flex-shrink: 0;
+}
+.v4-head-widget .icon { font-size: 13px; }
+.v4-head-widget .val { font-weight: 600; color: var(--tx1); font-size: 10px; }
+.v4-head-widget.status-ok { border-color: rgba(59, 201, 125, 0.3); color: var(--green); }
+
+.v4-content { flex: 1; position: relative; overflow: hidden; min-height: 0; }
+
+/* V4 pages — own .page CSS scoped to v4-content */
+.v4-content .page {
+  position: absolute !important; inset: 0 !important;
+  padding: 10px !important;
+  overflow: hidden !important;
+  display: none;
+  background: transparent !important;
+}
+/* CRITICAL: override V3 .page:not(.active) hidden rules — V4 active pages must be VISIBLE */
+.v4-content .page.v4-active,
+.v4-content .page.v4-active * {
+  visibility: visible !important;
+}
+.v4-content .page.v4-active {
+  display: block !important;
+  pointer-events: auto !important;
+}
+
+/* V4 Modal */
+.v4-modal {
+  position: fixed; inset: 0;
+  background: rgba(10, 15, 28, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 999;
+  display: none;
+  align-items: center; justify-content: center;
+  padding: 20px;
+}
+.v4-modal.active { display: flex; }
+.v4-modal-box {
+  width: 100%; max-width: 700px; max-height: 540px;
+  background: linear-gradient(180deg, #1a1f3a 0%, #13192b 100%);
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 0 80px rgba(34, 211, 238, 0.1);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.v4-modal-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+.v4-modal-head h3 { font-size: 12px; font-weight: 700; color: var(--cyan); flex: 1; margin: 0; }
+.v4-modal-close {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; cursor: pointer;
+}
+.v4-modal-body { flex: 1; padding: 12px 14px; overflow-y: auto; font-size: 10px; line-height: 1.5; color: var(--tx2); }
+
+/* === V4 HOME page layout === */
+.v4-home { display: grid; grid-template-rows: auto 1fr; gap: 6px; height: 100%; }
+.v4-status-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+.v4-status-card {
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  padding: 7px 9px;
+  display: flex; flex-direction: column; gap: 1px;
+  cursor: pointer;
+  transition: transform 120ms, box-shadow 120ms;
+  position: relative; overflow: hidden;
+  min-height: 64px;
+}
+.v4-status-card:active { transform: scale(.97); }
+.v4-status-card .lbl { font-size: 7px; color: var(--tx3); font-family: var(--mono); letter-spacing: 0.5px; text-transform: uppercase; }
+.v4-status-card .ico { font-size: 16px; line-height: 1; }
+.v4-status-card .val { font-size: 12px; font-weight: 700; color: var(--tx1); }
+.v4-status-card .sub { font-size: 7px; color: var(--tx3); }
+.v4-status-card.green { border-color: rgba(59, 201, 125, 0.3); box-shadow: 0 0 14px rgba(59, 201, 125, 0.12); }
+.v4-status-card.green .val { color: var(--green); }
+.v4-status-card.green .ico { filter: drop-shadow(0 0 6px rgba(59, 201, 125, 0.6)); }
+.v4-status-card.cyan { border-color: rgba(34, 211, 238, 0.3); box-shadow: 0 0 14px rgba(34, 211, 238, 0.12); }
+.v4-status-card.cyan .val { color: var(--cyan); }
+.v4-status-card.purple { border-color: rgba(168, 85, 247, 0.3); box-shadow: 0 0 14px rgba(168, 85, 247, 0.12); }
+.v4-status-card.purple .val { color: var(--purple); }
+.v4-status-card.orange { border-color: rgba(255, 159, 64, 0.3); box-shadow: 0 0 14px rgba(255, 159, 64, 0.12); }
+.v4-status-card.orange .val { color: var(--orange); }
+
+.v4-home-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 5px; min-height: 0;
+}
+.v4-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 9px;
+  padding: 6px 8px;
+  display: flex; flex-direction: column; gap: 3px;
+  overflow: hidden; min-height: 0;
+}
+.v4-card-title {
+  font-size: 8px; color: var(--tx2); font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  display: flex; align-items: center; gap: 5px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  flex-shrink: 0;
+}
+.v4-card-body { flex: 1; overflow: hidden; min-height: 0; display: flex; flex-direction: column; gap: 4px; }
+
+/* Quick scenes — 4 cols × 2 rows, fill card height */
+.v4-scene-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: 1fr 1fr;
+  gap: 4px;
+  height: 100%;
+}
+.v4-scene {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 7px;
+  padding: 4px 2px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px;
+  cursor: pointer;
+  transition: transform 100ms, box-shadow 120ms;
+  min-height: 0;
+}
+.v4-scene:active { transform: scale(.95); }
+.v4-scene:hover { box-shadow: 0 0 10px rgba(34, 211, 238, 0.2); border-color: rgba(34, 211, 238, 0.3); }
+.v4-scene .ico { font-size: 18px; line-height: 1; }
+.v4-scene .name { font-size: 8px; color: var(--tx2); }
+
+/* Camera mini */
+.v4-cam-mini {
+  background: #000;
+  border-radius: 7px;
+  position: relative;
+  overflow: hidden;
+  flex: 1;
+  min-height: 0;
+  cursor: pointer;
+}
+.v4-cam-mini img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.v4-cam-mini .live-tag {
+  position: absolute; top: 4px; left: 4px;
+  background: var(--red); color: #fff;
+  font-size: 7px; padding: 1px 5px;
+  border-radius: 3px; font-weight: 700;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+}
+.v4-cam-mini .off-state {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--tx3); font-size: 10px;
+}
+
+/* Activity log */
+.v4-activity { display: flex; flex-direction: column; gap: 2px; overflow: hidden; }
+.v4-activity-row {
+  display: flex; align-items: center; gap: 6px;
+  padding: 3px 4px;
+  font-size: 9px;
+  border-radius: 4px;
+}
+.v4-activity-row .ico { font-size: 11px; flex-shrink: 0; }
+.v4-activity-row .lbl { flex: 1; color: var(--tx2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v4-activity-row .time { font-size: 7px; color: var(--tx3); font-family: var(--mono); flex-shrink: 0; }
+
+/* Footer */
+.v4-foot {
+  height: 22px;
+  display: flex; align-items: center;
+  padding: 0 14px;
+  gap: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: 8px;
+  color: var(--tx3);
+  font-family: var(--mono);
+  background: rgba(13, 20, 36, 0.5);
+  flex-shrink: 0;
+}
+.v4-foot-ok { color: var(--green); display: flex; align-items: center; gap: 4px; }
+.v4-foot-ok::before { content: '●'; filter: drop-shadow(0 0 4px var(--green)); }
+
+/* Hide V3 page-home content (V4 has own home structure) */
+.v4-shell #page-home > * { display: none !important; }
+.v4-shell #page-home .v4-home { display: grid !important; }
+.v4-shell #page-home .v4-home * { display: revert !important; }
+
+/* === V4 PHASE 2: REDESIGN ostatních stránek (25.4.2026) === */
+
+/* === GLOBAL: scope to V4 — vše hide help panels, ultra compact === */
+#v4-content .page .help-panel { display: none !important; }
+#v4-content .page .help-btn { display: inline-flex !important; padding: 1px 4px !important; font-size: 8px !important; min-height: 16px !important; }
+#v4-content .page .help-sect-header { font-size: 9px !important; }
+#v4-content .page hr, #v4-content .page .divider { margin: 3px 0 !important; }
+
+/* Skip-link banner — hide in V4 (sidebar replaces it) */
+.skip-link { display: none !important; }
+
+/* === V4 Phase 2: per-page compact overrides === */
+
+/* AI page — biggest overflow. 2-col layout + minimal padding */
+#v4-content #page-ai {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px 8px !important;
+  align-content: start !important;
+  padding: 8px !important;
+}
+#v4-content #page-ai .sect { font-size: 8px !important; margin: 2px 0 1px !important; padding: 0 !important; }
+#v4-content #page-ai .card { padding: 4px 6px !important; margin-bottom: 2px !important; }
+#v4-content #page-ai .tile { min-height: 38px !important; padding: 3px 5px !important; }
+#v4-content #page-ai .tile .t-icon { font-size: 13px !important; width: 22px !important; height: 22px !important; }
+#v4-content #page-ai .tile .t-lbl { font-size: 9px !important; }
+#v4-content #page-ai .tile .t-val { font-size: 10px !important; }
+#v4-content #page-ai .auto-levels { gap: 1px !important; }
+#v4-content #page-ai .auto-lv { padding: 3px 1px !important; }
+#v4-content #page-ai .lv-num { font-size: 11px !important; }
+#v4-content #page-ai .lv-lbl { font-size: 7px !important; }
+#v4-content #page-ai .help-panel, #v4-content #page-ai .help-btn { display: none !important; }
+#v4-content #page-ai .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+#v4-content #page-ai > * { min-width: 0 !important; }
+
+/* Settings page — sub-tab style: hide most, only Připojení visible by default */
+#v4-content #page-settings {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 4px 8px !important;
+  align-content: start !important;
+  padding: 8px !important;
+}
+#v4-content #page-settings .sect { font-size: 8px !important; margin: 2px 0 1px !important; padding-top: 2px !important; }
+#v4-content #page-settings .cfg-row { min-height: 26px !important; padding: 2px 0 !important; font-size: 9px !important; }
+#v4-content #page-settings .cfg-row input { font-size: 9px !important; padding: 2px 4px !important; height: 20px !important; width: 50px !important; }
+#v4-content #page-settings .cfg-label { font-size: 9px !important; }
+#v4-content #page-settings .cfg-hint { font-size: 8px !important; padding: 2px 4px !important; margin: 0 0 1px !important; }
+#v4-content #page-settings .roleta-cfg-row { padding: 2px 4px !important; }
+#v4-content #page-settings .roleta-cfg-name { font-size: 9px !important; }
+#v4-content #page-settings .roleta-cfg-desc, #v4-content #page-settings .roleta-cfg-example { font-size: 7px !important; line-height: 1.1 !important; }
+#v4-content #page-settings .help-panel, #v4-content #page-settings .help-btn { display: none !important; }
+#v4-content #page-settings .save-btn { min-height: 30px !important; padding: 6px !important; font-size: 10px !important; }
+#v4-content #page-settings .card { padding: 4px 6px !important; margin-bottom: 2px !important; }
+#v4-content #page-settings > * { min-width: 0 !important; }
+
+/* Heating — 2-col: TRVs left, Boiler+AI right */
+#v4-content #page-heating {
+  display: grid !important;
+  grid-template-columns: 1.2fr 1fr !important;
+  gap: 4px 8px !important;
+  align-content: start !important;
+  padding: 8px !important;
+}
+#v4-content #page-heating .sect { font-size: 8px !important; margin: 2px 0 1px !important; padding-top: 2px !important; }
+#v4-content #page-heating .card { padding: 4px 6px !important; margin-bottom: 2px !important; }
+#v4-content #page-heating .tile { min-height: 38px !important; padding: 4px 6px !important; }
+#v4-content #page-heating .tile .t-icon { font-size: 13px !important; width: 22px !important; height: 22px !important; }
+#v4-content #page-heating .tile .t-lbl { font-size: 9px !important; }
+#v4-content #page-heating .tile .t-val { font-size: 10px !important; }
+#v4-content #page-heating .help-panel, #v4-content #page-heating .help-btn { display: none !important; }
+#v4-content #page-heating .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+#v4-content #page-heating > * { min-width: 0 !important; }
+
+/* Weather — compact, 2-row layout */
+#v4-content #page-weather { padding: 8px !important; }
+#v4-content #page-weather .sect { font-size: 8px !important; margin: 2px 0 !important; }
+#v4-content #page-weather .card { padding: 4px 6px !important; margin-bottom: 3px !important; }
+#v4-content #page-weather .tile { min-height: 40px !important; padding: 4px !important; }
+#v4-content #page-weather .help-panel, #v4-content #page-weather .help-btn { display: none !important; }
+#v4-content #page-weather .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+
+/* Logy — small overflow, just compact */
+#v4-content #page-logy { padding: 8px !important; }
+#v4-content #page-logy .sect { font-size: 8px !important; margin: 2px 0 !important; }
+#v4-content #page-logy .card { padding: 4px 6px !important; margin-bottom: 3px !important; }
+#v4-content #page-logy .help-panel, #v4-content #page-logy .help-btn { display: none !important; }
+#v4-content #page-logy .card-row { font-size: 9px !important; padding: 2px 0 !important; }
+
+/* Zones, audio, camera — already 0 overflow, ensure compact */
+#v4-content #page-zones { padding: 8px !important; }
+#v4-content #page-audio { padding: 8px !important; }
+#v4-content #page-camera { padding: 8px !important; }
+
+/* Generic: hide all help panels in V4 (toggle via modal popup if needed) */
+#v4-content .help-panel { display: none !important; }
+#v4-content .help-btn { display: none !important; }
+
+/* Generic compact for any page */
+#v4-content .page .sect[style*="margin-top:12px"] { margin-top: 4px !important; }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* === V4 PHASE 2: Per-page strict compact 1024×600 (no scroll) ═ */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* TOPENÍ — 4 TRV cards (left) + Boiler + AI panel (right) */
+#v4-content #page-heating {
+  display: grid !important;
+  grid-template-columns: 1.2fr 1fr !important;
+  grid-template-rows: auto 1fr !important;
+  gap: 6px 8px !important;
+  padding: 8px !important;
+  align-content: start !important;
+}
+#v4-content #page-heating > * { min-width: 0 !important; }
+#v4-content #page-heating .sect { font-size: 9px !important; margin: 2px 0 1px !important; padding-top: 2px !important; }
+#v4-content #page-heating .card { padding: 5px 7px !important; margin-bottom: 2px !important; border-radius: 6px !important; }
+#v4-content #page-heating .tile { min-height: 42px !important; padding: 4px 6px !important; }
+#v4-content #page-heating .tile .t-icon { font-size: 14px !important; width: 24px !important; height: 24px !important; }
+#v4-content #page-heating .tile .t-lbl { font-size: 10px !important; }
+#v4-content #page-heating .tile .t-val { font-size: 11px !important; }
+#v4-content #page-heating .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+
+/* OSVĚTLENÍ (zones) — místnosti grid 4×2 */
+#v4-content #page-zones { padding: 8px !important; overflow-y: auto !important; }
+#v4-content #page-zones .sect { font-size: 9px !important; margin: 2px 0 1px !important; }
+#v4-content #page-zones .zone-list { grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; }
+#v4-content #page-zones .room, #v4-content #page-zones .zone-card { min-height: 50px !important; padding: 6px !important; font-size: 10px !important; }
+#v4-content #page-zones .floor-grid { grid-template-columns: repeat(4, 1fr) !important; grid-template-rows: repeat(2, 1fr) !important; gap: 4px !important; }
+#v4-content #page-zones .tile { min-height: 42px !important; padding: 4px 6px !important; }
+#v4-content #page-zones .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+
+/* AUDIO — speaker cards 2-col */
+#v4-content #page-audio {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px !important;
+  padding: 8px !important;
+  align-content: start !important;
+}
+#v4-content #page-audio > * { min-width: 0 !important; }
+#v4-content #page-audio .sect { font-size: 9px !important; margin: 2px 0 !important; }
+#v4-content #page-audio .speaker-card { padding: 6px !important; margin-bottom: 3px !important; }
+#v4-content #page-audio .spk-icon { font-size: 14px !important; width: 26px !important; height: 26px !important; }
+#v4-content #page-audio .spk-name { font-size: 10px !important; }
+#v4-content #page-audio .spk-status { font-size: 8px !important; }
+#v4-content #page-audio .audio-grid { grid-template-columns: 1fr !important; gap: 3px !important; }
+#v4-content #page-audio .tile { min-height: 38px !important; padding: 3px 5px !important; }
+#v4-content #page-audio .btn { min-height: 28px !important; padding: 4px 8px !important; font-size: 9px !important; }
+
+/* AI — 2-col panels */
+#v4-content #page-ai {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 6px 8px !important;
+  padding: 8px !important;
+  align-content: start !important;
+}
+#v4-content #page-ai > * { min-width: 0 !important; }
+#v4-content #page-ai .sect { font-size: 9px !important; margin: 2px 0 1px !important; }
+#v4-content #page-ai .card { padding: 5px 7px !important; margin-bottom: 3px !important; }
+#v4-content #page-ai .tile { min-height: 38px !important; padding: 3px 5px !important; }
+#v4-content #page-ai .tile .t-icon { font-size: 13px !important; width: 22px !important; height: 22px !important; }
+#v4-content #page-ai .tile .t-lbl { font-size: 9px !important; }
+#v4-content #page-ai .tile .t-val { font-size: 10px !important; }
+#v4-content #page-ai .ai-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 3px !important; }
+#v4-content #page-ai .auto-levels { gap: 1px !important; }
+#v4-content #page-ai .auto-lv { padding: 3px 1px !important; }
+#v4-content #page-ai .lv-num { font-size: 11px !important; }
+#v4-content #page-ai .lv-lbl { font-size: 7px !important; }
+
+/* KAMERA — full screen camera + sidebar IR controls */
+#v4-content #page-camera { padding: 8px !important; display: grid !important; grid-template-columns: 1fr 200px !important; gap: 8px !important; height: 100% !important; overflow: hidden !important; }
+#v4-content #page-camera > * { min-width: 0 !important; min-height: 0 !important; }
+#v4-content #page-camera .cam-body { height: 100% !important; max-height: 100% !important; border-radius: 8px !important; }
+#v4-content #page-camera .cam-body img { width: 100% !important; height: 100% !important; object-fit: contain !important; }
+#v4-content #page-camera .sect { font-size: 9px !important; margin: 2px 0 !important; }
+#v4-content #page-camera .btn { min-height: 32px !important; padding: 6px !important; font-size: 10px !important; }
+
+/* POČASÍ — current + 5-day forecast */
+#v4-content #page-weather { padding: 8px !important; }
+#v4-content #page-weather .sect { font-size: 9px !important; margin: 2px 0 !important; }
+#v4-content #page-weather .card { padding: 5px 7px !important; margin-bottom: 3px !important; }
+#v4-content #page-weather .tile { min-height: 40px !important; padding: 4px !important; }
+#v4-content #page-weather .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+
+/* KONFIGURACE — keep 2-col, smaller everything */
+#v4-content #page-settings {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 5px 8px !important;
+  padding: 8px !important;
+  align-content: start !important;
+}
+#v4-content #page-settings > * { min-width: 0 !important; }
+#v4-content #page-settings .sect { font-size: 9px !important; margin: 2px 0 1px !important; padding-top: 2px !important; }
+#v4-content #page-settings .cfg-row { min-height: 26px !important; padding: 2px 0 !important; }
+#v4-content #page-settings .cfg-row input { font-size: 9px !important; padding: 2px 4px !important; height: 20px !important; width: 50px !important; }
+#v4-content #page-settings .cfg-label { font-size: 9px !important; }
+#v4-content #page-settings .cfg-hint { font-size: 8px !important; padding: 2px 4px !important; margin: 0 0 1px !important; }
+#v4-content #page-settings .roleta-cfg-row { padding: 2px 4px !important; }
+#v4-content #page-settings .roleta-cfg-name { font-size: 9px !important; }
+#v4-content #page-settings .roleta-cfg-desc, #v4-content #page-settings .roleta-cfg-example { font-size: 7px !important; line-height: 1.1 !important; }
+#v4-content #page-settings .save-btn { min-height: 28px !important; padding: 5px !important; font-size: 10px !important; }
+#v4-content #page-settings .card { padding: 4px 6px !important; margin-bottom: 2px !important; }
+#v4-content #page-settings .tile { min-height: 36px !important; padding: 3px 5px !important; }
+#v4-content #page-settings .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+
+/* LOGY — events list, ultra compact */
+#v4-content #page-logy { padding: 8px !important; }
+#v4-content #page-logy .sect { font-size: 9px !important; margin: 2px 0 !important; }
+#v4-content #page-logy .card { padding: 4px 6px !important; margin-bottom: 3px !important; }
+#v4-content #page-logy .card-row { font-size: 9px !important; padding: 2px 0 !important; min-height: 18px !important; }
+#v4-content #page-logy .card-row .card-icon { font-size: 12px !important; width: 18px !important; }
+#v4-content #page-logy .card-row .card-lbl { font-size: 9px !important; }
+#v4-content #page-logy .tile { min-height: 36px !important; padding: 3px 5px !important; }
+#v4-content #page-logy .tile-grid { gap: 3px !important; margin-bottom: 3px !important; }
+
+/* HISTORIE — graphs */
+#v4-content #page-historie { padding: 8px !important; }
+#v4-content #page-historie .sect { font-size: 9px !important; margin: 2px 0 !important; }
+#v4-content #page-historie canvas { max-height: 120px !important; }
+
+/* HEATING2 (Plán) — compact slot list */
+#v4-content #page-heating2 { padding: 8px !important; }
+#v4-content #page-heating2 .sect { font-size: 9px !important; margin: 2px 0 !important; padding-top: 2px !important; }
+#v4-content #page-heating2 .card { padding: 5px 7px !important; margin-bottom: 3px !important; }
+#v4-content #page-heating2 .btn { min-height: 24px !important; padding: 3px 8px !important; font-size: 9px !important; }
+#v4-content #page-heating2 .h2-slot-del { font-size: 8px !important; padding: 1px 4px !important; }
+#v4-content #h2-preview-bar { height: 16px !important; }
+#v4-content #h2-all-zones > div { font-size: 8px !important; padding: 3px 5px !important; }
+#v4-content #page-heating2 #h2-slots-list > div { padding: 3px 5px !important; font-size: 9px !important; }
+
+/* ADVANCED — 2-col compact */
+#v4-content #page-advanced {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 5px 8px !important;
+  padding: 8px !important;
+  align-content: start !important;
+}
+#v4-content #page-advanced > * { min-width: 0 !important; }
+#v4-content #page-advanced .sect { font-size: 9px !important; margin: 2px 0 1px !important; }
+#v4-content #page-advanced .card { padding: 5px 7px !important; margin-bottom: 2px !important; }
+#v4-content #page-advanced .tile { min-height: 36px !important; padding: 3px 5px !important; }
+#v4-content #page-advanced .btn { min-height: 26px !important; font-size: 9px !important; padding: 4px 8px !important; }
+
+/* FINANCE + BURZA */
+#v4-content #page-finance, #v4-content #page-burza { padding: 8px !important; }
+#v4-content #page-finance .sect, #v4-content #page-burza .sect { font-size: 9px !important; margin: 2px 0 !important; }
+#v4-content #page-burza .card { padding: 5px 7px !important; margin-bottom: 3px !important; }
+#v4-content #page-burza .tile { min-height: 36px !important; padding: 3px 5px !important; }
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* === V4 SUB-TAB NAV — for pages with overflow on RPi 1024×600 === */
+/* ═══════════════════════════════════════════════════════════════ */
+.v4-sub-nav {
+  display: flex;
+  gap: 4px;
+  padding: 0 0 6px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  flex-wrap: wrap;
+}
+.v4-sub-nav button {
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.08);
+  color: var(--tx2);
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  font-family: var(--sans);
+  transition: all 120ms;
+}
+.v4-sub-nav button .ico { font-size: 14px; line-height: 1; }
+.v4-sub-nav button:hover { background: rgba(74,158,255,.08); color: var(--tx1); }
+.v4-sub-nav button.active {
+  background: linear-gradient(135deg, rgba(34,211,238,.18), rgba(74,158,255,.08));
+  border-color: rgba(34,211,238,.4);
+  color: var(--cyan);
+  box-shadow: 0 0 12px rgba(34,211,238,.15);
+}
+.v4-sub-section { display: none; }
+.v4-sub-section.active { display: block; }
+/* When sub-tabs active, page is no longer 2-col grid */
+#v4-content .page.v4-has-subtabs {
+  display: block !important;
+  grid-template-columns: none !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════ */
+/* === ULTRA COMPACT — pro stránky se zbylým overflow (advanced/ai/settings/heating/heating2/weather) === */
+/* ═══════════════════════════════════════════════════════════════ */
+
+/* ADVANCED — biggest overflow (394px). Hide validator narrative + 3-col grid */
+#v4-content #page-advanced {
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 4px 6px !important;
+}
+#v4-content #page-advanced .sect { font-size: 8px !important; margin: 1px 0 0 !important; padding-top: 1px !important; }
+#v4-content #page-advanced .card { padding: 3px 5px !important; margin-bottom: 1px !important; }
+#v4-content #page-advanced .tile { min-height: 32px !important; padding: 2px 4px !important; }
+#v4-content #page-advanced .tile .t-icon { font-size: 11px !important; width: 18px !important; height: 18px !important; }
+#v4-content #page-advanced .tile .t-lbl { font-size: 8px !important; }
+#v4-content #page-advanced .tile .t-val { font-size: 9px !important; }
+#v4-content #page-advanced .tile-grid { gap: 2px !important; margin-bottom: 2px !important; }
+#v4-content #page-advanced .btn { min-height: 24px !important; font-size: 8px !important; padding: 3px 6px !important; }
+#v4-content #page-advanced .card-row { font-size: 8px !important; padding: 1px 0 !important; }
+
+/* AI — 3-col + tighter */
+#v4-content #page-ai {
+  grid-template-columns: 1fr 1fr 1fr !important;
+}
+#v4-content #page-ai .sect { font-size: 8px !important; margin: 1px 0 0 !important; padding-top: 1px !important; }
+#v4-content #page-ai .card { padding: 3px 5px !important; margin-bottom: 1px !important; }
+#v4-content #page-ai .tile { min-height: 30px !important; padding: 2px 4px !important; }
+#v4-content #page-ai .tile .t-icon { font-size: 11px !important; width: 18px !important; height: 18px !important; }
+#v4-content #page-ai .tile .t-lbl { font-size: 8px !important; }
+#v4-content #page-ai .tile .t-val { font-size: 9px !important; }
+#v4-content #page-ai .tile .t-cat { font-size: 6px !important; }
+#v4-content #page-ai .auto-lv { padding: 2px 1px !important; min-height: 26px !important; }
+#v4-content #page-ai .lv-num { font-size: 10px !important; }
+#v4-content #page-ai .lv-lbl { font-size: 6px !important; }
+#v4-content #page-ai .ai-grid { grid-template-columns: repeat(4, 1fr) !important; gap: 2px !important; }
+
+/* SETTINGS — extra compact */
+#v4-content #page-settings .cfg-row { min-height: 22px !important; padding: 1px 0 !important; }
+#v4-content #page-settings .cfg-row input { font-size: 8px !important; height: 18px !important; padding: 1px 3px !important; width: 45px !important; }
+#v4-content #page-settings .cfg-label { font-size: 8px !important; line-height: 1.1 !important; }
+#v4-content #page-settings .cfg-hint { display: none !important; }
+#v4-content #page-settings .roleta-cfg-row { padding: 1px 3px !important; }
+#v4-content #page-settings .roleta-cfg-name { font-size: 8px !important; }
+#v4-content #page-settings .roleta-cfg-desc, #v4-content #page-settings .roleta-cfg-example { display: none !important; }
+#v4-content #page-settings .sect { font-size: 8px !important; margin: 1px 0 0 !important; padding-top: 1px !important; }
+#v4-content #page-settings .card { padding: 3px 5px !important; margin-bottom: 1px !important; }
+#v4-content #page-settings .save-btn { min-height: 22px !important; padding: 3px !important; font-size: 9px !important; }
+
+/* HEATING — tilety menší + tighter */
+#v4-content #page-heating .sect { font-size: 8px !important; margin: 1px 0 0 !important; }
+#v4-content #page-heating .card { padding: 3px 5px !important; margin-bottom: 1px !important; }
+#v4-content #page-heating .tile { min-height: 32px !important; padding: 2px 4px !important; }
+#v4-content #page-heating .tile .t-icon { font-size: 11px !important; width: 18px !important; height: 18px !important; }
+#v4-content #page-heating .tile .t-lbl { font-size: 8px !important; }
+#v4-content #page-heating .tile .t-val { font-size: 9px !important; }
+#v4-content #page-heating .tile-grid { gap: 2px !important; margin-bottom: 2px !important; }
+
+/* HEATING2 (Plán) — ultra compact */
+#v4-content #page-heating2 .sect { font-size: 8px !important; margin: 1px 0 0 !important; }
+#v4-content #page-heating2 .card { padding: 3px 5px !important; margin-bottom: 1px !important; }
+#v4-content #page-heating2 .btn { min-height: 20px !important; padding: 2px 6px !important; font-size: 8px !important; }
+#v4-content #page-heating2 #h2-slots-list > div { padding: 2px 4px !important; font-size: 8px !important; min-height: 22px !important; }
+#v4-content #h2-preview-bar { height: 14px !important; }
+#v4-content #h2-all-zones { gap: 2px !important; }
+#v4-content #h2-all-zones > div { font-size: 7px !important; padding: 2px 4px !important; }
+
+/* WEATHER — tighter */
+#v4-content #page-weather .sect { font-size: 8px !important; margin: 1px 0 !important; }
+#v4-content #page-weather .card { padding: 3px 5px !important; margin-bottom: 1px !important; }
+#v4-content #page-weather .tile { min-height: 32px !important; padding: 2px 4px !important; }
+#v4-content #page-weather .tile .t-icon { font-size: 11px !important; width: 18px !important; height: 18px !important; }
+#v4-content #page-weather .tile .t-lbl { font-size: 8px !important; }
+#v4-content #page-weather .tile .t-val { font-size: 9px !important; }
+#v4-content #page-weather .tile-grid { gap: 2px !important; margin-bottom: 2px !important; }
+
+/* ═══════════════════════════════════════════════════════════════════════ */
 /* === RPI 1024×600 OVERRIDES — WaveShare 10.1" HDMI LCD (XPT2046 touch) === */
 /* === Vytvořeno 25.4.2026 pro native 1024×600 16:9.6 widescreen displej === */
 /* ═══════════════════════════════════════════════════════════════════════ */
 
-/* Body fixed na 1024×600 (no scroll v body) */
+/* Body — RPi default 1024×600 (no scroll). Override pro PC níže přes @media. */
 html, body {
   width: 1024px !important;
   height: 600px !important;
@@ -1666,6 +2361,88 @@ html, body {
   overflow: hidden !important;
 }
 body { padding-bottom: 56px !important; }
+
+/* === 14" notebook 1920×1080 — větší sidebar, scroll OK === */
+@media (min-width: 1600px) {
+  html, html body {
+    width: 100vw !important;
+    height: 100vh !important;
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    min-width: 100vw !important;
+    overflow: hidden !important;
+  }
+  html body { padding-bottom: 0 !important; }
+  .v4-shell {
+    width: 100vw !important;
+    height: 100vh !important;
+    grid-template-columns: 220px 1fr !important;
+  }
+  .v4-brand-name { font-size: 13px !important; }
+  .v4-brand-sub { font-size: 9px !important; }
+  .v4-brand-icon { width: 36px !important; height: 36px !important; font-size: 20px !important; }
+  .v4-nav-item { font-size: 12px !important; padding: 9px 12px !important; min-height: 38px !important; gap: 11px !important; }
+  .v4-nav-icon { font-size: 17px !important; width: 22px !important; }
+  .v4-health { font-size: 10px !important; padding: 7px 9px !important; }
+  .v4-user-name { font-size: 11px !important; }
+  .v4-user-loc { font-size: 9px !important; }
+  .v4-avatar { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+  .v4-header { height: 60px !important; padding: 0 18px !important; gap: 14px !important; }
+  .v4-greet-title { font-size: 16px !important; }
+  .v4-greet-sub { font-size: 11px !important; }
+  .v4-head-widget { font-size: 12px !important; padding: 6px 12px !important; min-height: 36px !important; }
+  .v4-head-widget .icon { font-size: 16px !important; }
+  .v4-head-widget .val { font-size: 13px !important; }
+  /* Allow scroll in pages */
+  #v4-content .page { overflow-y: auto !important; }
+  /* Bigger status cards */
+  .v4-status-card { min-height: 80px !important; padding: 10px 12px !important; }
+  .v4-status-card .lbl { font-size: 9px !important; }
+  .v4-status-card .ico { font-size: 22px !important; }
+  .v4-status-card .val { font-size: 16px !important; }
+  .v4-status-card .sub { font-size: 9px !important; }
+  /* Bigger card titles */
+  .v4-card-title { font-size: 11px !important; }
+  /* Bigger scenes */
+  .v4-scene .ico { font-size: 22px !important; }
+  .v4-scene .name { font-size: 10px !important; }
+  /* Disable RPi sub-tabs at this size — scroll is fine */
+  .v4-sub-nav { display: none !important; }
+  #v4-content .page.v4-has-subtabs > * { display: revert !important; }
+  /* Footer larger */
+  .v4-foot { height: 28px !important; font-size: 10px !important; }
+  /* Tabbar bottom (V3 fallback) — hide */
+  .tabs { display: none !important; }
+}
+
+/* === 32" monitor 2880×1800 — even bigger === */
+@media (min-width: 2400px) {
+  .v4-shell { grid-template-columns: 280px 1fr !important; }
+  .v4-brand-name { font-size: 16px !important; }
+  .v4-brand-sub { font-size: 11px !important; }
+  .v4-brand-icon { width: 44px !important; height: 44px !important; font-size: 24px !important; }
+  .v4-nav-item { font-size: 14px !important; padding: 11px 14px !important; min-height: 44px !important; gap: 13px !important; }
+  .v4-nav-icon { font-size: 20px !important; width: 26px !important; }
+  .v4-health { font-size: 12px !important; padding: 9px 12px !important; }
+  .v4-user-name { font-size: 13px !important; }
+  .v4-user-loc { font-size: 11px !important; }
+  .v4-avatar { width: 40px !important; height: 40px !important; font-size: 17px !important; }
+  .v4-header { height: 80px !important; padding: 0 24px !important; gap: 16px !important; }
+  .v4-greet-title { font-size: 22px !important; }
+  .v4-greet-sub { font-size: 14px !important; }
+  .v4-head-widget { font-size: 14px !important; padding: 9px 16px !important; min-height: 50px !important; }
+  .v4-head-widget .icon { font-size: 20px !important; }
+  .v4-head-widget .val { font-size: 16px !important; }
+  .v4-status-card { min-height: 110px !important; padding: 14px 18px !important; }
+  .v4-status-card .lbl { font-size: 11px !important; }
+  .v4-status-card .ico { font-size: 32px !important; }
+  .v4-status-card .val { font-size: 22px !important; }
+  .v4-status-card .sub { font-size: 12px !important; }
+  .v4-card-title { font-size: 13px !important; }
+  .v4-scene .ico { font-size: 28px !important; }
+  .v4-scene .name { font-size: 12px !important; }
+  .v4-foot { height: 36px !important; font-size: 12px !important; }
+}
 
 /* Topbar — shorter (40px místo 48px) — uvolní prostor pro content */
 .topbar { height: 40px !important; padding: 0 12px !important; }
@@ -1987,642 +2764,267 @@ hr, .divider { margin: 4px 0 !important; }
   z-index: 10;
 }
 .page.active { z-index: 20; }
-
-/* ═══════════════════════════════════════════════════════════════════════
-   🎨 PREMIUM REDESIGN LAYER — v3.5 (2026-04-26)
-   Source: redesign/DESIGN_SYSTEM.md + REFERENCES.md
-   Strategy: CSS-only override, no HTML/JS changes
-   Quality target: vendor-grade (Loxone/Homey Pro/HA Premium)
-   ═══════════════════════════════════════════════════════════════════════ */
-
-:root {
-  /* === BASE LAYERS (replaces purple gradient with calm dark blue) === */
-  --bg0: #050810;
-  --bg1: #0d1424;
-  --bg2: rgba(20, 29, 51, 0.85);
-  --bg3: rgba(26, 37, 63, 0.92);
-  --bg4: rgba(31, 41, 66, 0.95);
-  --bg-gradient: radial-gradient(ellipse at top, #0d1424 0%, #050810 60%);
-
-  /* === BORDERS (subtle premium) === */
-  --bd: rgba(255, 255, 255, 0.06);
-  --bda: rgba(74, 222, 128, 0.35);
-  --bd-strong: rgba(255, 255, 255, 0.12);
-  --bd-active: rgba(74, 222, 128, 0.45);
-
-  /* === TEXT (refined) === */
-  --tx1: #e8edf5;
-  --tx2: #9ba8bd;
-  --tx3: #5e6e85;
-  --tx-disabled: #3a4458;
-
-  /* === ACCENTS (refined intensity) === */
-  --green: #4ade80;        --greend: rgba(74, 222, 128, 0.14);   --greenb: rgba(74, 222, 128, 0.4);
-  --orange: #fb923c;       --oranged: rgba(251, 146, 60, 0.14);
-  --red: #f87171;          --redd: rgba(248, 113, 113, 0.14);
-  --cyan: #22d3ee;         --cyand: rgba(34, 211, 238, 0.14);    --cyanb: rgba(34, 211, 238, 0.4);
-  --blue: #60a5fa;         --blued: rgba(96, 165, 250, 0.14);
-  --purple: #a78bfa;       --purpled: rgba(167, 139, 250, 0.14);
-  --light: #fbbf24;        --lightd: rgba(251, 191, 36, 0.14);
-  --pink: #f472b6;         --pinkd: rgba(244, 114, 182, 0.14);
-
-  /* === RADII (premium softer) === */
-  --r: 14px;
-  --r2: 18px;
-  --r3: 22px;
-
-  /* === SHADOWS (depth + glow) === */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.35);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.45);
-  --shadow-card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-
-  /* === GLOWS (per accent) === */
-  --glow-green: 0 0 32px rgba(74, 222, 128, 0.30);
-  --glow-amber: 0 0 32px rgba(251, 191, 36, 0.30);
-  --glow-red: 0 0 32px rgba(248, 113, 113, 0.30);
-  --glow-blue: 0 0 32px rgba(96, 165, 250, 0.30);
-  --glow-purple: 0 0 32px rgba(167, 139, 250, 0.30);
-  --glow-cyan: 0 0 32px rgba(34, 211, 238, 0.30);
-
-  /* === MOTION === */
-  --tr-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
-  --tr-med: 250ms cubic-bezier(0.16, 1, 0.3, 1);
-  --tr-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-/* === BODY: replace purple gradient with calm dark === */
-html, body {
-  background: var(--bg-gradient) !important;
-  background-attachment: fixed !important;
-}
-
-/* === GLOBAL CARD ELEVATION (subtle premium) === */
-.tile, .card, .sect, [class*="-card"], [class*="card-"] {
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.025) 0%,
-    rgba(255, 255, 255, 0) 50%
-  ), var(--bg2) !important;
-  border: 1px solid var(--bd) !important;
-  border-radius: var(--r) !important;
-  box-shadow: var(--shadow-sm), var(--shadow-card-inset) !important;
-  transition: transform var(--tr-fast), box-shadow var(--tr-fast), border-color var(--tr-fast) !important;
-}
-
-.tile:hover, .card:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-md), var(--shadow-card-inset) !important;
-  border-color: var(--bd-strong) !important;
-}
-
-/* Active states with green glow (matches references) */
-.tile.active, .card.active, .tile.on, .card.on {
-  border-color: var(--bd-active) !important;
-  box-shadow: 0 0 0 1px var(--greenb), var(--glow-green), var(--shadow-md) !important;
-}
-
-/* === HERO VALUES (kWh, °C, scores) — large premium typography === */
-.hero-value, [class*="big-num"], [class*="hero-num"] {
-  font-size: clamp(28px, 2.4vw, 42px);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--tx1);
-  font-feature-settings: "tnum";
-}
-
-/* === SECTION LABELS (uppercase tracking-wide) === */
-.sect-label, [class*="-label"], .sect h3, .sect-title {
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--tx2);
-}
-
-/* === GLOW UTILITY CLASSES === */
-.glow-green  { box-shadow: var(--glow-green), var(--shadow-sm) !important; }
-.glow-amber  { box-shadow: var(--glow-amber), var(--shadow-sm) !important; }
-.glow-red    { box-shadow: var(--glow-red), var(--shadow-sm) !important; }
-.glow-blue   { box-shadow: var(--glow-blue), var(--shadow-sm) !important; }
-.glow-purple { box-shadow: var(--glow-purple), var(--shadow-sm) !important; }
-.glow-cyan   { box-shadow: var(--glow-cyan), var(--shadow-sm) !important; }
-
-/* === STATUS PILLS (top header — image 2 reference) === */
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  background: var(--bg2);
-  border: 1px solid var(--bd);
-  border-radius: var(--r);
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--tx2);
-}
-.status-pill.active { color: var(--green); border-color: var(--greenb); }
-.status-pill.warn   { color: var(--orange); border-color: rgba(251,146,60,0.4); }
-.status-pill.danger { color: var(--red); border-color: rgba(248,113,113,0.4); }
-
-/* === BUTTONS (premium consistency) === */
-button, .btn {
-  border-radius: var(--r) !important;
-  transition: all var(--tr-fast) !important;
-  font-family: var(--sans) !important;
-  font-weight: 500 !important;
-}
-
-button:hover, .btn:hover {
-  filter: brightness(1.1);
-}
-
-/* === SCROLLBARS (premium) === */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
-
-/* === ULTRAWIDE EXPANSION (2200+ wide screens like 32" 2880) ════════
-   Reference: image 1 home grid takes most of viewport (~95%)
-   Strategy: expand max-width but cap camera column to readable size
-   so image doesn't stretch to full screen height
-================================================================== */
-@media (min-width: 2200px) {
-  .home-grid {
-    max-width: 2400px !important;
-    margin: 0 auto !important;
-    grid-template-columns: minmax(0, 1fr) 720px !important;
-    gap: 24px !important;
-    padding: 24px !important;
-  }
-  /* Cap camera height to prevent stretch */
-  .home-grid > *:last-child {
-    max-height: 520px !important;
-    align-self: start !important;
-  }
-  /* Larger tiles on big screens */
-  .tile.ht { min-height: 130px !important; padding: 20px 16px !important; }
-  .tile.ht .ht-icon { font-size: 38px !important; }
-  .tile.ht .ht-name { font-size: 11px !important; }
-  .tile.ht .ht-val { font-size: 22px !important; }
-  /* Larger floor/zone tiles */
-  .floor-grid .tile { min-height: 110px !important; padding: 18px !important; }
-  .floor-grid .tile .ht-icon { font-size: 32px !important; }
-  .floor-grid .tile .ht-name { font-size: 14px !important; }
-  /* Larger scene tiles */
-  .scene-grid .tile { min-height: 95px !important; padding: 16px !important; }
-  .scene-grid .tile .ht-icon { font-size: 30px !important; }
-  .scene-grid .tile .ht-name { font-size: 13px !important; }
-}
-
-/* === SUPER-ULTRAWIDE (>3000px, future-proofing) === */
-@media (min-width: 3000px) {
-  .home-grid { max-width: 3000px !important; }
-}
-
-/* === COMPACT NARROW (1024×600 RPi WaveShare + small tablets) === */
-@media (max-width: 1100px) {
-  .home-grid {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-  /* Camera moves below content stack on narrow */
-  .home-grid > *:last-child {
-    max-height: 200px !important;
-  }
-  /* Status tiles container — top row of home page (5 → 3 cols) */
-  .hg-status, [class*="hg-status"] {
-    grid-template-columns: repeat(3, 1fr) !important;
-    gap: 8px !important;
-  }
-  /* Floor grid: 4 → 2 cols */
-  .floor-grid {
-    grid-template-columns: 1fr 1fr !important;
-  }
-  /* Scene grid: 7 → 4 cols, others wrap */
-  .scene-grid {
-    grid-template-columns: repeat(4, 1fr) !important;
-  }
-  /* Status tile-grid: limit to 3 cols on narrow */
-  .tile-grid {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-  .tile-grid.g4, .tile-grid.g5 {
-    grid-template-columns: repeat(3, 1fr) !important;
-  }
-  /* Compact tile padding on narrow */
-  .tile.ht { min-height: 90px !important; padding: 12px 8px !important; }
-  .tile.ht .ht-icon { font-size: 26px !important; }
-  .tile.ht .ht-name { font-size: 9px !important; }
-  .tile.ht .ht-val { font-size: 14px !important; }
-}
-
-/* === MOBILE / NARROW SCREENS === */
-@media (max-width: 768px) {
-  .tile, .card { padding: 14px !important; }
-  .hero-value { font-size: 24px; }
-  .home-grid { padding: 8px !important; }
-  /* Mobile: tile-grid single col fallback for very small */
-  .tile-grid.g5 { grid-template-columns: repeat(2, 1fr) !important; }
-  .scene-grid { grid-template-columns: repeat(3, 1fr) !important; }
-}
-
-@media (max-width: 480px) {
-  .floor-grid, .tile-grid { grid-template-columns: 1fr 1fr !important; }
-  .scene-grid { grid-template-columns: 1fr 1fr !important; }
-  .home-grid > *:last-child { max-height: 180px !important; }
-}
-
-/* === FOCUS RING (accessibility) === */
-*:focus-visible {
-  outline: 2px solid var(--cyan) !important;
-  outline-offset: 2px !important;
-  border-radius: var(--r) !important;
-}
-
-/* === LIVE INDICATOR (for camera tiles) — pulse animation === */
-@keyframes live-pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--red); }
-  50% { opacity: 0.6; box-shadow: 0 0 4px var(--red); }
-}
-.live-indicator, [class*="live"]::before {
-  animation: live-pulse 2s ease-in-out infinite;
-}
-
-/* === STATUS TILES (.tile.ht) — premium hero treatment ════════════
-   Reference: image 1 — top status row (REŽIM DOMU / PŘÍTOMNOST / DENNÍ FÁZE / ...)
-   icon big + glowing, label uppercase tiny, value medium bold
-=================================================================== */
-.tile.ht {
-  padding: 16px 12px !important;
-  gap: 8px !important;
-  min-height: 110px !important;
-}
-.tile.ht .ht-icon {
-  font-size: 32px !important;
-  line-height: 1 !important;
-  filter: drop-shadow(0 0 12px rgba(74, 222, 128, 0.25));
-  margin-bottom: 4px !important;
-}
-.tile.ht .ht-name {
-  font-size: 10px !important;
-  font-weight: 600 !important;
-  letter-spacing: 0.1em !important;
-  text-transform: uppercase !important;
-  color: var(--tx2) !important;
-  line-height: 1.3 !important;
-}
-.tile.ht .ht-val {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  font-family: var(--sans) !important;
-  letter-spacing: -0.01em !important;
-  color: var(--tx1) !important;
-  line-height: 1.1 !important;
-  font-feature-settings: "tnum" !important;
-}
-.tile.ht.on .ht-icon {
-  filter: drop-shadow(0 0 16px rgba(74, 222, 128, 0.5)) !important;
-}
-.tile.ht.on .ht-val {
-  color: var(--green) !important;
-}
-.tile.ht.active-c .ht-icon {
-  filter: drop-shadow(0 0 16px rgba(34, 211, 238, 0.5)) !important;
-}
-.tile.ht.active-c .ht-val {
-  color: var(--cyan) !important;
-}
-
-/* === SCENE TILES (.tile.scene) — pill-shaped premium scenes === */
-.tile.scene {
-  min-height: 80px !important;
-  padding: 12px 8px !important;
-  gap: 6px !important;
-}
-.tile.scene .ht-icon {
-  font-size: 26px !important;
-}
-.tile.scene .ht-name {
-  font-size: 11px !important;
-  font-weight: 500 !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  color: var(--tx1) !important;
-}
-
-/* === FLOOR/ZONE TILES (Jídelna/Kuchyně/...) — slightly more prominent === */
-.tile-grid .tile, .floor-grid .tile {
-  min-height: 90px !important;
-  padding: 14px 10px !important;
-}
-
-/* === BOTTOM TAB BAR — premium dock styling ═══════════════
-   Reference: image 1 + 4 — sidebar nav has clear hierarchy
-   We can't move to sidebar (HTML-locked) but make tabs premium
-=================================================================== */
-[class*="tabbar"], [class*="bottom-nav"], [id*="tabbar"], #tabBar, .tab-bar, .bottom-bar {
-  background: linear-gradient(180deg,
-    rgba(13, 20, 36, 0.85),
-    rgba(5, 8, 16, 0.95)
-  ) !important;
-  border-top: 1px solid var(--bd) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-}
-
-/* Tab item icons + labels */
-[class*="tabbar"] > div, [class*="bottom-nav"] > div, .tab-item {
-  transition: all var(--tr-fast) !important;
-}
-[class*="tabbar"] > div:hover, .tab-item:hover {
-  background: var(--bg3) !important;
-  transform: translateY(-1px);
-}
-.tab-item.active, [class*="tabbar"] > div.active, [class*="tabbar"] [class*="active"] {
-  background: rgba(74, 222, 128, 0.1) !important;
-  border-top: 2px solid var(--green) !important;
-}
-
-/* === SIDEBAR-STYLE TOPBAR (left) — clean header brand === */
-#topbar, .topbar, header {
-  background: linear-gradient(180deg,
-    rgba(13, 20, 36, 0.92),
-    rgba(13, 20, 36, 0.75)
-  ) !important;
-  border-bottom: 1px solid var(--bd) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
-}
-
-/* === LIVE BADGE (cameras) — image 1 reference === */
-[class*="live"], .badge-live, [data-live="true"] {
-  background: linear-gradient(135deg, var(--red), #dc2626) !important;
-  color: white !important;
-  font-weight: 700 !important;
-  font-size: 10px !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.1em !important;
-  padding: 3px 8px !important;
-  border-radius: 6px !important;
-  box-shadow: 0 0 12px rgba(248, 113, 113, 0.5);
-}
-
-/* === SECTION HEADERS (panels with title bar) === */
-.sect-head, .panel-head, h2, h3 {
-  font-family: var(--sans) !important;
-  letter-spacing: 0.05em !important;
-}
-
-/* === SECTION HEADER PREMIUM REFRESH (.sect) ═════════════════════
-   Matches reference image 1, 2, 4 — section labels mají:
-   - uppercase + tracking-wide
-   - small accent dot/bar before
-   - subtle separator line after
-=================================================================== */
-.sect {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 12px 16px 8px !important;
-  margin-top: 4px !important;
-  font-size: 11px !important;
-  font-weight: 600 !important;
-  text-transform: uppercase !important;
-  letter-spacing: 0.12em !important;
-  color: var(--tx2) !important;
-  border-bottom: 1px solid var(--bd) !important;
-  position: relative !important;
-}
-.sect::before {
-  content: '';
-  display: inline-block;
-  width: 4px;
-  height: 14px;
-  background: var(--green);
-  border-radius: 2px;
-  box-shadow: 0 0 8px var(--greenb);
-  margin-right: 4px;
-}
-/* Accent variants — pages can add .sect.cyan / .sect.purple etc. */
-.sect.cyan::before   { background: var(--cyan);   box-shadow: 0 0 8px var(--cyanb); }
-.sect.amber::before  { background: var(--light);  box-shadow: 0 0 8px var(--lightd); }
-.sect.red::before    { background: var(--red);    box-shadow: 0 0 8px var(--redd); }
-.sect.blue::before   { background: var(--blue);   box-shadow: 0 0 8px var(--blued); }
-.sect.purple::before { background: var(--purple); box-shadow: 0 0 8px var(--purpled); }
-
-/* === EMPTY STATE PLACEHOLDER (na "Načítám..." text) ═══════════
-   Pages můžou wrapnout placeholder do .empty-state pro lepší look
-=================================================================== */
-.empty-state {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 32px 16px !important;
-  color: var(--tx3) !important;
-  text-align: center !important;
-  gap: 8px !important;
-}
-.empty-state::before {
-  content: '⌛';
-  font-size: 32px;
-  opacity: 0.5;
-  animation: empty-pulse 2s ease-in-out infinite;
-}
-@keyframes empty-pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.8; }
-}
-
-/* === TOGGLE SWITCH (modern iOS-style) ════════════════════════
-   Pages s booleanovými cfg můžou použít .toggle-pill místo text "true/false"
-   <label class="toggle-pill"><input type="checkbox"><span></span></label>
-=================================================================== */
-.toggle-pill {
-  display: inline-flex;
-  align-items: center;
-  cursor: pointer;
-  position: relative;
-  width: 44px;
-  height: 24px;
-}
-.toggle-pill input { opacity: 0; width: 0; height: 0; }
-.toggle-pill span {
-  position: absolute;
-  inset: 0;
-  background: var(--bg3);
-  border: 1px solid var(--bd);
-  border-radius: 12px;
-  transition: all var(--tr-fast);
-}
-.toggle-pill span::before {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 18px;
-  height: 18px;
-  background: var(--tx2);
-  border-radius: 50%;
-  transition: all var(--tr-fast);
-}
-.toggle-pill input:checked + span {
-  background: var(--greend);
-  border-color: var(--green);
-}
-.toggle-pill input:checked + span::before {
-  left: 22px;
-  background: var(--green);
-  box-shadow: 0 0 8px var(--greenb);
-}
-
-/* === HEALTH GAUGE (SVG donut for scores 0-100) ════════════════
-   Reference image 2, 3, 5 mají kruhový gauge s číslem uprostřed
-   Pages můžou injectovat SVG s class .health-gauge
-   Použít jako: <svg class="health-gauge" data-score="94">...</svg>
-=================================================================== */
-.health-gauge {
-  display: block;
-  width: 140px;
-  height: 140px;
-  margin: 0 auto;
-}
-.health-gauge .gauge-bg {
-  fill: none;
-  stroke: var(--bg3);
-  stroke-width: 10;
-}
-.health-gauge .gauge-fg {
-  fill: none;
-  stroke: var(--green);
-  stroke-width: 10;
-  stroke-linecap: round;
-  filter: drop-shadow(0 0 8px var(--greenb));
-  transition: stroke-dashoffset 800ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-.health-gauge .gauge-text {
-  fill: var(--tx1);
-  font-size: 36px;
-  font-weight: 700;
-  text-anchor: middle;
-  font-family: var(--sans);
-  letter-spacing: -0.02em;
-}
-.health-gauge .gauge-sub {
-  fill: var(--tx3);
-  font-size: 10px;
-  text-anchor: middle;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* === SPARKLINE (mini chart for tile values) ════════════════════ */
-.sparkline {
-  display: block;
-  width: 100%;
-  height: 32px;
-  margin-top: 6px;
-}
-.sparkline path {
-  fill: none;
-  stroke: var(--cyan);
-  stroke-width: 1.5;
-  stroke-linejoin: round;
-  filter: drop-shadow(0 0 4px var(--cyanb));
-}
-.sparkline .sparkline-area {
-  fill: url(#spark-gradient);
-  stroke: none;
-  opacity: 0.3;
-}
-
-/* === HERO METRIC CARD (large stat tiles) ═══════════════════════
-   For tiles s velkým číslem + label + trend
-=================================================================== */
-.metric-hero {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 20px;
-}
-.metric-hero .metric-label {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--tx2);
-}
-.metric-hero .metric-value {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--tx1);
-  letter-spacing: -0.02em;
-  line-height: 1.1;
-  font-feature-settings: "tnum";
-}
-.metric-hero .metric-unit {
-  font-size: 18px;
-  color: var(--tx2);
-  font-weight: 500;
-  margin-left: 4px;
-}
-.metric-hero .metric-delta {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--green);
-}
-.metric-hero .metric-delta.neg { color: var(--red); }
-.metric-hero .metric-delta::before { content: '↑ '; }
-.metric-hero .metric-delta.neg::before { content: '↓ '; }
-
-/* === BUTTON PRIMARY/SECONDARY/DANGER (premium variants) ══════ */
-.btn-primary {
-  background: linear-gradient(135deg, var(--green), #22c55e) !important;
-  color: white !important;
-  border: none !important;
-  padding: 10px 20px !important;
-  font-weight: 600 !important;
-  border-radius: var(--r) !important;
-  cursor: pointer !important;
-  transition: all var(--tr-fast) !important;
-  box-shadow: 0 2px 8px var(--greenb) !important;
-}
-.btn-primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--greenb), 0 0 16px var(--greenb) !important;
-}
-.btn-secondary {
-  background: var(--bg3) !important;
-  color: var(--tx1) !important;
-  border: 1px solid var(--bd-strong) !important;
-  padding: 10px 20px !important;
-  border-radius: var(--r) !important;
-  font-weight: 500 !important;
-  cursor: pointer !important;
-  transition: all var(--tr-fast) !important;
-}
-.btn-secondary:hover {
-  background: var(--bg4) !important;
-  border-color: var(--bd-active) !important;
-}
-.btn-danger {
-  background: linear-gradient(135deg, var(--red), #dc2626) !important;
-  color: white !important;
-  border: none !important;
-  padding: 10px 20px !important;
-  font-weight: 600 !important;
-  border-radius: var(--r) !important;
-  cursor: pointer !important;
-  box-shadow: 0 2px 8px var(--redd) !important;
-}
-
-/* === PREMIUM REDESIGN LAYER END ═════════════════════════════════════ */
-
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- V4 SHELL — sidebar (180) + main (844) na 1024×600                -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<div class="v4-shell" id="v4-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="v4-sidebar">
+    <div class="v4-brand">
+      <div class="v4-brand-icon">🏠</div>
+      <div>
+        <div class="v4-brand-name">SMART HOME</div>
+        <div class="v4-brand-sub">Homey Pro 2026</div>
+      </div>
+    </div>
+
+    <div class="v4-nav-item active" data-page="home" onclick="v4Switch('home')">
+      <span class="v4-nav-icon">🏠</span><span>Přehled</span>
+    </div>
+    <div class="v4-nav-item" data-page="heating" onclick="v4Switch('heating')">
+      <span class="v4-nav-icon">🔥</span><span>Topení</span>
+    </div>
+    <div class="v4-nav-item" data-page="zones" onclick="v4Switch('zones')">
+      <span class="v4-nav-icon">💡</span><span>Osvětlení</span>
+    </div>
+    <div class="v4-nav-item" data-page="audio" onclick="v4Switch('audio')">
+      <span class="v4-nav-icon">🎵</span><span>Audio</span>
+    </div>
+    <div class="v4-nav-item" data-page="ai" onclick="v4Switch('ai')">
+      <span class="v4-nav-icon">🧠</span><span>AI</span>
+    </div>
+    <div class="v4-nav-item" data-page="camera" onclick="v4Switch('camera')">
+      <span class="v4-nav-icon">📷</span><span>Kamera</span>
+    </div>
+    <div class="v4-nav-item" data-page="weather" onclick="v4Switch('weather')">
+      <span class="v4-nav-icon">🌤</span><span>Počasí</span>
+    </div>
+    <div class="v4-nav-item" data-page="settings" onclick="v4Switch('settings')">
+      <span class="v4-nav-icon">⚙</span><span>Konfigurace</span>
+    </div>
+    <div class="v4-nav-item" data-page="logy" onclick="v4Switch('logy')">
+      <span class="v4-nav-icon">📊</span><span>Logy</span>
+    </div>
+    <div class="v4-nav-item" onclick="document.getElementById('v4-more-modal').classList.add('active')">
+      <span class="v4-nav-icon">⋯</span><span>Více</span>
+    </div>
+
+    <div class="v4-side-foot">
+      <div class="v4-health" id="v4-health-pill">
+        <span style="filter:drop-shadow(0 0 4px var(--green));">●</span>
+        <span>Vše v pořádku</span>
+      </div>
+      <div class="v4-user">
+        <div class="v4-avatar">L</div>
+        <div>
+          <div class="v4-user-name">Luděk Budínský</div>
+          <div class="v4-user-loc">Semily</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="v4-main">
+    <header class="v4-header">
+      <div class="v4-greet">
+        <div class="v4-greet-title" id="v4-greet">Dobrý den, Luděk 👋</div>
+        <div class="v4-greet-sub" id="v4-subgreet">Vše je v pořádku · režim Domov</div>
+      </div>
+      <div class="v4-head-widget">
+        <span class="icon">⏰</span><span class="val" id="v4-clock">--:--</span>
+      </div>
+      <div class="v4-head-widget">
+        <span class="icon">🌤</span><span class="val" id="v4-temp-out">— °C</span>
+      </div>
+      <div class="v4-head-widget status-ok" onclick="showConfig()" style="cursor:pointer;">
+        <span class="icon">●</span><span class="val">Online</span>
+      </div>
+    </header>
+
+    <!-- Pages render-area (V3 page divs become V4 active pages here, redirected by enforcer) -->
+    <div class="v4-content" id="v4-content">
+
+      <!-- V4 HOME page (renders inside v4-content) -->
+      <div class="page v4-active" id="v4-page-home">
+        <div class="v4-home">
+          <div class="v4-status-row">
+            <div class="v4-status-card green" onclick="openV4Modal('presence')">
+              <div class="lbl">PŘÍTOMNOST</div>
+              <div class="ico">🏠</div>
+              <div class="val" id="v4-presence">—</div>
+              <div class="sub">Doma</div>
+            </div>
+            <div class="v4-status-card cyan" onclick="openV4Modal('phase')">
+              <div class="lbl">FÁZE DNE</div>
+              <div class="ico">☀️</div>
+              <div class="val" id="v4-phase">—</div>
+              <div class="sub" id="v4-phase-time">—</div>
+            </div>
+            <div class="v4-status-card purple" onclick="openV4Modal('sleep')">
+              <div class="lbl">SPÁNEK</div>
+              <div class="ico">😴</div>
+              <div class="val" id="v4-sleep">—</div>
+              <div class="sub">Wake scorer</div>
+            </div>
+            <div class="v4-status-card orange">
+              <div class="lbl">VENKU</div>
+              <div class="ico">🌡</div>
+              <div class="val" id="v4-temp-out2">— °C</div>
+              <div class="sub" id="v4-weather">—</div>
+            </div>
+            <div class="v4-status-card cyan" onclick="openV4Modal('power')">
+              <div class="lbl">SPOTŘEBA</div>
+              <div class="ico">⚡</div>
+              <div class="val" id="v4-power">— W</div>
+              <div class="sub" id="v4-kwh">— kWh</div>
+            </div>
+            <div class="v4-status-card green" onclick="openV4Modal('health')">
+              <div class="lbl">SYSTÉM</div>
+              <div class="ico">💚</div>
+              <div class="val" id="v4-health">—</div>
+              <div class="sub">Online</div>
+            </div>
+          </div>
+
+          <div class="v4-home-grid">
+            <!-- Card: Quick scenes (1 row, 4 cols × 2 rows tiles) -->
+            <div class="v4-card">
+              <div class="v4-card-title">⚡ RYCHLÉ SCÉNY</div>
+              <div class="v4-card-body">
+                <div class="v4-scene-grid">
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','relax')"><span class="ico">🌙</span><span class="name">Relax</span></div>
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','work')"><span class="ico">💼</span><span class="name">Work</span></div>
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','audio')"><span class="ico">🎵</span><span class="name">Audio</span></div>
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','vareni')"><span class="ico">🍳</span><span class="name">Vaření</span></div>
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','kino')"><span class="ico">🎬</span><span class="name">Kino</span></div>
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','romantika')"><span class="ico">🕯</span><span class="name">Romant.</span></div>
+                  <div class="v4-scene" onclick="sendReq('sh_scene_active_request','reset')"><span class="ico">↺</span><span class="name">Reset</span></div>
+                  <div class="v4-scene" onclick="v4Switch('zones')"><span class="ico">💡</span><span class="name">Světla</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Camera mini -->
+            <div class="v4-card" onclick="v4Switch('camera')">
+              <div class="v4-card-title">📷 KAMERA</div>
+              <div class="v4-card-body">
+                <div class="v4-cam-mini">
+                  <img id="v4-cam-img" alt="" style="display:none;">
+                  <div class="off-state" id="v4-cam-off">Kamera offline</div>
+                  <div class="live-tag" id="v4-cam-live" style="display:none;">● LIVE</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Aktivity -->
+            <div class="v4-card">
+              <div class="v4-card-title">📋 POSLEDNÍ AKTIVITY</div>
+              <div class="v4-card-body">
+                <div class="v4-activity" id="v4-activity">
+                  <div class="v4-activity-row">
+                    <span class="ico">⏳</span><span class="lbl">Načítám…</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card: Klima přehled -->
+            <div class="v4-card">
+              <div class="v4-card-title">🌡 KLIMA</div>
+              <div class="v4-card-body" id="v4-klima-body">
+                <div style="font-size:9px;color:var(--tx3);">Načítám…</div>
+              </div>
+            </div>
+
+            <!-- Card: Audio -->
+            <div class="v4-card" onclick="v4Switch('audio')">
+              <div class="v4-card-title">🎵 AUDIO</div>
+              <div class="v4-card-body" id="v4-audio-body">
+                <div style="font-size:9px;color:var(--tx3);">Klikni pro detail</div>
+              </div>
+            </div>
+
+            <!-- Card: Počasí + BTC mini -->
+            <div class="v4-card">
+              <div class="v4-card-title">🌤 POČASÍ + BURZA</div>
+              <div class="v4-card-body" style="display:flex;flex-direction:column;gap:4px;justify-content:space-around;">
+                <div onclick="v4Switch('weather')" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(255,159,64,.15);border-radius:6px;cursor:pointer;">
+                  <span style="font-size:26px;line-height:1;filter:drop-shadow(0 0 6px rgba(255,159,64,.5));" id="v4-weather-ico">🌤</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:14px;font-weight:700;color:var(--orange);" id="v4-weather-temp2">— °C</div>
+                    <div style="font-size:8px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" id="v4-weather-cond">—</div>
+                  </div>
+                </div>
+                <div onclick="document.getElementById('v4-more-modal').classList.add('active');" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(98,126,234,.25);border-radius:6px;cursor:pointer;">
+                  <span style="font-size:22px;line-height:1;color:#627eea;filter:drop-shadow(0 0 6px rgba(98,126,234,.5));">⟠</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:700;color:#627eea;" id="v4-eth-price">— $</div>
+                    <div style="font-size:8px;font-family:var(--mono);" id="v4-eth-change">—</div>
+                  </div>
+                </div>
+                <div onclick="document.getElementById('v4-more-modal').classList.add('active');" style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.03);border:1px solid rgba(247,147,26,.25);border-radius:6px;cursor:pointer;">
+                  <span style="font-size:22px;line-height:1;color:#f7931a;filter:drop-shadow(0 0 6px rgba(247,147,26,.5));">₿</span>
+                  <div style="flex:1;min-width:0;">
+                    <div style="font-size:12px;font-weight:700;color:#f7931a;" id="v4-btc-price">— $</div>
+                    <div style="font-size:8px;font-family:var(--mono);" id="v4-btc-change">—</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /V4 HOME -->
+
+      <!-- V3 pages will be relocated here via JS (v4Switch) -->
+
+    </div>
+    <!-- /v4-content -->
+
+    <footer class="v4-foot">
+      <span id="v4-foot-sync">Poslední synchronizace: —</span>
+      <span style="margin-left:auto;">Homey Pro 2026 · v4.0</span>
+      <span class="v4-foot-ok" id="v4-foot-status">Vše online</span>
+    </footer>
+  </main>
+</div>
+
+<!-- ═══ V4 MORE MODAL — overlay s ostatními page links ═══ -->
+<div class="v4-modal" id="v4-more-modal">
+  <div class="v4-modal-box">
+    <div class="v4-modal-head">
+      <h3>📋 Více stránek</h3>
+      <div class="v4-modal-close" onclick="document.getElementById('v4-more-modal').classList.remove('active')">✕</div>
+    </div>
+    <div class="v4-modal-body">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        <div class="v4-scene" onclick="document.getElementById('v4-more-modal').classList.remove('active');v4Switch('heating2');"><span class="ico">📅</span><span class="name">Plán topení</span></div>
+        <div class="v4-scene" onclick="document.getElementById('v4-more-modal').classList.remove('active');v4Switch('historie');"><span class="ico">📉</span><span class="name">Historie</span></div>
+        <div class="v4-scene" onclick="document.getElementById('v4-more-modal').classList.remove('active');v4Switch('advanced');"><span class="ico">🔧</span><span class="name">Advanced</span></div>
+        <div class="v4-scene" onclick="document.getElementById('v4-more-modal').classList.remove('active');v4Switch('finance');"><span class="ico">💰</span><span class="name">Finance</span></div>
+        <div class="v4-scene" onclick="document.getElementById('v4-more-modal').classList.remove('active');v4Switch('burza');"><span class="ico">📈</span><span class="name">Burza</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ V4 GENERIC MODAL pro detail tilů ═══ -->
+<div class="v4-modal" id="v4-detail-modal">
+  <div class="v4-modal-box">
+    <div class="v4-modal-head">
+      <h3 id="v4-detail-title">Detail</h3>
+      <div class="v4-modal-close" onclick="document.getElementById('v4-detail-modal').classList.remove('active')">✕</div>
+    </div>
+    <div class="v4-modal-body" id="v4-detail-body">—</div>
+  </div>
+</div>
+
 <a href="#pagesContainer" class="skip-link">Přeskočit na obsah</a>
 <!-- 🎨 v3 theme banner — REMOVED (overlapping clock). Filename identifies version. -->
 <!-- <div style="position:fixed;top:10px;right:10px;...">v3 • theme</div> -->
@@ -3465,10 +3867,7 @@ button:hover, .btn:hover {
       <div style="font-weight:600;color:var(--cyan);margin-bottom:4px;">🔍 Kontrola konzistence (sanity check)</div>
       <div id="roletaSanityList" style="color:var(--tx2);line-height:1.5;">—</div>
     </div>
-    <!-- placeholder-removed --> style="margin-bottom:10px;font-size:11px;padding:8px 12px;border-radius:var(--r2);border:1px solid rgba(100,244,216,.2);background:rgba(100,244,216,.05);">
-      <div style="font-weight:600;color:var(--cyan);margin-bottom:4px;">🔍 Kontrola konzistence (sanity check)</div>
-      <div id="roletaSanityList" style="color:var(--tx2);line-height:1.5;">—</div>
-    </div>
+    <!-- v4 fix 25.4.: removed orphan duplicate roletaSanityPanel that was rendering as raw text -->
 
     <!-- Config: 2 columns (advanced moved) -->
     <div class="cfg-tile-grid">
@@ -4629,7 +5028,11 @@ button:hover, .btn:hover {
 // ════════════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════════════
-let CFG = { host: 'http://localhost:8080', token: 'be2e2ce1-1d55-40bf-9d24-f07294d5071d:089f6b36-e770-45c7-870d-71e86a07a9e3:1b38e08a545a4ef5ff651c18e5ddeede17a5d87c', interval: 10 };
+// V4: auto-detect host - works for RPi (localhost:8080) and PC (loads via http://192.168.1.122:8080/)
+const _v4DefaultHost = (location.protocol === 'http:' || location.protocol === 'https:')
+  ? location.origin
+  : 'http://192.168.1.122:8080';
+let CFG = { host: _v4DefaultHost, token: 'be2e2ce1-1d55-40bf-9d24-f07294d5071d:089f6b36-e770-45c7-870d-71e86a07a9e3:1b38e08a545a4ef5ff651c18e5ddeede17a5d87c', interval: 10 };
 let ALL_VARS = {};
 let ALL_SCRIPTS = {};
 let ALL_DEVICES = {};
@@ -9045,7 +9448,11 @@ function refreshCamera() {
   const imgMini = document.getElementById('camImgMini');
   const offMini = document.getElementById('camOffMini');
   const liveMini = document.getElementById('camLiveMini');
-  if (!img && !imgMini) return;
+  // V4 home camera mini IDs
+  const v4Img = document.getElementById('v4-cam-img');
+  const v4Off = document.getElementById('v4-cam-off');
+  const v4Live = document.getElementById('v4-cam-live');
+  if (!img && !imgMini && !v4Img) return;
   const ni = new Image();
   ni.onload = function() {
     if (img) { img.src = this.src; img.style.display = 'block'; }
@@ -9054,6 +9461,9 @@ function refreshCamera() {
     if (imgMini) { imgMini.src = this.src; imgMini.style.display = 'block'; }
     if (offMini) offMini.style.display = 'none';
     if (liveMini) liveMini.style.display = '';
+    if (v4Img) { v4Img.src = this.src; v4Img.style.display = 'block'; }
+    if (v4Off) v4Off.style.display = 'none';
+    if (v4Live) v4Live.style.display = 'block';
   };
   ni.onerror = function() {
     if (img) img.style.display = 'none';
@@ -9062,6 +9472,9 @@ function refreshCamera() {
     if (imgMini) imgMini.style.display = 'none';
     if (offMini) offMini.style.display = 'flex';
     if (liveMini) liveMini.style.display = 'none';
+    if (v4Img) v4Img.style.display = 'none';
+    if (v4Off) v4Off.style.display = 'flex';
+    if (v4Live) v4Live.style.display = 'none';
   };
   ni.src = CAM_URL + '&t=' + Date.now();
 }
@@ -9189,23 +9602,35 @@ const WX_LAT = 50.6012, WX_LON = 15.4950;
 let wxLastFetch = 0;
 const WX_COOLDOWN = 600000; // 10 min
 
-function wxIconImg(code, size) {
-  if (!code) return '<span style="font-size:'+size+'px;">🌡</span>';
-  return '<img src="https://openweathermap.org/img/wn/' + code + '@2x.png" style="width:'+size+'px;height:'+size+'px;filter:brightness(1.1) drop-shadow(0 2px 6px rgba(0,0,0,.4));" alt="">';
-}
 function wxIcon(code) {
   if (!code) return '🌡';
   const c = String(code);
-  if (c.startsWith('01')) return '☀️';
-  if (c.startsWith('02')) return '⛅';
+  // 01d = clear day = sun, 01n = clear night = moon
+  if (c.startsWith('01')) return c.endsWith('n') ? '🌙' : '☀️';
+  if (c.startsWith('02')) return c.endsWith('n') ? '☁️' : '⛅';
   if (c.startsWith('03')) return '☁️';
   if (c.startsWith('04')) return '☁️';
   if (c.startsWith('09')) return '🌧';
-  if (c.startsWith('10')) return '🌦';
+  if (c.startsWith('10')) return c.endsWith('n') ? '🌧' : '🌦';
   if (c.startsWith('11')) return '⛈';
   if (c.startsWith('13')) return '❄️';
   if (c.startsWith('50')) return '🌫';
   return '🌡';
+}
+// V4: emoji-based weather ikony (vibrant, no gray PNG fallback)
+function wxIconImg(code, size) {
+  if (!code) return '<span style="font-size:'+size+'px;line-height:1;">🌡</span>';
+  const emoji = wxIcon(code);
+  // Colored glow per ikona type
+  const c = String(code);
+  let glow = 'rgba(255,200,100,.5)';
+  if (c.startsWith('01') && c.endsWith('n')) glow = 'rgba(180,200,255,.6)'; // moon — modrý glow
+  else if (c.startsWith('01')) glow = 'rgba(255,200,80,.7)'; // sun — žlutý glow
+  else if (c.startsWith('02') || c.startsWith('03') || c.startsWith('04')) glow = 'rgba(220,230,255,.4)'; // cloud — šedo-modrý
+  else if (c.startsWith('09') || c.startsWith('10')) glow = 'rgba(100,160,255,.5)'; // rain — modrý
+  else if (c.startsWith('11')) glow = 'rgba(255,230,100,.6)'; // thunder — žlutý
+  else if (c.startsWith('13')) glow = 'rgba(255,255,255,.6)'; // snow — bílý
+  return '<span style="font-size:'+size+'px;line-height:1;display:inline-block;filter:drop-shadow(0 0 10px '+glow+') drop-shadow(0 2px 4px rgba(0,0,0,.3));">'+emoji+'</span>';
 }
 
 function wxTime(unix) {
@@ -9261,7 +9686,7 @@ function renderWeather(cur, fc) {
   const sunrise = cur.sys?.sunrise ? wxTime(cur.sys.sunrise) : '—';
   const sunset = cur.sys?.sunset ? wxTime(cur.sys.sunset) : '—';
 
-  el('wx-icon').innerHTML = wxIconImg(iconCode, 64);
+  el('wx-icon').innerHTML = wxIconImg(iconCode, 36);
   el('wx-temp').textContent = temp + '°C';
   el('wx-desc').textContent = desc.toUpperCase();
   el('wx-feels').textContent = 'Pocitová ' + feels + '°C';
@@ -9283,7 +9708,7 @@ function renderWeather(cur, fc) {
     const fDesc = f.weather?.[0]?.description || '';
     const fWind = Math.round((f.wind?.speed ?? 0) * 3.6);
     const fRain = f.rain?.['3h'] ?? 0;
-    const fIconHtml = wxIconImg(f.weather?.[0]?.icon || '', 48);
+    const fIconHtml = wxIconImg(f.weather?.[0]?.icon || '', 28);
 
     html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:8px 6px;text-align:center;">' +
       '<div style="font-size:9px;color:var(--tx3);">' + fDay + '</div>' +
@@ -9360,7 +9785,7 @@ function renderWeatherDaily(fc) {
   if (!days.length) { el.innerHTML = '<div style="color:var(--tx3);font-size:11px;padding:8px;text-align:center;">Data pro 3-day agregaci chybí (ověř cnt v OWM URL).</div>'; return; }
   let html = '<div style="display:grid;grid-template-columns:repeat(' + days.length + ',1fr);gap:6px;">';
   for (const d of days) {
-    const iconHtml = (typeof wxIconImg === 'function') ? wxIconImg(d.icon, 56) : '';
+    const iconHtml = (typeof wxIconImg === 'function') ? wxIconImg(d.icon, 32) : '';
     const rainStr = d.rainSum > 0.1 ? ' · 🌧 ' + d.rainSum.toFixed(1) + ' mm' : '';
     html += '<div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r2);padding:10px 8px;text-align:center;">' +
       '<div style="font-size:11px;color:var(--cyan);font-family:var(--mono);font-weight:500;">' + d.dayLabel + '</div>' +
@@ -10947,57 +11372,419 @@ document.addEventListener('DOMContentLoaded', () => {
   </div>
 </div>
 
-<!-- ═══ RPI 1024×600 AGGRESSIVE PAGE ENFORCER v2 (25.4.2026) ═══ -->
-<!-- setInterval-based enforcement + non-active pages na position:absolute;left:-99999px
-     (= mimo screen, i kdyby Chromium ignoroval display:none) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- V4 SIDEBAR NAV ENFORCER + PAGE RELOCATOR (25.4.2026)            -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
 <script>
 (function() {
-  let targetPage = 'page-home';
+  let v4Current = 'home';
+  let v4Relocated = false;
 
-  const ACTIVE_CSS = 'display:block !important;visibility:visible !important;pointer-events:auto !important;position:absolute !important;top:0 !important;left:0 !important;right:0 !important;bottom:0 !important;overflow-y:auto !important;z-index:20 !important;background:linear-gradient(135deg,#1a0a2e 0%,#2d1b4e 25%,#4a2066 50%,#6b2fa0 75%,#8b3fa0 100%) !important;';
-  const HIDDEN_CSS = 'display:none !important;visibility:hidden !important;pointer-events:none !important;position:absolute !important;left:-99999px !important;top:-99999px !important;width:0 !important;height:0 !important;overflow:hidden !important;';
+  // After init: move all V3 .page divs into v4-content (so they render in V4 main)
+  function relocateV3Pages() {
+    if (v4Relocated) return;
+    const v4Content = document.getElementById('v4-content');
+    if (!v4Content) return;
+    // Find all V3 page divs (those NOT having v4- prefix in id)
+    const allPages = document.querySelectorAll('.page');
+    allPages.forEach(p => {
+      // Skip our V4 home (id starts with v4-)
+      if (p.id && p.id.startsWith('v4-page-')) return;
+      // Skip duplicates already hidden
+      if (p.classList.contains('page-DUP-hidden')) return;
+      // Move into v4-content
+      v4Content.appendChild(p);
+    });
+    v4Relocated = true;
+  }
 
-  function enforce() {
-    document.querySelectorAll('.page').forEach(p => {
-      if (p.id === targetPage) {
-        p.classList.add('active');
-        p.setAttribute('style', ACTIVE_CSS);
+  function v4Enforce() {
+    // Show only matching page
+    const targetId = (v4Current === 'home') ? 'v4-page-home' : 'page-' + v4Current;
+    document.querySelectorAll('#v4-content .page').forEach(p => {
+      if (p.id === targetId) {
+        p.classList.add('v4-active');
+        // Don't add 'active' for V4 home (we own it); add it for V3 pages so V3 logic works
+        if (!p.id.startsWith('v4-page-')) p.classList.add('active');
+        p.style.cssText = 'display:block !important;visibility:visible !important;pointer-events:auto !important;position:absolute !important;inset:0 !important;padding:10px !important;overflow-y:auto !important;background:transparent !important;';
       } else {
-        p.classList.remove('active');
-        p.setAttribute('style', HIDDEN_CSS);
+        p.classList.remove('v4-active');
+        p.classList.remove('active');  // CRITICAL: also remove V3 'active' class
+        p.style.cssText = 'display:none !important;visibility:hidden !important;pointer-events:none !important;';
       }
     });
-    // Tabs
-    document.querySelectorAll('.tab').forEach(t => {
-      const tabId = t.id || '';
-      const pageId = 'page-' + tabId.replace(/^tab-/, '');
-      if (pageId === targetPage) t.classList.add('active');
-      else t.classList.remove('active');
+    // Sidebar nav active state
+    document.querySelectorAll('.v4-nav-item').forEach(n => {
+      const np = n.dataset.page || '';
+      if (np === v4Current) n.classList.add('active');
+      else n.classList.remove('active');
     });
   }
 
-  // Hook switchPage — překryje původní (originál pak může volat čehokoliv, my držíme stav)
-  const _origSwitchPage = window.switchPage;
-  window.switchPage = function(name) {
-    targetPage = 'page-' + name;
-    if (_origSwitchPage) {
-      try { _origSwitchPage.call(this, name); } catch(e) {}
+  window.v4Switch = function(name) {
+    v4Current = name;
+    // Use original switchPage too (for V3 page-specific init like rendering)
+    if (typeof window._origSwitchPageV3 === 'function') {
+      try { window._origSwitchPageV3.call(window, name === 'home' ? 'home' : name); } catch(e) {}
+    } else if (typeof window.switchPage === 'function') {
+      try { window.switchPage(name === 'home' ? 'home' : name); } catch(e) {}
     }
-    enforce();
+    v4Enforce();
   };
 
-  // Aggressive: every 200ms enforce
-  setInterval(enforce, 200);
-
-  // First run
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', enforce);
-  } else {
-    enforce();
+  // Hook V3's switchPage so calls from inside dashboard JS (e.g. goZone) update v4 state
+  if (typeof window.switchPage === 'function') {
+    window._origSwitchPageV3 = window.switchPage;
   }
+  const origSwitchPage = window.switchPage || function(){};
+  window.switchPage = function(name) {
+    v4Current = name;
+    try { origSwitchPage.call(window, name); } catch(e) {}
+    v4Enforce();
+  };
+
+  // V4 Modal helper
+  window.openV4Modal = function(type) {
+    const modal = document.getElementById('v4-detail-modal');
+    const title = document.getElementById('v4-detail-title');
+    const body = document.getElementById('v4-detail-body');
+    const D = (typeof DATA !== 'undefined' && DATA) ? DATA : {};
+    const titles = {
+      presence: '🏠 Přítomnost',
+      phase: '☀️ Fáze dne',
+      sleep: '😴 Spánek + Wake Scorer',
+      power: '⚡ Spotřeba energie',
+      health: '💚 Zdraví systému'
+    };
+    title.textContent = titles[type] || 'Detail';
+    body.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--tx3);">'
+      + JSON.stringify(D[type] || D.state || {}, null, 2).replace(/\n/g, '<br>')
+      + '</div>';
+    modal.classList.add('active');
+  };
+
+  // Update V4 home tilety from DATA — receives data as arg (originál neukládá do window.DATA)
+  window._v4LastData = null;
+  function v4UpdateHome(data) {
+    if (data) window._v4LastData = data;  // cache fresh data
+    const D = data || window._v4LastData || (typeof DATA !== 'undefined' && DATA) || null;
+    if (!D) return;
+    const setText = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const state = D.state || {};
+    const pres = state.presence || '—';
+    setText('v4-presence', pres === 'home' ? 'DOMA' : pres === 'pryc' ? 'PRYČ' : (pres+'').toUpperCase());
+    setText('v4-phase', ((state.phase || '—')+'').toUpperCase());
+    setText('v4-sleep', state.sleep === 'yes' ? 'SPÍ' : 'VZHŮRU');
+    setText('v4-health', state.health || 'OK');
+    // Power — sum from energy.top10 (no now_w field in Homey)
+    const pw = D.energy || D.power || {};
+    let totalW = pw.now_w !== undefined ? pw.now_w : null;
+    if (totalW === null && Array.isArray(pw.top10)) {
+      totalW = pw.top10.reduce((s, d) => s + (Number(d.power_w) || 0), 0);
+    }
+    setText('v4-power', (totalW !== null ? Math.round(totalW) : '—') + ' W');
+    const kwh = pw.kwh_today !== undefined ? pw.kwh_today : pw.today_kwh;
+    setText('v4-kwh', (kwh !== undefined && kwh !== null ? Number(kwh).toFixed(1) : '—') + ' kWh');
+    // Weather — use D.weather.icon + .desc directly (Homey provides them)
+    const w = D.weather || {};
+    const tempVal = (w.temp_out !== undefined ? w.temp_out : (w.temp !== undefined ? w.temp : '—'));
+    setText('v4-temp-out', tempVal + ' °C');
+    setText('v4-temp-out2', tempVal + ' °C');
+    setText('v4-weather-temp2', tempVal + ' °C');
+    const cond = w.desc || w.condition || w.summary || w.status || '—';
+    setText('v4-weather', cond);
+    setText('v4-weather-cond', cond);
+    const wIco = document.getElementById('v4-weather-ico');
+    if (wIco) wIco.textContent = w.icon || '🌤';
+    // BTC/ETH NOT updated here — handled by v4FetchCrypto (direct CoinGecko, runs every 60s).
+    // This prevents overwriting fetched prices when Homey D.crypto is empty.
+    // Greeting
+    const h = new Date().getHours();
+    const gr = h < 5 ? 'Dobrou noc' : h < 9 ? 'Dobré ráno' : h < 17 ? 'Dobrý den' : h < 22 ? 'Dobrý večer' : 'Dobrou noc';
+    setText('v4-greet', gr + ', Luděk 👋');
+    setText('v4-subgreet', 'Vše v pořádku · režim ' + (pres === 'home' ? 'Domov' : 'Pryč'));
+    // Klima — list room temps
+    const klimaBody = document.getElementById('v4-klima-body');
+    if (klimaBody && D.rooms) {
+      const rooms = ['kitchen', 'bedroom', 'bathroom', 'jidelna'];
+      const html = rooms.map(rk => {
+        const r = D.rooms[rk] || {};
+        const t = r.temp !== undefined ? r.temp + '°C' : '—';
+        const h = r.humidity !== undefined ? r.humidity + '%' : '';
+        const name = {kitchen:'Kuchyně',bedroom:'Ložnice',bathroom:'Koupelna',jidelna:'Jídelna'}[rk] || rk;
+        return `<div style="display:flex;justify-content:space-between;font-size:9px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);"><span>${name}</span><span style="color:var(--cyan);font-family:var(--mono);">${t} ${h}</span></div>`;
+      }).join('');
+      klimaBody.innerHTML = html || '<div style="font-size:9px;color:var(--tx3);">Načítám…</div>';
+    }
+    // Audio mini
+    const audioBody = document.getElementById('v4-audio-body');
+    if (audioBody && D.audio) {
+      const a = D.audio;
+      const playing = a.playing === 'yes';
+      const speaker = a.speaker || a.active_speaker || '—';
+      const mode = a.mode || '—';
+      audioBody.innerHTML = `
+        <div style="font-size:9px;color:${playing ? 'var(--green)' : 'var(--tx3)'};margin-bottom:2px;">${playing ? '▶ Hraje' : '⏸ Stop'}</div>
+        <div style="font-size:8px;color:var(--tx2);">${speaker}</div>
+        <div style="font-size:8px;color:var(--tx3);font-family:var(--mono);">${mode}</div>`;
+    }
+    // Aktivity log
+    const activityEl = document.getElementById('v4-activity');
+    if (activityEl) {
+      const items = [];
+      const sc = (D.state && D.state.scene) ? D.state.scene : null;
+      if (sc) items.push({ico: '🎬', lbl: 'Scéna: ' + sc, time: D._time || ''});
+      if (D.morning && D.morning.last_briefing) items.push({ico: '🌅', lbl: 'Briefing: ' + (D.morning.last_briefing+'').substring(0,30), time: ''});
+      if (D.heating && D.heating.demand) items.push({ico: '🔥', lbl: 'Topení: ' + D.heating.demand, time: ''});
+      if (D.audio && D.audio.playing === 'yes') items.push({ico: '🎵', lbl: 'Audio: ' + (D.audio.speaker || ''), time: ''});
+      if (D.offline && D.offline.length) items.push({ico: '📡', lbl: D.offline.length + ' offline zařízení', time: ''});
+      if (items.length === 0) items.push({ico: '✅', lbl: 'Vše v pořádku', time: D._time || ''});
+      activityEl.innerHTML = items.slice(0,5).map(i =>
+        `<div class="v4-activity-row"><span class="ico">${i.ico}</span><span class="lbl">${i.lbl}</span><span class="time">${i.time}</span></div>`
+      ).join('');
+    }
+    // Foot sync time
+    const footSync = document.getElementById('v4-foot-sync');
+    if (footSync && D._time) footSync.textContent = 'Poslední synchronizace: ' + D._time;
+  }
+  // Hook polling — capture data argument
+  const _origUpdateUI = window.updateUI;
+  if (typeof _origUpdateUI === 'function') {
+    window.updateUI = function(data) {
+      // Store data globally for V4 + V3 access
+      try { window.DATA = data; } catch(e) {}
+      try { _origUpdateUI.call(window, data); } catch(e) {}
+      try { v4UpdateHome(data); } catch(e) {}
+    };
+  } else {
+    // updateUI not defined yet — wait
+    setTimeout(() => {
+      const u2 = window.updateUI;
+      if (typeof u2 === 'function') {
+        window.updateUI = function(data) {
+          try { window.DATA = data; } catch(e) {}
+          try { u2.call(window, data); } catch(e) {}
+          try { v4UpdateHome(data); } catch(e) {}
+        };
+      }
+    }, 1000);
+  }
+
+  // V4 Clock
+  function v4Clock() {
+    const el = document.getElementById('v4-clock');
+    if (el) el.textContent = new Date().toLocaleTimeString('cs-CZ', {hour: '2-digit', minute: '2-digit'});
+  }
+  setInterval(v4Clock, 1000);
+  v4Clock();
+
+  // V4 Crypto fetcher — direct CoinGecko (every 60s, fast initial load)
+  async function v4FetchCrypto() {
+    if (typeof fetchCryptoMarkets !== 'function') return;
+    try {
+      const res = await fetchCryptoMarkets('bitcoin,ethereum');
+      if (!res || !res.data) return;
+      const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+      const setColor = (id, color) => { const e = document.getElementById(id); if (e) e.style.color = color; };
+      const fmtChg = (n) => {
+        const x = Number(n);
+        const sign = x >= 0 ? '▲' : '▼';
+        return { text: sign + ' ' + Math.abs(x).toFixed(1) + '%', color: x >= 0 ? 'var(--green)' : 'var(--red)' };
+      };
+      for (const coin of res.data) {
+        if (coin.id === 'bitcoin') {
+          setText('v4-btc-price', '$' + Math.round(coin.current_price).toLocaleString('cs-CZ'));
+          if (coin.price_change_percentage_24h !== undefined) {
+            const c = fmtChg(coin.price_change_percentage_24h);
+            setText('v4-btc-change', c.text); setColor('v4-btc-change', c.color);
+          }
+        } else if (coin.id === 'ethereum') {
+          setText('v4-eth-price', '$' + Math.round(coin.current_price).toLocaleString('cs-CZ'));
+          if (coin.price_change_percentage_24h !== undefined) {
+            const c = fmtChg(coin.price_change_percentage_24h);
+            setText('v4-eth-change', c.text); setColor('v4-eth-change', c.color);
+          }
+        }
+      }
+      // Cache
+      try { localStorage.setItem('v4_crypto', JSON.stringify({ts: Date.now(), data: res.data})); } catch(e){}
+    } catch(e) { console.warn('v4 crypto:', e.message); }
+  }
+  // Load cached + fetch immediately
+  try {
+    const cached = JSON.parse(localStorage.getItem('v4_crypto') || 'null');
+    if (cached && cached.data && (Date.now() - cached.ts < 5 * 60 * 1000)) {
+      // Use cache <5min old
+      const setText = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
+      for (const coin of cached.data) {
+        if (coin.id === 'bitcoin') setText('v4-btc-price', '$' + Math.round(coin.current_price).toLocaleString('cs-CZ'));
+        if (coin.id === 'ethereum') setText('v4-eth-price', '$' + Math.round(coin.current_price).toLocaleString('cs-CZ'));
+      }
+    }
+  } catch(e){}
+  // Fire 1× immediately, then every 60s
+  setTimeout(v4FetchCrypto, 2000);
+  setInterval(v4FetchCrypto, 60000);
+
+  // V4 Foot status update from connLed
+  setInterval(() => {
+    const led = document.getElementById('connLed');
+    const foot = document.getElementById('v4-foot-status');
+    if (!led || !foot) return;
+    if (led.classList.contains('off')) {
+      foot.textContent = 'Offline';
+      foot.style.color = 'var(--red)';
+    } else {
+      foot.textContent = 'Vše online';
+      foot.style.color = 'var(--green)';
+    }
+  }, 2000);
+
+  // First run + repeated enforcement
+  function v4Init() {
+    relocateV3Pages();
+    v4Enforce();
+    v4UpdateHome();
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', v4Init);
+  } else {
+    v4Init();
+  }
+  // Re-enforce periodically (originál JS volá switchPage)
+  setInterval(v4Enforce, 500);
 })();
 </script>
-<!-- ═══ END RPI 1024 ENFORCER v2 ═══ -->
+<!-- ═══ END V4 SIDEBAR ENFORCER ═══ -->
+
+<!-- ═══ V4 SUB-TAB ENGINE — pro stránky s overflow (AI/Advanced/Heating/Settings) ═══ -->
+<script>
+(function() {
+  // Mapping: pageId → array of {ico, label, match (regex on .sect text)}
+  const V4_SUB_TABS_MAP = {
+    'page-ai': [
+      {ico: '🧠', label: 'Brain',     match: /AI CONTROL|AUTONOMIE|MODULY/i},
+      {ico: '🔁', label: 'Pipeline',  match: /REQUEST|SNAPSHOT|ČEKAJÍCÍ|TASKS/i},
+      {ico: '🩺', label: 'Diagnostic',match: /DIAGNOSTI|OFFLINE|PŘEPISY|HEALTH|VÝKON/i}
+    ],
+    'page-advanced': [
+      {ico: '🛡', label: 'Validator', match: /VALIDATOR|SANITY|DEVICES/i},
+      {ico: '🪞', label: 'Roleta SIM',match: /ROLETA SIM/i},
+      {ico: '⚙', label: 'Nastavení', match: /NASTAVENÍ|ENERGIE|ZÁSUVKY|OCHRANA/i}
+    ],
+    'page-heating': [
+      {ico: '🌡', label: 'Zóny',      match: /ZÓNY/i},
+      {ico: '⚡', label: 'Akce',      match: /RYCHLÉ|AKCE/i},
+      {ico: '🧠', label: 'AI',        match: /AI PŘEMÝŠLÍ|AI/i}
+    ],
+    'page-settings': [
+      {ico: '🔌', label: 'Připojení', match: /PŘIPOJENÍ|PROVOZNÍ/i},
+      {ico: '🌅', label: 'Wake',      match: /WAKE/i},
+      {ico: '🪟', label: 'Roleta',    match: /ROLETA|LUX/i},
+      {ico: '🌡', label: 'Klima',     match: /KLIMA|TEPLOTA|VLHKOST/i},
+      {ico: '🔔', label: 'Alerts',    match: /ALERT|UPOZORNĚNÍ|BRIEFING/i}
+    ]
+  };
+
+  function setupSubTabsForPage(pageId, tabs) {
+    const page = document.getElementById(pageId);
+    if (!page || page.dataset.v4subtabs === '1') return;
+
+    // Find all .sect elements (top-level only — direct children of page or 1 level deep)
+    const sects = [...page.querySelectorAll('.sect')];
+    if (sects.length < 2) return;
+
+    // For each tab, find sect that matches
+    const tabGroups = tabs.map(tab => {
+      const matchingSects = sects.filter(s => tab.match.test(s.textContent || ''));
+      return { ...tab, sects: matchingSects };
+    }).filter(t => t.sects.length > 0);
+
+    if (tabGroups.length < 2) return; // No useful split
+
+    // Helper: find common ancestor that's direct child of page
+    function topAncestor(el) {
+      let cur = el;
+      while (cur && cur.parentElement && cur.parentElement !== page) cur = cur.parentElement;
+      return cur;
+    }
+
+    // For each sect, mark all elements between this sect's top-ancestor and next sect's top-ancestor
+    // Group structure: each tab gets a list of top-level child elements that belong to it
+    const elementToTab = new Map();
+    for (const tab of tabGroups) {
+      for (const sect of tab.sects) {
+        const top = topAncestor(sect);
+        if (top && !elementToTab.has(top)) elementToTab.set(top, tab.label);
+      }
+    }
+
+    // Walk through children and assign each top-level element to a tab
+    // (sections continue until next sect — group siblings)
+    let currentTab = tabGroups[0].label;
+    for (const child of [...page.children]) {
+      // Skip nav (we add it next)
+      if (child.classList.contains('v4-sub-nav')) continue;
+      if (elementToTab.has(child)) {
+        currentTab = elementToTab.get(child);
+      }
+      child.dataset.v4tab = currentTab;
+    }
+
+    // Build nav at top
+    const nav = document.createElement('div');
+    nav.className = 'v4-sub-nav';
+    tabGroups.forEach((tab, idx) => {
+      const btn = document.createElement('button');
+      btn.innerHTML = '<span class="ico">' + tab.ico + '</span>' + tab.label;
+      if (idx === 0) btn.classList.add('active');
+      btn.addEventListener('click', () => {
+        // Hide non-matching, show matching
+        nav.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        for (const child of page.children) {
+          if (child.classList.contains('v4-sub-nav')) continue;
+          if (child.dataset.v4tab === tab.label) {
+            child.style.display = '';
+          } else {
+            child.style.display = 'none';
+          }
+        }
+      });
+      nav.appendChild(btn);
+    });
+    page.insertBefore(nav, page.firstChild);
+
+    // Initial state — show only first tab
+    const firstTab = tabGroups[0].label;
+    for (const child of page.children) {
+      if (child.classList.contains('v4-sub-nav')) continue;
+      if (child.dataset.v4tab !== firstTab) {
+        child.style.display = 'none';
+      }
+    }
+    page.classList.add('v4-has-subtabs');
+    page.dataset.v4subtabs = '1';
+  }
+
+  function setupAllSubTabs() {
+    for (const [pageId, tabs] of Object.entries(V4_SUB_TABS_MAP)) {
+      try { setupSubTabsForPage(pageId, tabs); } catch(e) { console.warn('subtabs', pageId, e.message); }
+    }
+  }
+
+  // Run after dashboard initialized + after each switchPage (page may render content lazily)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(setupAllSubTabs, 1000));
+  } else {
+    setTimeout(setupAllSubTabs, 1000);
+  }
+  // Also retry after 3s + 8s in case sections render async
+  setTimeout(setupAllSubTabs, 3000);
+  setTimeout(setupAllSubTabs, 8000);
+})();
+</script>
+<!-- ═══ END V4 SUB-TAB ENGINE ═══ -->
 
 </body>
 </html>
