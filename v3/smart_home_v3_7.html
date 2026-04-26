@@ -2881,6 +2881,93 @@ function v37SetActive(page) {
     <div class="page" id="page-ai">
     <div style="height:16px;flex-shrink:0;column-span:all;"></div>
 
+    <!-- 🧠 V3.7 AI BRAIN VISUAL — central pulsing brain + orbital context nodes -->
+    <div class="card" id="ai-brain-card" style="padding:24px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden;column-span:all;">
+      <div class="sect" style="color:var(--purple);justify-content:center;border:none;padding:0 0 16px;">🧠 INTENT CENTER — Context Awareness</div>
+      <svg id="ai-brain-svg" viewBox="0 0 600 320" style="width:100%;max-width:600px;height:auto;display:block;margin:0 auto;font-family:var(--sans);">
+        <defs>
+          <radialGradient id="ai-brain-grad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.9"/>
+            <stop offset="60%" stop-color="#7c3aed" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+          </radialGradient>
+          <filter id="ai-brain-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="6"/>
+          </filter>
+          <linearGradient id="ai-link-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.05"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Connection lines from brain to nodes (7 orbital) -->
+        <g id="ai-links" stroke="url(#ai-link-grad)" stroke-width="1.2" fill="none" opacity="0.7">
+          <line x1="300" y1="160" x2="120" y2="60"/>
+          <line x1="300" y1="160" x2="480" y2="60"/>
+          <line x1="300" y1="160" x2="80"  y2="160"/>
+          <line x1="300" y1="160" x2="520" y2="160"/>
+          <line x1="300" y1="160" x2="120" y2="260"/>
+          <line x1="300" y1="160" x2="480" y2="260"/>
+          <line x1="300" y1="160" x2="300" y2="290"/>
+        </g>
+
+        <!-- Central brain (pulsing radial gradient + glow) -->
+        <g transform="translate(300, 160)">
+          <circle cx="0" cy="0" r="68" fill="url(#ai-brain-grad)" filter="url(#ai-brain-glow)">
+            <animate attributeName="r" values="65;72;65" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="0" cy="0" r="55" fill="rgba(167,139,250,0.18)" stroke="rgba(167,139,250,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-4" text-anchor="middle" font-size="40" id="ai-brain-icon">🧠</text>
+          <text x="0" y="22" text-anchor="middle" fill="#e8edf5" font-size="11" font-weight="700" letter-spacing="0.1em" id="ai-brain-state">ACTIVE</text>
+          <text x="0" y="36" text-anchor="middle" fill="#a78bfa" font-size="10" id="ai-brain-conf">— %</text>
+        </g>
+
+        <!-- Orbital context nodes (7 around brain) -->
+        <g id="ai-node-presence" transform="translate(120, 60)">
+          <circle cx="0" cy="0" r="26" fill="rgba(74,222,128,0.12)" stroke="rgba(74,222,128,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">👤</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">PŘÍTOMNOST</text>
+          <text x="0" y="40" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700" id="ai-val-presence">—</text>
+        </g>
+        <g id="ai-node-phase" transform="translate(480, 60)">
+          <circle cx="0" cy="0" r="26" fill="rgba(96,165,250,0.12)" stroke="rgba(96,165,250,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">☀</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">FÁZE DNE</text>
+          <text x="0" y="40" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="700" id="ai-val-phase">—</text>
+        </g>
+        <g id="ai-node-lux" transform="translate(80, 160)">
+          <circle cx="0" cy="0" r="26" fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">💡</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">LUX</text>
+          <text x="0" y="40" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700" id="ai-val-lux">—</text>
+        </g>
+        <g id="ai-node-temp" transform="translate(520, 160)">
+          <circle cx="0" cy="0" r="26" fill="rgba(248,113,113,0.12)" stroke="rgba(248,113,113,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">🌡</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">TEPLOTA</text>
+          <text x="0" y="40" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700" id="ai-val-temp">—</text>
+        </g>
+        <g id="ai-node-mode" transform="translate(120, 260)">
+          <circle cx="0" cy="0" r="26" fill="rgba(34,211,238,0.12)" stroke="rgba(34,211,238,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">🏠</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">REŽIM</text>
+          <text x="0" y="40" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="700" id="ai-val-mode">—</text>
+        </g>
+        <g id="ai-node-sleep" transform="translate(480, 260)">
+          <circle cx="0" cy="0" r="26" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">😴</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">SPÁNEK</text>
+          <text x="0" y="40" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="700" id="ai-val-sleep">—</text>
+        </g>
+        <g id="ai-node-activity" transform="translate(300, 290)">
+          <circle cx="0" cy="0" r="26" fill="rgba(244,114,182,0.12)" stroke="rgba(244,114,182,0.5)" stroke-width="1.5"/>
+          <text x="0" y="-2" text-anchor="middle" font-size="16">🎯</text>
+          <text x="0" y="12" text-anchor="middle" fill="#9ba8bd" font-size="8" font-weight="600">AKTIVITA</text>
+          <text x="0" y="50" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="700" id="ai-val-activity">—</text>
+        </g>
+      </svg>
+    </div>
+
     <div class="sect" style="color:var(--purple);">
       <span class="help-sect-header">
         <span>🧠 AI CONTROL CENTER</span>
@@ -4002,6 +4089,86 @@ function v37SetActive(page) {
       <p><strong>D57d má proměnné NT okno</strong> — ČEZ spíná HDO centrálně, skutečné hodiny se mění. Defaultní 22:00–06:00 je přibližná.</p>
     </div>
 
+    <!-- ⚡ ENERGY FLOW SANKEY (V3.7 premium) -->
+    <div class="sect" style="color:var(--cyan);margin-top:6px;">⚡ TOK ENERGIE — Live</div>
+    <div class="card" id="energy-sankey-card" style="padding:20px;min-height:220px;position:relative;overflow:hidden;">
+      <svg id="energy-sankey" viewBox="0 0 800 220" style="width:100%;height:auto;display:block;font-family:var(--sans);">
+        <defs>
+          <linearGradient id="sk-grad-solar" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#fbbf24" stop-opacity="0.65"/>
+          </linearGradient>
+          <linearGradient id="sk-grad-grid" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#60a5fa" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#60a5fa" stop-opacity="0.65"/>
+          </linearGradient>
+          <linearGradient id="sk-grad-batt" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.15"/>
+            <stop offset="100%" stop-color="#a78bfa" stop-opacity="0.65"/>
+          </linearGradient>
+          <linearGradient id="sk-grad-house" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#4ade80" stop-opacity="0.65"/>
+            <stop offset="100%" stop-color="#4ade80" stop-opacity="0.15"/>
+          </linearGradient>
+          <filter id="sk-glow" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="3"/>
+          </filter>
+        </defs>
+
+        <!-- Source nodes (left) -->
+        <g id="sk-src-solar" transform="translate(60, 40)">
+          <rect x="-50" y="-22" width="100" height="44" rx="8" fill="rgba(251,191,36,0.12)" stroke="rgba(251,191,36,0.5)" stroke-width="1"/>
+          <text x="0" y="-2" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">☀ SOLÁR</text>
+          <text x="0" y="14" text-anchor="middle" fill="#e8edf5" font-size="13" font-weight="700" id="sk-solar-w">— W</text>
+        </g>
+        <g id="sk-src-grid" transform="translate(60, 110)">
+          <rect x="-50" y="-22" width="100" height="44" rx="8" fill="rgba(96,165,250,0.12)" stroke="rgba(96,165,250,0.5)" stroke-width="1"/>
+          <text x="0" y="-2" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">⚡ SÍŤ</text>
+          <text x="0" y="14" text-anchor="middle" fill="#e8edf5" font-size="13" font-weight="700" id="sk-grid-w">— W</text>
+        </g>
+        <g id="sk-src-batt" transform="translate(60, 180)">
+          <rect x="-50" y="-22" width="100" height="44" rx="8" fill="rgba(167,139,250,0.12)" stroke="rgba(167,139,250,0.5)" stroke-width="1"/>
+          <text x="0" y="-2" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">🔋 BATERIE</text>
+          <text x="0" y="14" text-anchor="middle" fill="#e8edf5" font-size="13" font-weight="700" id="sk-batt-w">— %</text>
+        </g>
+
+        <!-- Center: TOTAL hub -->
+        <g id="sk-hub" transform="translate(400, 110)">
+          <circle cx="0" cy="0" r="60" fill="rgba(74,222,128,0.08)" stroke="rgba(74,222,128,0.4)" stroke-width="2"/>
+          <circle cx="0" cy="0" r="60" fill="none" stroke="rgba(74,222,128,0.6)" stroke-width="1" filter="url(#sk-glow)"/>
+          <text x="0" y="-8" text-anchor="middle" fill="#9ba8bd" font-size="10" font-weight="600" letter-spacing="0.1em">CELKEM</text>
+          <text x="0" y="14" text-anchor="middle" fill="#4ade80" font-size="22" font-weight="700" id="sk-total-kw">— W</text>
+          <text x="0" y="32" text-anchor="middle" fill="#5e6e85" font-size="9" id="sk-total-sub">live</text>
+        </g>
+
+        <!-- Destination nodes (right) -->
+        <g id="sk-dst-house" transform="translate(720, 75)">
+          <rect x="-50" y="-22" width="100" height="44" rx="8" fill="rgba(74,222,128,0.14)" stroke="rgba(74,222,128,0.5)" stroke-width="1"/>
+          <text x="0" y="-2" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="600">🏠 DŮM</text>
+          <text x="0" y="14" text-anchor="middle" fill="#e8edf5" font-size="13" font-weight="700" id="sk-house-w">— W</text>
+        </g>
+        <g id="sk-dst-export" transform="translate(720, 145)">
+          <rect x="-50" y="-22" width="100" height="44" rx="8" fill="rgba(34,211,238,0.10)" stroke="rgba(34,211,238,0.4)" stroke-width="1"/>
+          <text x="0" y="-2" text-anchor="middle" fill="#22d3ee" font-size="11" font-weight="600">↪ PŘEBYTKY</text>
+          <text x="0" y="14" text-anchor="middle" fill="#e8edf5" font-size="13" font-weight="700" id="sk-export-w">— W</text>
+        </g>
+
+        <!-- Flow paths (bezier curves) — width animated by sk-render -->
+        <path id="sk-flow-solar" d="M 110 40 Q 250 40, 340 95" stroke="url(#sk-grad-solar)" stroke-width="0" fill="none" opacity="0"/>
+        <path id="sk-flow-grid"  d="M 110 110 Q 250 110, 340 110" stroke="url(#sk-grad-grid)" stroke-width="0" fill="none" opacity="0"/>
+        <path id="sk-flow-batt"  d="M 110 180 Q 250 180, 340 125" stroke="url(#sk-grad-batt)" stroke-width="0" fill="none" opacity="0"/>
+        <path id="sk-flow-house"  d="M 460 95 Q 580 75, 670 75" stroke="url(#sk-grad-house)" stroke-width="0" fill="none" opacity="0"/>
+        <path id="sk-flow-export" d="M 460 125 Q 580 145, 670 145" stroke="url(#sk-grad-house)" stroke-width="0" fill="none" opacity="0"/>
+      </svg>
+
+      <!-- Legend / status row -->
+      <div style="display:flex;justify-content:space-around;margin-top:10px;font-size:10px;color:var(--tx3);">
+        <div><span style="color:#fbbf24;">●</span> Solar (uvidíš až po HW)</div>
+        <div><span style="color:#60a5fa;">●</span> Síť (live z plugs)</div>
+        <div><span style="color:#a78bfa;">●</span> Baterie (uvidíš až po HW)</div>
+      </div>
+    </div>
+
     <div class="cfg-tile-grid">
       <div class="cfg-tile">
         <div class="sect" style="color:var(--cyan);">⚡ AKTUÁLNĚ</div>
@@ -4528,8 +4695,62 @@ function _finIsNightTariff() {
   return (h >= start && h < end);
 }
 
+// V3.7 — Energy Sankey rendering (premium SVG flow visualization)
+function renderEnergySankey() {
+  try {
+    const svg = document.getElementById('energy-sankey');
+    if (!svg) return;  // not on V3.7 finance page
+
+    // Read live data sources
+    const totalPower = Number(DATA?.health?.power_total || ALL_VARS?.['sh_energy_total_power']?.value || 0);
+    const solarW = Number(ALL_VARS?.['sh_energy_solar_w']?.value || 0);  // future HW
+    const battPct = Number(ALL_VARS?.['sh_energy_battery_pct']?.value || 0);  // future HW
+    const battW = Number(ALL_VARS?.['sh_energy_battery_w']?.value || 0);  // future HW
+
+    // Currently we only know house total power. Without solar/battery HW, all power = grid → house.
+    const gridW = Math.max(0, totalPower - solarW - battW);
+    const houseW = totalPower;
+    const exportW = Math.max(0, solarW + battW - houseW);
+
+    // Update node values
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('sk-solar-w',  solarW > 0 ? Math.round(solarW) + ' W' : '— W');
+    set('sk-grid-w',   Math.round(gridW) + ' W');
+    set('sk-batt-w',   battPct > 0 ? battPct + '%' : '— %');
+    set('sk-total-kw', Math.round(totalPower) + ' W');
+    set('sk-house-w',  Math.round(houseW) + ' W');
+    set('sk-export-w', exportW > 0 ? Math.round(exportW) + ' W' : '— W');
+
+    // Update flow path widths based on power magnitude
+    // Scale: 0 → 2px, 200W → 8px, 500W+ → 16px
+    const powerToWidth = (w) => {
+      if (w < 5) return 0;
+      const scaled = Math.min(20, 2 + Math.sqrt(w) * 0.7);
+      return scaled.toFixed(1);
+    };
+    const setFlow = (id, w) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const sw = powerToWidth(w);
+      el.setAttribute('stroke-width', sw);
+      el.setAttribute('opacity', w < 5 ? '0.1' : '0.85');
+    };
+
+    setFlow('sk-flow-solar', solarW);
+    setFlow('sk-flow-grid', gridW);
+    setFlow('sk-flow-batt', battW);
+    setFlow('sk-flow-house', houseW);
+    setFlow('sk-flow-export', exportW);
+  } catch(e) {
+    console.debug('[sankey render]', e && e.message);
+  }
+}
+
 async function renderFinancePage() {
   if (!varMapLoaded) await loadVarMap();
+
+  // V3.7: render energy sankey (defensive — silent if not V3.7)
+  try { renderEnergySankey(); } catch(_) {}
 
   const priceVT = Number(_getVar('sh_cfg_price_vt') || 5.48);
   const priceNT = Number(_getVar('sh_cfg_price_nt') || 4.76);
@@ -6466,6 +6687,111 @@ function updateUI(d) {
     <div class="chip"><span class="dot ${sDot}"></span>${s.sleep==='yes'?'SPÍM':'VZHŮRU'}</div>
     <div class="chip"><span class="dot dc"></span>${(s.intent||'idle').toUpperCase()}</div>
   `;
+
+  // V3.7: live update Energy Sankey (if Finance page rendered)
+  try { if (typeof renderEnergySankey === 'function') renderEnergySankey(); } catch(_){}
+
+  // V3.7: live update AI Brain visual (orbital nodes)
+  try {
+    const setNode = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    let presence = (s.presence || '—').toUpperCase();
+    if (s.presence === 'home') presence = 'DOMA';
+    else if (s.presence === 'away' || s.presence === 'pryc') presence = 'PRYČ';
+    setNode('ai-val-presence', presence);
+    setNode('ai-val-phase', (s.phase || '—').toUpperCase());
+    // Lux from kitchen sensor
+    const luxK = ALL_VARS?.['sh_lux_kuchyne']?.value || ALL_VARS?.['sh_lux_jidelna']?.value;
+    setNode('ai-val-lux', luxK !== undefined ? Math.round(Number(luxK)) + ' lx' : '—');
+    // Temperature indoor
+    const tIn = ALL_VARS?.['sh_temp_kuchyne']?.value || ALL_VARS?.['sh_temp_obyvak']?.value || ALL_VARS?.['sh_temp_jidelna']?.value;
+    setNode('ai-val-temp', tIn !== undefined ? Number(tIn).toFixed(1) + '°C' : '—');
+    // Mode (house_state)
+    const hsRaw = String(s.house_state || ALL_VARS?.['sh_house_state']?.value || 'home').toUpperCase();
+    setNode('ai-val-mode', hsRaw);
+    // Sleep
+    setNode('ai-val-sleep', s.sleep === 'yes' ? 'SPÍM' : 'VZHŮRU');
+    // Activity (intent)
+    setNode('ai-val-activity', (s.intent || ai.intent || 'idle').toUpperCase());
+    // Brain center: confidence + state
+    const aiActive = String(ai.active || ALL_VARS?.['sh_ai_active']?.value || 'yes').toLowerCase();
+    setNode('ai-brain-state', aiActive === 'yes' ? 'ACTIVE' : 'IDLE');
+    const conf = Number(ai.confidence || h.score || 0);
+    setNode('ai-brain-conf', conf > 0 ? Math.round(conf) + '%' : '—');
+  } catch(e) {
+    console.debug('[ai brain]', e && e.message);
+  }
+
+  // V3.7 STATUS PILLS (5 in topbar) — wired to live data
+  // Defensive: silent no-op if pill elements missing (V3 master without V3.7 sidebar)
+  try {
+    const setPill = (id, val, state) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = val;
+      // Update pill container state class for color (warn / danger / active)
+      const pill = el.closest('.v37-status-pill');
+      if (pill && state) {
+        pill.classList.remove('warn', 'danger', 'info');
+        if (state !== 'ok') pill.classList.add(state);
+      }
+    };
+
+    // 1) REŽIM — presence (DOMA/PRYČ/SPÍM)
+    let modeVal = (s.presence || '—').toUpperCase();
+    if (s.presence === 'home') modeVal = 'DOMA';
+    else if (s.presence === 'away' || s.presence === 'pryc') modeVal = 'PRYČ';
+    if (s.sleep === 'yes') modeVal = 'SPÍM';
+    setPill('v37-pill-mode-val', modeVal, s.sleep === 'yes' ? 'info' : 'ok');
+
+    // 2) SECURITY — house_state aware
+    const hsRaw = String(s.house_state || ALL_VARS['sh_house_state']?.value || 'home').toLowerCase();
+    let secVal = 'OK';
+    let secState = 'ok';
+    if (hsRaw.includes('alarm') || hsRaw.includes('intrusion')) { secVal = 'ALARM'; secState = 'danger'; }
+    else if (hsRaw === 'away' || hsRaw === 'pryc') { secVal = 'ARMED'; secState = 'info'; }
+    setPill('v37-pill-security-val', secVal, secState);
+
+    // 3) ALARM — critical alerts count
+    const alertsRaw = String(ALL_VARS['sh_critical_alerts']?.value || '');
+    let alarmVal = 'OK';
+    let alarmState = 'ok';
+    if (alertsRaw && alertsRaw !== 'idle' && alertsRaw !== '0' && alertsRaw !== '') {
+      try {
+        const arr = JSON.parse(alertsRaw);
+        const count = Array.isArray(arr) ? arr.length : Object.keys(arr).length;
+        if (count > 0) { alarmVal = count + ' WARN'; alarmState = 'warn'; }
+      } catch(_) {
+        if (alertsRaw.length > 2) { alarmVal = 'WARN'; alarmState = 'warn'; }
+      }
+    }
+    setPill('v37-pill-alarm-val', alarmVal, alarmState);
+
+    // 4) AI — health based + active state
+    const aiActive = String(ai.active || ALL_VARS['sh_ai_active']?.value || 'yes').toLowerCase();
+    const aiHealthScore = Number(ai.health_score || h.score || 100);
+    let aiVal = 'IDLE';
+    let aiState = 'info';
+    if (aiActive === 'yes' || aiActive === 'active') {
+      if (aiHealthScore >= 90) { aiVal = 'ACTIVE'; aiState = 'ok'; }
+      else if (aiHealthScore >= 70) { aiVal = 'WARN'; aiState = 'warn'; }
+      else { aiVal = 'ERROR'; aiState = 'danger'; }
+    }
+    setPill('v37-pill-ai-val', aiVal, aiState);
+
+    // 5) WEATHER — outdoor temp from weather page element OR var
+    let wxText = '—';
+    const wxEl = document.getElementById('wx-temp');
+    if (wxEl && wxEl.textContent && !wxEl.textContent.includes('—')) {
+      wxText = wxEl.textContent.trim();
+    } else {
+      const tOut = ALL_VARS['sh_teplota_venku']?.value;
+      if (tOut !== undefined && tOut !== null) wxText = Number(tOut).toFixed(1) + '°C';
+    }
+    setPill('v37-pill-weather-val', wxText, 'ok');
+  } catch(e) {
+    // V3.7 pills are optional — never break main UI
+    console.debug('[V3.7 pills update]', e && e.message);
+  }
 
   // Status tiles (HOME)
   setText('s-presence', (s.presence||'—').toUpperCase());
