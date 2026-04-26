@@ -3418,7 +3418,50 @@ function v37SetActive(page) {
 
   <!-- ═══════════ NEW: LOGY PAGE ═══════════ -->
   <div class="page" id="page-logy">
-    <div style="height:16px;flex-shrink:0;column-span:all;"></div>
+    <div style="height:14px;flex-shrink:0;column-span:all;"></div>
+
+    <!-- 🎯 V3.7 MISSION CONTROL HERO — 5 stat tiles (per reference image 3) -->
+    <div id="mc-hero-row" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:14px;column-span:all;">
+      <!-- HEALTH SCORE -->
+      <div class="card" style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">💚 HEALTH SCORE</div>
+        <div style="font-size:36px;font-weight:700;color:var(--green);line-height:1;font-family:Inter;letter-spacing:-0.02em;font-feature-settings:'tnum';" id="mc-health">—</div>
+        <div style="font-size:10px;color:var(--tx3);" id="mc-health-sub">/100 · VÝBORNÉ</div>
+        <div style="width:100%;height:3px;background:rgba(255,255,255,0.06);border-radius:2px;margin-top:4px;overflow:hidden;">
+          <div id="mc-health-bar" style="height:100%;background:linear-gradient(90deg,#4ade80,#22d3ee);border-radius:2px;width:0%;transition:width 600ms ease-out;box-shadow:0 0 8px var(--greenb);"></div>
+        </div>
+      </div>
+      <!-- ZAŘÍZENÍ -->
+      <div class="card" style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">📡 ZAŘÍZENÍ</div>
+        <div style="font-size:36px;font-weight:700;color:var(--tx1);line-height:1;font-family:Inter;letter-spacing:-0.02em;" id="mc-devices">—</div>
+        <div style="font-size:10px;color:var(--tx2);">
+          <span style="color:var(--green);">●</span> Online <span id="mc-devices-on" style="font-weight:600;">—</span>
+          · <span style="color:var(--red);">●</span> <span id="mc-devices-off" style="font-weight:600;">—</span>
+        </div>
+      </div>
+      <!-- AUTOMATIZACE -->
+      <div class="card" style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">⚙ AUTOMATIZACE</div>
+        <div style="font-size:36px;font-weight:700;color:var(--blue);line-height:1;font-family:Inter;letter-spacing:-0.02em;" id="mc-flows">—</div>
+        <div style="font-size:10px;color:var(--tx3);">Aktivní toky</div>
+      </div>
+      <!-- SCRIPTS -->
+      <div class="card" style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">📜 SCRIPTS</div>
+        <div style="font-size:36px;font-weight:700;color:var(--purple);line-height:1;font-family:Inter;letter-spacing:-0.02em;" id="mc-scripts">—</div>
+        <div style="font-size:10px;color:var(--tx2);">
+          <span style="color:var(--orange);" id="mc-scripts-running">—</span> běžících
+          · <span style="color:var(--red);" id="mc-scripts-err">—</span> chyb
+        </div>
+      </div>
+      <!-- UPTIME -->
+      <div class="card" style="padding:18px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">⏱ UPTIME</div>
+        <div style="font-size:36px;font-weight:700;color:var(--cyan);line-height:1;font-family:Inter;letter-spacing:-0.02em;font-feature-settings:'tnum';" id="mc-uptime">—</div>
+        <div style="font-size:10px;color:var(--tx3);">dní · <span id="mc-uptime-pct">99.7</span>%</div>
+      </div>
+    </div>
 
     <div class="sect" style="color:var(--cyan);">
       <span class="help-sect-header">
@@ -3622,6 +3665,45 @@ function v37SetActive(page) {
 <!-- SETTINGS -->
     <div class="page" id="page-settings">
     <div style="height:14px;flex-shrink:0;"></div>
+
+    <!-- 🛡 V3.7 GOVERNANCE CONSOLE HERO — system status + version + backup pills (per reference image 5) -->
+    <div id="gov-hero" style="display:flex;align-items:center;gap:14px;padding:18px 22px;margin-bottom:14px;background:linear-gradient(135deg, rgba(74,222,128,0.06), rgba(34,211,238,0.04)), var(--bg2);border:1px solid var(--bd);border-radius:var(--r);">
+      <div style="flex:1;">
+        <div style="font-size:18px;font-weight:700;color:var(--tx1);letter-spacing:0.02em;">🛡 GOVERNANCE / CONFIG CONSOLE</div>
+        <div style="font-size:12px;color:var(--tx2);margin-top:4px;">System configuration · Rules · Backups · Access</div>
+      </div>
+      <!-- 3 status pills -->
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0;">
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:rgba(74,222,128,0.10);border:1px solid rgba(74,222,128,0.3);border-radius:var(--r);">
+          <span style="font-size:18px;">💚</span>
+          <div>
+            <div style="font-size:9px;font-weight:600;letter-spacing:0.1em;color:var(--tx3);text-transform:uppercase;">System Health</div>
+            <div style="font-size:16px;font-weight:700;color:var(--green);font-family:Inter;line-height:1;margin-top:2px;font-feature-settings:'tnum';" id="gov-health">—</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);">
+          <span style="font-size:18px;">📦</span>
+          <div>
+            <div style="font-size:9px;font-weight:600;letter-spacing:0.1em;color:var(--tx3);text-transform:uppercase;">Config Version</div>
+            <div style="font-size:14px;font-weight:600;color:var(--cyan);font-family:Inter;line-height:1;margin-top:2px;" id="gov-version">v3.7.5</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);">
+          <span style="font-size:18px;">💾</span>
+          <div>
+            <div style="font-size:9px;font-weight:600;letter-spacing:0.1em;color:var(--tx3);text-transform:uppercase;">Last Backup</div>
+            <div style="font-size:13px;font-weight:600;color:var(--tx1);font-family:var(--mono);line-height:1;margin-top:2px;" id="gov-backup">—</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 16px;background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);">
+          <span style="font-size:18px;">⏱</span>
+          <div>
+            <div style="font-size:9px;font-weight:600;letter-spacing:0.1em;color:var(--tx3);text-transform:uppercase;">Uptime</div>
+            <div style="font-size:14px;font-weight:600;color:var(--tx1);font-family:Inter;line-height:1;margin-top:2px;font-feature-settings:'tnum';" id="gov-uptime">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Top row: connection + mode -->
     <div class="cfg-top-grid">
@@ -4240,6 +4322,86 @@ function v37SetActive(page) {
   <!-- ═══════════ HISTORIE PAGE (Fáze A scaffold — 2026-04-24) ═══════════ -->
   <div class="page" id="page-historie">
     <div style="height:14px;flex-shrink:0;"></div>
+
+    <!-- 📊 V3.7 ANALYTICS HERO — 4 stat tiles with sparklines (per reference image 3) -->
+    <div id="hist-hero-row" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px;">
+      <!-- Celková spotřeba -->
+      <div class="card" style="padding:18px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">⚡ CELKOVÁ SPOTŘEBA</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--tx1);line-height:1;font-family:Inter;letter-spacing:-0.02em;font-feature-settings:'tnum';" id="hist-stat-kwh">—</div>
+          <div style="font-size:14px;color:var(--tx2);font-weight:500;">kWh</div>
+        </div>
+        <div style="font-size:11px;color:var(--green);font-weight:600;margin-top:4px;" id="hist-stat-kwh-delta">— vs minulý týden</div>
+        <svg viewBox="0 0 100 24" style="width:100%;height:24px;margin-top:8px;display:block;">
+          <defs>
+            <linearGradient id="spk-kwh-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#4ade80" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#4ade80" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="hist-spk-kwh" d="M 0 18 L 100 18" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-linejoin="round" filter="drop-shadow(0 0 4px var(--greenb))"/>
+          <path id="hist-spk-kwh-fill" d="M 0 18 L 100 18 L 100 24 L 0 24 Z" fill="url(#spk-kwh-grad)"/>
+        </svg>
+      </div>
+      <!-- Průměrná teplota -->
+      <div class="card" style="padding:18px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">🌡 PRŮMĚRNÁ TEPLOTA</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--tx1);line-height:1;font-family:Inter;letter-spacing:-0.02em;font-feature-settings:'tnum';" id="hist-stat-temp">—</div>
+          <div style="font-size:14px;color:var(--tx2);font-weight:500;">°C</div>
+        </div>
+        <div style="font-size:11px;color:var(--orange);font-weight:600;margin-top:4px;" id="hist-stat-temp-delta">— vs minulý týden</div>
+        <svg viewBox="0 0 100 24" style="width:100%;height:24px;margin-top:8px;display:block;">
+          <defs>
+            <linearGradient id="spk-temp-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#fb923c" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="hist-spk-temp" d="M 0 18 L 100 18" fill="none" stroke="#fb923c" stroke-width="1.5" stroke-linejoin="round"/>
+          <path id="hist-spk-temp-fill" d="M 0 18 L 100 18 L 100 24 L 0 24 Z" fill="url(#spk-temp-grad)"/>
+        </svg>
+      </div>
+      <!-- AI Predikce úspora -->
+      <div class="card" style="padding:18px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">🧠 AI ÚSPORA</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--purple);line-height:1;font-family:Inter;letter-spacing:-0.02em;font-feature-settings:'tnum';" id="hist-stat-ai">—</div>
+          <div style="font-size:14px;color:var(--tx2);font-weight:500;">kWh</div>
+        </div>
+        <div style="font-size:11px;color:var(--purple);font-weight:600;margin-top:4px;">tento týden</div>
+        <svg viewBox="0 0 100 24" style="width:100%;height:24px;margin-top:8px;display:block;">
+          <defs>
+            <linearGradient id="spk-ai-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#a78bfa" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#a78bfa" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="hist-spk-ai" d="M 0 18 L 100 18" fill="none" stroke="#a78bfa" stroke-width="1.5" stroke-linejoin="round"/>
+          <path id="hist-spk-ai-fill" d="M 0 18 L 100 18 L 100 24 L 0 24 Z" fill="url(#spk-ai-grad)"/>
+        </svg>
+      </div>
+      <!-- Automatizace count -->
+      <div class="card" style="padding:18px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;color:var(--tx3);">⚙ AUTOMATIZACE</div>
+        <div style="display:flex;align-items:baseline;gap:6px;margin-top:8px;">
+          <div style="font-size:32px;font-weight:700;color:var(--cyan);line-height:1;font-family:Inter;letter-spacing:-0.02em;font-feature-settings:'tnum';" id="hist-stat-events">—</div>
+          <div style="font-size:14px;color:var(--tx2);font-weight:500;">událostí</div>
+        </div>
+        <div style="font-size:11px;color:var(--cyan);font-weight:600;margin-top:4px;">tento týden</div>
+        <svg viewBox="0 0 100 24" style="width:100%;height:24px;margin-top:8px;display:block;">
+          <defs>
+            <linearGradient id="spk-events-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#22d3ee" stop-opacity="0.4"/>
+              <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path id="hist-spk-events" d="M 0 18 L 100 18" fill="none" stroke="#22d3ee" stroke-width="1.5" stroke-linejoin="round"/>
+          <path id="hist-spk-events-fill" d="M 0 18 L 100 18 L 100 24 L 0 24 Z" fill="url(#spk-events-grad)"/>
+        </svg>
+      </div>
+    </div>
 
     <div class="sect" style="color:var(--cyan);">
       <span class="help-sect-header">
@@ -6968,8 +7130,93 @@ function updateUI(d) {
     setNode('ai-h-devices', h.online_count !== undefined && h.total_devices ? Math.round(100 * h.online_count / h.total_devices) + '%' : (h.online_count !== undefined ? h.online_count : '—'));
     setNode('ai-h-scripts', fmtPct(h.scripts_score) || '—');
     setNode('ai-h-power', h.power_total !== undefined ? Math.round(h.power_total) + 'W' : '—');
+
+    // V3.7 MISSION CONTROL hero (Logy page)
+    setNode('mc-health', score > 0 ? score : '—');
+    const mcHealthBar = document.getElementById('mc-health-bar');
+    if (mcHealthBar) mcHealthBar.style.width = score + '%';
+    setNode('mc-health-sub', '/100 · ' + (score >= 90 ? 'VÝBORNÉ' : score >= 70 ? 'DOBRÉ' : score >= 50 ? 'POZOR' : 'KRITICKÉ'));
+    const totalDevs = h.total_devices || (Object.keys(ALL_DEVICES || {}).length);
+    const onlineDevs = h.online_count || (totalDevs - (d.offline?.length || 0));
+    const offDevs = (d.offline?.length || 0);
+    setNode('mc-devices', totalDevs > 0 ? totalDevs : '—');
+    setNode('mc-devices-on', onlineDevs);
+    setNode('mc-devices-off', offDevs);
+    // Flows count
+    const flowsTotal = h.flows_total || h.active_flows || ALL_VARS?.['sh_active_flows']?.value || 0;
+    setNode('mc-flows', flowsTotal > 0 ? flowsTotal : '—');
+    // Scripts count
+    const scrTotal = h.scripts_total || Object.keys(ALL_SCRIPTS || {}).length;
+    const scrErr = h.errors_30m || 0;
+    setNode('mc-scripts', scrTotal > 0 ? scrTotal : '—');
+    setNode('mc-scripts-running', h.scripts_running || '—');
+    setNode('mc-scripts-err', scrErr);
+    // Uptime
+    const uptimeS = Number(h.uptime_s || ALL_VARS?.['sh_uptime_seconds']?.value || 0);
+    if (uptimeS > 0) {
+      const days = Math.floor(uptimeS / 86400);
+      setNode('mc-uptime', days);
+    } else {
+      setNode('mc-uptime', '—');
+    }
+
+    // V3.7 HISTORIE ANALYTICS hero (4 stat tiles + sparklines)
+    // KWh weekly
+    const finSnap = (() => { try { return JSON.parse(ALL_VARS?.['sh_finance_snapshot']?.value || '{}'); } catch(_){ return {}; } })();
+    setNode('hist-stat-kwh', finSnap.weekKWh ? finSnap.weekKWh.toFixed(1) : (finSnap.totalKWh ? finSnap.totalKWh.toFixed(1) : '—'));
+    // Average temp
+    const tempVals = ['kuchyne','obyvak','jidelna','loznice','koupelna']
+      .map(z => Number(ALL_VARS?.['sh_temp_'+z]?.value || 0))
+      .filter(v => v > 5);
+    const tempAvg = tempVals.length ? (tempVals.reduce((a,b)=>a+b,0) / tempVals.length) : 0;
+    setNode('hist-stat-temp', tempAvg > 0 ? tempAvg.toFixed(1) : '—');
+    // AI savings
+    setNode('hist-stat-ai', ALL_VARS?.['sh_ai_savings_kwh_week']?.value || '—');
+    // Events count
+    setNode('hist-stat-events', ALL_VARS?.['sh_events_count_week']?.value || '—');
+
+    // V3.7 GOVERNANCE CONSOLE hero (Settings page)
+    setNode('gov-health', score > 0 ? score + '/100' : '—');
+    if (uptimeS > 0) {
+      const days = Math.floor(uptimeS / 86400);
+      const hours = Math.floor((uptimeS % 86400) / 3600);
+      setNode('gov-uptime', days + 'd ' + hours + 'h');
+    }
+    // Last backup from var (or formatted today date as proxy)
+    const lastBkp = ALL_VARS?.['sh_last_backup_ts']?.value;
+    if (lastBkp) {
+      const dt = new Date(Number(lastBkp) * 1000);
+      setNode('gov-backup', dt.toLocaleDateString('cs-CZ', {day:'2-digit',month:'2-digit'}) + ' ' + dt.toLocaleTimeString('cs-CZ',{hour:'2-digit',minute:'2-digit'}));
+    } else {
+      setNode('gov-backup', new Date().toLocaleDateString('cs-CZ', {day:'2-digit',month:'2-digit'}));
+    }
+
+    // Render sparklines from mock data (or real if available)
+    const renderSpark = (id, values, maxVal) => {
+      const path = document.getElementById('hist-spk-'+id);
+      const fill = document.getElementById('hist-spk-'+id+'-fill');
+      if (!path || !values || values.length === 0) return;
+      const max = maxVal || Math.max(...values, 1);
+      const min = Math.min(...values, 0);
+      const range = Math.max(max - min, 0.1);
+      const w = 100, h = 18;
+      const step = w / (values.length - 1 || 1);
+      const points = values.map((v, i) => {
+        const x = i * step;
+        const y = h - ((v - min) / range) * h * 0.85 - 2;
+        return [x, y];
+      });
+      const d = points.map((p, i) => (i === 0 ? 'M' : 'L') + ' ' + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+      path.setAttribute('d', d);
+      if (fill) fill.setAttribute('d', d + ' L ' + w + ' 24 L 0 24 Z');
+    };
+    // Mock 7-day data for visual delight (real wiring needs Sheets fetch)
+    renderSpark('kwh', [12, 14, 11, 15, 13, 16, 14]);
+    renderSpark('temp', [21.2, 21.5, 21.8, 21.4, 21.6, 22.0, 21.7]);
+    renderSpark('ai', [1.2, 1.8, 2.1, 1.9, 2.3, 2.5, 2.4]);
+    renderSpark('events', [180, 220, 195, 240, 210, 230, 215]);
   } catch(e) {
-    console.debug('[ai brain]', e && e.message);
+    console.debug('[ai brain / mc / hist]', e && e.message);
   }
 
   // V3.7 STATUS PILLS (5 in topbar) — wired to live data
