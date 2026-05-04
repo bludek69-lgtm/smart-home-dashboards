@@ -3225,7 +3225,7 @@ function v37SetActive(page) {
         <h4>🗺 Zóny — jak fungují místnosti</h4>
         <p>Každá zóna (místnost) má svá <strong>zařízení</strong>, <strong>senzory</strong> a <strong>automatizace</strong>. Klikni na kartu pro detail.</p>
         <ul>
-          <li><strong>🛋 Jídelna</strong> — Sektorka1, Stul Jidelna1, Roleta Fyrtur1, okno SNZB-04, lux senzor. <em>Auto-osvětlení open space + roleta dle lux/phase.</em></li>
+          <li><strong>🛋 Jídelna</strong> — Sektorka1, Stul Jidelna1 (master) + 3× Smart RGBTW Bulb (Matter), Roleta Fyrtur1, okno SNZB-04, lux senzor. <em>Auto-osvětlení open space + roleta dle lux/phase.</em></li>
           <li><strong>🍳 Kuchyně</strong> — Kuchyňská světla (Sektorka, E14 žárovky), reproduktor Kuchyn, PIR senzor, presence senzor SNZB-06P. <em>Motion ON → Kitchen AI → světla + rádio.</em></li>
           <li><strong>🛏 Ložnice</strong> — Žárovka Ložnice, Led pasek postel, Nest Hub Max (ložnice), teplotní senzor. <em>Motion v noci → LED pásek (orientační). Ráno → sunrise simulace.</em></li>
           <li><strong>🚿 Koupelna</strong> — Svetlo Koupelna, Speaker koupelna, 2× PIR senzory, teplotně-vlhkostní senzor. <em>Motion → světlo + ranní rádio. Večer auto-off.</em></li>
@@ -8884,6 +8884,9 @@ const DEVICE_DISPLAY_BY_ZONE = {
   jidelna: {
     light_2: { name: 'Stůl jídelna', icon: '💡', type: 'light' },
     strip:   { name: 'Led pásek',    icon: '🎗', type: 'light' },
+    bulb_1:  { name: 'RGBTW 1',      icon: '💡', type: 'light' },
+    bulb_2:  { name: 'RGBTW 2',      icon: '💡', type: 'light' },
+    bulb_3:  { name: 'RGBTW 3',      icon: '💡', type: 'light' },
   },
   kitchen: {
     light_1: { name: 'Sektorka',   icon: '💡', type: 'light' },
@@ -9089,7 +9092,7 @@ const DEVICE_CFG = {
 
 
 const ZONE_META = {
-  jidelna:  { name: 'Jídelna', sub: 'Stul Jidelna1 · Led pasek · Roleta · Okno', icon: '🛋' },
+  jidelna:  { name: 'Jídelna', sub: 'Stul · 3× RGBTW · Led pasek · Roleta · Okno', icon: '🛋' },
   kitchen:  { name: 'Kitchen', sub: 'Sektorka1 · 3× Smart · Kuchyn · Zásuvky', icon: '🍳', speaker: true },
   bedroom:  { name: 'Ložnice', sub: 'Zarovka · LED pásek · TV · Nest Hub Max', icon: '🛏' },
   bathroom: { name: 'Koupelna', sub: 'Světlo · Temp · Motion · Speaker', icon: '🚿', speaker: 'bathroom' },
