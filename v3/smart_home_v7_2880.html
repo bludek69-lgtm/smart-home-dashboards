@@ -4410,7 +4410,7 @@ function v37SetActive(page) {
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;">
       <div>
         <div class="sect" style="color:var(--purple);margin-top:0;">AI TASKS (GOOGLE SHEETS)</div>
-        <div class="card" style="padding:10px 12px;">
+        <div class="card" style="display:none;padding:10px 12px;">
           <div class="card-row">
             <span class="card-icon">📋</span><span class="card-lbl">Otevřené úkoly</span>
             <div class="btn" onclick="openAiTasksModal()" style="padding:3px 8px;font-size:10px;" title="Zobrazit celý v popupu">⛶</div>
@@ -7641,36 +7641,9 @@ async function toggleDovolena() {
 
 // AI Tasks loader ze Google Sheets (Apps Script v7 ?mode=tasks)
 async function loadAITasks() {
-  const el = document.getElementById('aiTasksList');
-  if (!el) return;
-  el.innerHTML = '<span style="color:var(--tx2)">⏳ Načítám z Google Sheets…</span>';
-  try {
-    const sheetsUrl = ALL_VARS['sh_sheets_url']?.value || ALL_VARS['sh_cfg_sheets_url']?.value || '';
-    if (!sheetsUrl) {
-      el.innerHTML = '<span style="color:var(--orange)">⚠ sh_sheets_url proměnná nenalezena. Nastav URL v CONFIG → AI.</span>';
-      return;
-    }
-    const res = await fetch(sheetsUrl + '?mode=tasks', { cache: 'no-store' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    const tasks = data.tasks || data.data || data || [];
-    if (!Array.isArray(tasks) || tasks.length === 0) {
-      el.innerHTML = '<span style="color:var(--green)">✅ Žádné otevřené úkoly</span>';
-      return;
-    }
-    el.innerHTML = tasks.map(t => {
-      const status = t.status || t.Status || '?';
-      const desc = t.description || t.Description || t.task || JSON.stringify(t);
-      const ai = t.ai || t.AI || '';
-      const cls = status === 'open' ? 'var(--orange)' : status === 'done' ? 'var(--green)' : 'var(--tx2)';
-      return '<div style="padding:5px 0;border-bottom:1px solid var(--bd)">' +
-        '<span style="color:' + cls + ';font-size:9px">[' + status.toUpperCase() + ']</span>' +
-        (ai ? ' <span style="color:var(--purple);font-size:9px">' + ai + '</span>' : '') +
-        '<div style="margin-top:2px">' + desc + '</div></div>';
-    }).join('');
-  } catch(e) {
-    el.innerHTML = '<span style="color:var(--red)">✗ ' + e.message + '</span>';
-  }
+  // v21 deprecated 2026-05-05 — AI Tasks sheet removed (Apps Script v21).
+  // Panel hidden via display:none in HTML; this stub kept to avoid ReferenceErrors.
+  console.log('[AI Tasks] deprecated v21 — removed from architecture');
 }
 
 // Přeruší smyčku: roleta zavřená + světla ON → vypne světla → recheck rolety
